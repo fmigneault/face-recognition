@@ -1,5 +1,5 @@
 #include "FaceRecogConfig.h"
-#ifdef FACE_RECOG_HAS_YOLO_CNN
+#ifdef FACE_RECOG_HAS_YOLO
 
 
 template<typename Dtype>
@@ -29,7 +29,7 @@ Dtype lap(Dtype x1_min,Dtype x1_max,Dtype x2_min,Dtype x2_max)
 template int lap(int x1_min, int x1_max, int x2_min, int x2_max);
 template float lap(float x1_min, float x1_max, float x2_min, float x2_max);
 
-FaceDetectorYoloCNN::FaceDetectorYoloCNN()
+FaceDetectorYOLO::FaceDetectorYOLO()
 {
     std::string model = "../yolo-face-deploy.prototxt";
     std::string proto = "../yolo-face.caffemodel"; 
@@ -39,7 +39,7 @@ FaceDetectorYoloCNN::FaceDetectorYoloCNN()
     net->CopyTrainedLayersFromBinaryProto(proto);
 }
 
-int FaceDetectorYoloCNN::findFaces(std::vector<std::vector<cv::Rect> >& faces)
+int FaceDetectorYOLO::findFaces(std::vector<std::vector<cv::Rect> >& faces)
 {
     m_faces.clear();
     loadData(frames[0]);
@@ -88,7 +88,7 @@ int FaceDetectorYoloCNN::findFaces(std::vector<std::vector<cv::Rect> >& faces)
     return 1;
 }
 
-double FaceDetectorYoloCNN::evaluateConfidence(Target& target, FACE_RECOG_MAT& image)
+double FaceDetectorYOLO::evaluateConfidence(Target& target, FACE_RECOG_MAT& image)
 { 
 	Rect face = target.bbox();
     FACE_RECOG_MAT croppedFace = image(face).clone();
@@ -111,12 +111,12 @@ double FaceDetectorYoloCNN::evaluateConfidence(Target& target, FACE_RECOG_MAT& i
     return bboxs.size();
 }
 
-void FaceDetectorYoloCNN::assignImage(FACE_RECOG_MAT frame)
+void FaceDetectorYOLO::assignImage(FACE_RECOG_MAT frame)
 {
     frames.emplace_back(frame);
 }
 
-void FaceDetectorYoloCNN::loadData(cv::Mat& image)
+void FaceDetectorYOLO::loadData(cv::Mat& image)
 {
     Blob<float>* input_layer = net->input_blobs()[0];
     int width, height;
@@ -139,7 +139,7 @@ void FaceDetectorYoloCNN::loadData(cv::Mat& image)
     }
 }
 
-void FaceDetectorYoloCNN::getBox(std::vector<float> result,float* pro_obj,int* idx_class,std::vector<std::vector<int> >& bboxs,float thresh,cv::Mat image)
+void FaceDetectorYOLO::getBox(std::vector<float> result,float* pro_obj,int* idx_class,std::vector<std::vector<int> >& bboxs,float thresh,cv::Mat image)
 {
     float pro_class[121];
     int idx;
@@ -194,4 +194,4 @@ void FaceDetectorYoloCNN::getBox(std::vector<float> result,float* pro_obj,int* i
     }
 }
 
-#endif/*FACE_RECOG_HAS_YOLO_CNN*/
+#endif/*FACE_RECOG_HAS_YOLO*/

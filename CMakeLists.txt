@@ -90,7 +90,9 @@ add_definitions(-DFaceRecog_ROOT_PATH="${FaceRecog_ROOT_DIR}")
 # === modules ===
 # --- Face Detection/Tracking ---
 face_recog_option(FaceRecog_USE_FRCNN       "Include FRCNN module [FD/FT]"                      OFF)
-face_recog_option(FaceRecog_USE_YOLO_CNN    "Include YOLO CNN module [FD/FT]"                   OFF)
+face_recog_option(FaceRecog_USE_KCF         "Include KCF module [FT]"                           OFF)
+face_recog_option(FaceRecog_USE_SSD         "Include SSD module [FD]"                           OFF)
+face_recog_option(FaceRecog_USE_YOLO        "Include YOLO CNN module [FD/FT]"                   OFF)
 
 # --- Face Recognition ---
 face_recog_option(BUILD_ESVM                "Build Exemplar-SVM (ESVM) module from sources"     OFF)

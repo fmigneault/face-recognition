@@ -1,18 +1,8 @@
-#ifndef FACE_RECOG_TrackerCompressive_H
-#define FACE_RECOG_TrackerCompressive_H
+#ifndef FACE_RECOG_TRACKER_COMPRESSIVE_H
+#define FACE_RECOG_TRACKER_COMPRESSIVE_H
 
-#include <vector>
-#include <Eigen/Core>
-#include <opencv/cv.h>
-#include <opencv2/imgproc/imgproc.hpp> 
+#include "FaceRecogConfig.h"
 
-#include "Configs/ConfigFile.h"
-#include "Trackers/ITracker.h"
-#include "Tracks/HaarFeatures.h"
-#include "Tracks/Kernels.h"
-#include "Tracks/LaRank.h"
-#include "Tracks/Rect.h"
-#include "Utilities/MatDefines.h"
 
 class ImageRep;
 
@@ -62,4 +52,4 @@ private:
 
 };
 
-#endif /*FACE_RECOG_TrackerCompressive_H*/
+#endif /*FACE_RECOG_TRACKER_COMPRESSIVE_H*/

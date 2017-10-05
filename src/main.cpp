@@ -7,6 +7,8 @@
         - Camshift: tracker
         - Compressive Tracking: tracker
         - FRCNN: Faster R-CNN face detection (Faster Region-based Convolutional Neural Networks)
+        - KCF: Kernelized Correlation Filters tracker 
+        - SSD: Single Shot MultiBox Detector (CNN)
         - YOLO: Real-Time Object Detection using CNN
         - EoESVM: Ensemble of Exemplar-SVM face recognition
         - FaceNet: face recognition using deep convolutional neural network
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                std::cout << "Unkwown option argument encountered: '" << opt << "'" << std::endl << usageMsg;
+                std::cout << "Unknown option argument encountered: '" << opt << "'" << std::endl << usageMsg;
                 FINALIZE(EXIT_FAILURE);
             }
         }
@@ -218,51 +220,51 @@ int main(int argc, char *argv[])
     /********************************************************************************************************************************************/
     /* CONFIGURATION FILES                                                                                                                      */
     /********************************************************************************************************************************************/
-    int tmpFaceCascadeCount = 0;
-    const int MAX_NB_FACE_CASCADES = 3;
-    string faceCascadePaths[MAX_NB_FACE_CASCADES];
+    int tmpFaceModelCount = 0;
+    const int MAX_NB_FACE_MODELS = 3;
+    string faceModelPaths[MAX_NB_FACE_MODELS];
     if (conf->VJ) {
-        tmpFaceCascadeCount = 1;
-        faceCascadePaths[0] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).string();
+        tmpFaceModelCount = 1;
+        faceModelPaths[0] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).string();
     }
     else if (conf->ImprovedLBP) {
-        tmpFaceCascadeCount = 1;
-        faceCascadePaths[0] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_frontalface_improved.xml")).string();
+        tmpFaceModelCount = 1;
+        faceModelPaths[0] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_frontalface_improved.xml")).string();
     }
     else if (conf->LBP) {
-        tmpFaceCascadeCount = 3;
-        faceCascadePaths[0] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_frontalface.xml")).string();
-        faceCascadePaths[1] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_profileface.xml")).string();
-        faceCascadePaths[2] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_profileface.xml")).string();
+        tmpFaceModelCount = 3;
+        faceModelPaths[0] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_frontalface.xml")).string();
+        faceModelPaths[1] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_profileface.xml")).string();
+        faceModelPaths[2] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_profileface.xml")).string();
     }
     else if (conf->YOLO) {
-        tmpFaceCascadeCount = 1;
+        tmpFaceModelCount = 1;
     }
     else if (conf->FastDT) {
-        tmpFaceCascadeCount = 3;
-        faceCascadePaths[0] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).string();
-        faceCascadePaths[1] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_profileface.xml")).string();
-        faceCascadePaths[2] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_profileface.xml")).string();
+        tmpFaceModelCount = 3;
+        faceModelPaths[0] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).string();
+        faceModelPaths[1] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_profileface.xml")).string();
+        faceModelPaths[2] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_profileface.xml")).string();
     }
-    ASSERT_LOG_FINALIZE(tmpFaceCascadeCount != 0, "Undefined face detector/tracker from specified 'config'", logOutput, EXIT_FAILURE);
-    const int NB_FACE_CASCADES = tmpFaceCascadeCount;
+    ASSERT_LOG_FINALIZE(tmpFaceModelCount != 0, "Undefined face detector/tracker from specified 'config'", logOutput, EXIT_FAILURE);
+    const int NB_FACE_MODELS = tmpFaceModelCount;
 
     FACE_RECOG_DEBUG(
-        logDebug << "CC[0] " << faceCascadePaths[0] << std::endl;
-        logDebug << "CC[1] " << faceCascadePaths[1] << std::endl;
-        logDebug << "CC[2] " << faceCascadePaths[2] << std::endl;
+        logDebug << "CC[0] " << faceModelPaths[0] << std::endl;
+        logDebug << "CC[1] " << faceModelPaths[1] << std::endl;
+        logDebug << "CC[2] " << faceModelPaths[2] << std::endl;
     );
 
     const int LEFT_EYE = 0, RIGHT_EYE = 1;
-    const int NB_EYE_CASCADES = 2;
-    string eyeCascadePaths[2];
-    eyeCascadePaths[LEFT_EYE] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_lefteye_2splits.xml")).string();
-    eyeCascadePaths[RIGHT_EYE] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_righteye_2splits.xml")).string();
-    //string eyeCascadePaths[NB_EYE_CASCADES][2];
-    //eyeCascadePaths[0][LEFT_EYE] = eyeCascadePaths[0][RIGHT_EYE] = "haarcascade_eye.xml";
-    //eyeCascadePaths[1][LEFT_EYE] = eyeCascadePaths[1][RIGHT_EYE] = "haarcascade_eye_tree_eyeglasses.xml";
-    //eyeCascadePaths[2][LEFT_EYE] = "haarcascade_lefteye_2splits.xml";
-    //eyeCascadePaths[2][RIGHT_EYE] = "haarcascade_righteye_2splits.xml";
+    const int NB_EYE_MODELS = 2;
+    string eyeModelPaths[2];
+    eyeModelPaths[LEFT_EYE] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_lefteye_2splits.xml")).string();
+    eyeModelPaths[RIGHT_EYE] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_righteye_2splits.xml")).string();
+    //string eyeModelPaths[NB_EYE_MODELS][2];
+    //eyeModelPaths[0][LEFT_EYE] = eyeModelPaths[0][RIGHT_EYE] = "haarcascade_eye.xml";
+    //eyeModelPaths[1][LEFT_EYE] = eyeModelPaths[1][RIGHT_EYE] = "haarcascade_eye_tree_eyeglasses.xml";
+    //eyeModelPaths[2][LEFT_EYE] = "haarcascade_lefteye_2splits.xml";
+    //eyeModelPaths[2][RIGHT_EYE] = "haarcascade_righteye_2splits.xml";
 
     /********************************************************************************************************************************************/
     /* OUTPUT AND TIMERS                                                                                                                        */
@@ -385,41 +387,46 @@ int main(int argc, char *argv[])
     // main face detector
     std::shared_ptr<IFaceDetector> faceDetector = nullptr, localFaceDetector = nullptr;
     if (conf->YOLO) {
-        #ifdef FACE_RECOG_HAS_YOLO_CNN
-        faceDetector = std::make_shared<FaceDetectorYoloCNN>();
-        #endif/*FACE_RECOG_HAS_YOLO_CNN*/
+        #ifdef FACE_RECOG_HAS_YOLO
+        faceDetector = std::make_shared<FaceDetectorYOLO>();
+        #endif/*FACE_RECOG_HAS_YOLO*/
     }
     else if (conf->FRCNN) {
         #ifdef FACE_RECOG_HAS_FRCNN
         faceDetector = std::make_shared<FaceDetectorFRCNN>();
         #endif/*FACE_RECOG_HAS_FRCNN*/
     }
+    else if (conf->SSD) {
+        #ifdef FACE_RECOG_HAS_SSD
+        faceDetector = std::make_shared<FaceDetectorSSD>();
+        #endif/*FACE_RECOG_HAS_SSD*/
+    }
     else {
         FaceDetectorVJ vj(conf->face.scaleFactor, conf->face.nmsThreshold, conf->face.minSize, conf->face.maxSize,
                           conf->face.confidenceSize, conf->face.minNeighbours, conf->face.overlapThreshold);
-        for (int c = 0; c < NB_FACE_CASCADES; ++c)
+        for (int c = 0; c < NB_FACE_MODELS; ++c)
         {
             // load face detector, flip last one for right profile if using Fast-DT
-            int success = vj.loadDetector(faceCascadePaths[c], (NB_FACE_CASCADES - 1 == c && conf->FastDT) ? HORIZONTAL : NONE);
-            ASSERT_LOG_FINALIZE(success == 0, "Failed loading face detector file: '" + faceCascadePaths[c] + "'\n", logOutput, EXIT_FAILURE);
-            logOutput << "Done loading face cascade " << c << ": '" << bfs::path(faceCascadePaths[c]).stem().string() << "'" << std::endl;
+            int success = vj.loadDetector(faceModelPaths[c], (NB_FACE_MODELS - 1 == c && conf->FastDT) ? HORIZONTAL : NONE);
+            ASSERT_LOG_FINALIZE(success == 0, "Failed loading face detector file: '" + faceModelPaths[c] + "'\n", logOutput, EXIT_FAILURE);
+            logOutput << "Done loading face cascade " << c << ": '" << bfs::path(faceModelPaths[c]).stem().string() << "'" << std::endl;
         }
         faceDetector = std::make_shared<FaceDetectorVJ>(vj);
     }
     ASSERT_LOG_FINALIZE(faceDetector != nullptr, "Face detector not initialized", logOutput, EXIT_FAILURE);
 
     // localized search face detector
-    const int NB_FACE_CASCADES_LOCAL_SEARCH = (conf->useLocalSearchROI ? (conf->use3CascadesLocalSearch ? 3 : 1) : 0);
+    const int NB_FACE_MODELS_LOCAL_SEARCH = (conf->useLocalSearchROI ? (conf->use3CascadesLocalSearch ? 3 : 1) : 0);
     if (conf->useLocalSearchROI)
     {
         FaceDetectorVJ vj(conf->face.scaleFactor, conf->face.nmsThreshold, conf->face.minSize, conf->face.maxSize,
                           conf->face.confidenceSize, conf->face.minNeighbours, conf->face.overlapThreshold);
-        for (int c = 0; c < NB_FACE_CASCADES_LOCAL_SEARCH; ++c)
+        for (int c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c)
         {
             // load face detector, flip last one for right profile if using 3 Cascades
-            int success = vj.loadDetector(faceCascadePaths[c], (NB_FACE_CASCADES - 1 == c && conf->FastDT) ? HORIZONTAL : NONE);
-            ASSERT_LOG_FINALIZE(success == 0, "Failed loading local face detector file: '" + faceCascadePaths[c] + "'\n", logOutput, EXIT_FAILURE);
-            logOutput << "Done loading local face cascade " << c << ": '" << bfs::path(faceCascadePaths[c]).stem().string() << "'" << std::endl;
+            int success = vj.loadDetector(faceModelPaths[c], (NB_FACE_MODELS - 1 == c && conf->FastDT) ? HORIZONTAL : NONE);
+            ASSERT_LOG_FINALIZE(success == 0, "Failed loading local face detector file: '" + faceModelPaths[c] + "'\n", logOutput, EXIT_FAILURE);
+            logOutput << "Done loading local face cascade " << c << ": '" << bfs::path(faceModelPaths[c]).stem().string() << "'" << std::endl;
         }
         localFaceDetector = std::make_shared<FaceDetectorVJ>(vj);
     }
@@ -430,13 +437,13 @@ int main(int argc, char *argv[])
     {
         eyesDetector.push_back(EyeDetector(conf->eyes.scaleFactor, conf->eyes.nmsThreshold, conf->eyes.minSize, conf->eyes.maxSize));
         eyesDetector.push_back(EyeDetector(conf->eyes.scaleFactor, conf->eyes.nmsThreshold, conf->eyes.minSize, conf->eyes.maxSize));
-        ASSERT_LOG_FINALIZE(eyesDetector[LEFT_EYE].loadDetector(eyeCascadePaths[LEFT_EYE]) == 0 &&
-                            eyesDetector[RIGHT_EYE].loadDetector(eyeCascadePaths[RIGHT_EYE]) == 0,
+        ASSERT_LOG_FINALIZE(eyesDetector[LEFT_EYE].loadDetector(eyeModelPaths[LEFT_EYE]) == 0 &&
+                            eyesDetector[RIGHT_EYE].loadDetector(eyeModelPaths[RIGHT_EYE]) == 0,
                             "Failed loading an eye detector file", logOutput, EXIT_FAILURE);
-        //for (int i = 0; i < NB_EYE_CASCADES; ++i)
+        //for (int i = 0; i < NB_EYE_MODELS; ++i)
         //{
-        //    eyesDetector[LEFT_EYE].loadDetector((string)opencv_root + "/" + eyeCascadePaths[i][LEFT_EYE]);
-        //    eyesDetector[RIGHT_EYE].loadDetector((string)opencv_root + "/" + eyeCascadePaths[i][RIGHT_EYE]);
+        //    eyesDetector[LEFT_EYE].loadDetector((string)opencv_root + "/" + eyeModelPaths[i][LEFT_EYE]);
+        //    eyesDetector[RIGHT_EYE].loadDetector((string)opencv_root + "/" + eyeModelPaths[i][RIGHT_EYE]);
         //}
     }
 
@@ -446,7 +453,7 @@ int main(int argc, char *argv[])
     currentTracks.reserve(25);
     /*DETECTION VECTORS*/
     vector<cv::Rect> mergedDet, unmatchedDets, newROIs;
-    vector<vector<cv::Rect> > combo(NB_FACE_CASCADES);
+    vector<vector<cv::Rect> > combo(NB_FACE_MODELS);
     vector<size_t> usedDetectorIndexes;
 
     /********************************************************************************************************************************************/
@@ -588,7 +595,7 @@ int main(int argc, char *argv[])
         FACE_RECOG_NAMESPACE::cvtColor(frame, frameGray, CV_BGR2GRAY);
 
         // clean previously detected faces
-        for (int c = 0; c < NB_FACE_CASCADES; ++c)
+        for (int c = 0; c < NB_FACE_MODELS; ++c)
             combo[c].clear();
 
         bool isNewDetection = frameCounter == 0 || frameCounter % conf->detectionFrameInterval == 0;
@@ -601,7 +608,7 @@ int main(int argc, char *argv[])
             FACE_RECOG_DEBUG(frameTime = getTimeNowPrecise());
 
             faceDetector->cleanImages();
-            for (int i = 0; i < NB_FACE_CASCADES; ++i)
+            for (int i = 0; i < NB_FACE_MODELS; ++i)
                 faceDetector->assignImage(frameGray);
             faceDetector->findFaces(combo);
            
@@ -890,9 +897,9 @@ int main(int argc, char *argv[])
                 roi = FACE_RECOG_MAT(frameGray, localSearchBBox);
 
                 // execute localize search to find faces ROI
-                std::vector<std::vector<cv::Rect> > localComboFaces(NB_FACE_CASCADES_LOCAL_SEARCH);
+                std::vector<std::vector<cv::Rect> > localComboFaces(NB_FACE_MODELS_LOCAL_SEARCH);
                 localFaceDetector->cleanImages();
-                for (int c = 0; c < NB_FACE_CASCADES_LOCAL_SEARCH; ++c)
+                for (int c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c)
                     localFaceDetector->assignImage(roi);
                 localFaceDetector->findFaces(localComboFaces);
                 newROIs = localFaceDetector->mergeDetections(localComboFaces);
@@ -900,7 +907,7 @@ int main(int argc, char *argv[])
                 FACE_RECOG_DEBUG(
                     logDebug << "current bbox: " << currentTracks[i].bbox() << std::endl;
                     logDebug << "local bbox: " << localSearchBBox << std::endl;
-                    logDebug << "NB CC Local: " << NB_FACE_CASCADES_LOCAL_SEARCH << std::endl;
+                    logDebug << "NB CC Local: " << NB_FACE_MODELS_LOCAL_SEARCH << std::endl;
                     logDebug << "combo size: " << localComboFaces.size() << std::endl;
                     logDebug << "localComboFaces: " << std::endl;
                     for (size_t ci = 0; ci < localComboFaces.size(); ++ci)
@@ -910,7 +917,7 @@ int main(int argc, char *argv[])
                     for (size_t ci = 0; ci < newROIs.size(); ++ci)
                         logDebug << "(ci=" << ci << "): " << newROIs[ci] << std::endl;
                     if (newROIs.size() > 0) {
-                        for (size_t c = 0; c < NB_FACE_CASCADES_LOCAL_SEARCH; ++c) {
+                        for (size_t c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c) {
                             if (newROIs[c].area() > 0) {
                                 logDebug << "combo bbox[" << c << "]: " << localComboFaces[c] << std::endl;
                                 logDebug << "newROI[" << c << "]: " << newROIs[c] << std::endl;

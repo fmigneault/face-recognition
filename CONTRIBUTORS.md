@@ -40,6 +40,14 @@
     Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun, *Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks*, Advances in Neural Information Processing Systems (NIPS), 2015.  
     Python contribution: Sean Bell (Cornell) 
 
+* KCF | [GitHub1](https://github.com/joaofaro/KCFcpp) | [GitHub2](https://github.com/vojirt/kcf) | [OpenCV](http://docs.opencv.org/trunk/d2/dff/classcv_1_1TrackerKCF.html)
+
+    J. F. Henriques, R. Caseiro, P. Martins, and J. Batista, *High-Speed Tracking with Kernelized Correlation Filters*, IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 37(3), pp. 583-596, 2015.
+    
+* SSD | [GitHub](https://github.com/weiliu89/caffe/tree/ssd)
+
+    W. Liu, D. Anguelov, D. Erhan, C. Szegedy, S. Reed, C.-Y. Fu, et al., *SSD: Single Shot MultiBox Detector*, in European conference on computer vision, 2016, pp. 21-37.
+    
 * YOLO | [Link](https://pjreddie.com/darknet/yolo/) | [GitHub 1](https://github.com/camel007/caffe-yolo-face-detection) | [GitHub 2](https://github.com/xingwangsfu/caffe-yolo)  
 
     J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, *You Only Look Once: Unified, Real-Time Object Detection*, in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2016, pp. 779-788.

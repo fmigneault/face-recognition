@@ -10,6 +10,9 @@
 #include "Configs/Platform.h"
 using namespace config;
 
+// Eigen
+#include <Eigen/Core>
+
 // OpenCV
 #include <opencv2/opencv.hpp>
 #include <opencv2/plot.hpp>
@@ -87,10 +90,21 @@ using namespace std;
     #endif/*FACE_RECOG_HAS_PYTHON*/
     #include "FaceDetectors/FaceDetectorFRCNN.h"
 #endif/*FACE_RECOG_HAS_FRCNN*/
-#ifdef FACE_RECOG_HAS_YOLO_CNN
-    #include "FaceDetectors/FaceDetectorYoloCNN.h"
-#endif/*FACE_RECOG_HAS_YOLO_CNN*/
-#include "FaceDetectors/FaceDetectorVJ.h"
+#ifdef FACE_RECOG_HAS_SSD
+#include "FaceDetectors/FaceDetectorSSD.h"
+#endif/*FACE_RECOG_HAS_SSD*/
+#ifdef FACE_RECOG_HAS_YOLO
+    #include "FaceDetectors/FaceDetectorYolo.h"
+#endif/*FACE_RECOG_HAS_YOLO*/
+#ifdef FACE_RECOG_HAS_KCF
+#include "Trackers/FaceDetectorVJ.h"
+#endif/*FACE_RECOG_HAS_KCF*/
+#ifdef FACE_RECOG_HAS_KCF
+#include "Trackers/FaceDetectorVJ.h"
+#endif/*FACE_RECOG_HAS_KCF*/
+#ifdef FACE_RECOG_HAS_KCF
+#include "Trackers/FaceDetectorVJ.h"
+#endif/*FACE_RECOG_HAS_KCF*/
 
 // FaceRecog Tracking Containers
 #include "Tracks/Association.h"

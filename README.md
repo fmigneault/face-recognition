@@ -15,6 +15,8 @@ On-line Face Detection, Tracking and Recognition.
 | **Camshift**                | tracker                                                                           |
 | **Compressive Tracking**    | tracker                                                                           |
 | **FRCNN**                   | Faster R-CNN face detection (Faster Region-based Convolutional Neural Networks)   |
+| **KCF**                     | Kernelized Correlation Filters tracker                                            |
+| **SSD**                     | Single Shot MultiBox Detector (CNN models with PASCAL-VOC, COCO or ILSVRC)        |
 | **YOLO**                    | Real-Time Object Detection using CNN                                              |
 | **EoESVM**                  | Ensemble of Exemplar-SVM face recognition                                         |
 | **FaceNet**                 | Face recognition using deep convolutional neural network                          |

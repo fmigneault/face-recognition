@@ -54,11 +54,11 @@ using std::string;
 using namespace std;
 namespace db = caffe::db;
 
-class FaceDetectorYoloCNN final : public IFaceDetector
+class FaceDetectorYOLO final : public IFaceDetector
 {
     public:
-        FaceDetectorYoloCNN();
-        ~FaceDetectorYoloCNN() {}
+        FaceDetectorYOLO();
+        ~FaceDetectorYOLO() {}
         // specialized overrides 
         int findFaces(std::vector<std::vector<cv::Rect>>& faces) override;
         double evaluateConfidence(Target& target, FACE_RECOG_MAT& image) override;

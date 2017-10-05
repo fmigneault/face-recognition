@@ -1,33 +1,18 @@
-/* 
-    Original Code Reference
-
-    FAST-DT: FAce STructured Detection and Tracking
-    Francesco Comaschi (f.comaschi@tue.nl)
-
-    Code to accompany the paper:
-
-        Online Multi-Face Detection and Tracking using Detector Confidence and Structured SVMs
-        F. Comaschi, S. Stuijk, T. Basten, H. Corporaal
-        Advanced Video and Signal-Based Surveillance (AVSS), 2015
-
-    Multiple updates and modifications applied to introduce improvements or combined use with projet
-*/
-
-#ifndef FACE_RECOG_FACE_DETECTOR_VJ_H
-#define FACE_RECOG_FACE_DETECTOR_VJ_H
+#ifndef FACE_RECOG_FACE_DETECTOR_SSD_H
+#define FACE_RECOG_FACE_DETECTOR_SSD_H
 
 #include "FaceRecogConfig.h"
 
 
-class FaceDetectorVJ final : public IFaceDetector
+class FaceDetectorSSD final : public IFaceDetector
 {
 public:
-	FaceDetectorVJ();
-    inline ~FaceDetectorVJ() {}
+	FaceDetectorSSD();
+    inline ~FaceDetectorSSD() {}
     // specific to specialized class
     void initializeParameters(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
                               cv::Size evalSize, int minNeighbours, double overlapThreshold);
-    FaceDetectorVJ(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
+    FaceDetectorSSD(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
                    cv::Size evalSize, int minNeighbours, double overlapThreshold);
     void SetDefaults();
     int loadDetector(std::string name, FlipMode faceFlipMode = NONE);
@@ -58,4 +43,4 @@ private:
 };
 
 
-#endif /* FACE_RECOG_FACE_DETECTOR_VJ_H */
+#endif /* FACE_RECOG_FACE_DETECTOR_SSD_H */
