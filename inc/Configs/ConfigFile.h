@@ -110,12 +110,12 @@ public:
     int associationTrackThreshold;
 
     // tracker creation and removal parameters
-    int removeThresholdInsideBounds;
-    int removeThresholdOutsideBounds;
-    double removeScoreInsideBounds;
-    double removeScoreOutsideBounds;
-    int createThreshold;
-    double createScore;
+    int removeTrackCountThresholdInBounds;
+    int removeTrackCountThresholdOutBounds;
+    double removeTrackConfidenceInBounds;
+    double removeTrackConfidenceOutBounds;
+    int createTrackCountThreshold;
+    double createTrackConfidenceThreshold;
     double trackerOverlapThreshold;
     int detectionAugmentationOffset;
     int detectionFrameInterval;

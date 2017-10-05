@@ -719,16 +719,17 @@ int main(int argc, char *argv[])
                 );
                 if (!currentTracks[i].isMatched())
                 {
-                    double maxScore = faceDetector->evaluateConfidence(currentTracks[i], frameGray);
-                    bool isOnEdgeOfImg = (currentTracks[i].bbox().x == 0 || currentTracks[i].bbox().y == 0 ||
-                                          currentTracks[i].bbox().x + currentTracks[i].bbox().width == frame.cols ||
-                                          currentTracks[i].bbox().y + currentTracks[i].bbox().height == frame.rows);
+                    double maxConfidence = faceDetector->evaluateConfidence(currentTracks[i], frameGray);
+                    bool onImageEdge = (currentTracks[i].bbox().x == 0 || currentTracks[i].bbox().y == 0 ||
+                                        currentTracks[i].bbox().x + currentTracks[i].bbox().width == frame.cols ||
+                                        currentTracks[i].bbox().y + currentTracks[i].bbox().height == frame.rows);
                     FACE_RECOG_DEBUG(
-                        logDebug << "Max confidence for track " << currentTracks[i].getTrackNumber() << " = " << maxScore << std::endl;
-                        if (isOnEdgeOfImg)
+                        logDebug << "Max confidence for track " << currentTracks[i].getTrackNumber() << " = " << maxConfidence << std::endl;
+                        if (onImageEdge)
                             logDebug << "BBOX " << i << " is on edge of image" << std::endl;
                     );
-                    if ((maxScore <= conf->removeScoreOutsideBounds && isOnEdgeOfImg) || maxScore <= conf->removeScoreInsideBounds) {
+                    if ((maxConfidence <= conf->removeTrackConfidenceOutBounds && onImageEdge) || 
+                        (maxConfidence <= conf->removeTrackConfidenceInBounds)) {
                         currentTracks[i].increaseRemoveCount();
                         FACE_RECOG_DEBUG(logDebug << "Remove count = " << currentTracks[i].getRemoveCount() << std::endl);
                     }
@@ -748,9 +749,9 @@ int main(int argc, char *argv[])
                 {
                     FACE_RECOG_DEBUG(
                         logDebug << "RemoveCount: " << (*iter).getRemoveCount() << std::endl
-                                 << "RemoveThresh: " << conf->removeThresholdOutsideBounds << std::endl;
+                                 << "RemoveThresh: " << conf->removeTrackCountThresholdOutBounds << std::endl;
                     );
-                    if ((*iter).getRemoveCount() >= conf->removeThresholdOutsideBounds) {
+                    if ((*iter).getRemoveCount() >= conf->removeTrackCountThresholdOutBounds) {
                         if (conf->useFaceRecognition)
                             accScores.removeTrackScores(iter->getTrackNumber());
                         iter = currentTracks.erase(iter);
@@ -819,12 +820,12 @@ int main(int argc, char *argv[])
                 //--------------------------------------------------------------------------------------------------------------------------------
                 for (size_t i = 0; i < initCandidates.size(); ++i)
                 {
-                    double maxScore = faceDetector->evaluateConfidence(initCandidates[i], frameGray);
+                    double maxConfidence = faceDetector->evaluateConfidence(initCandidates[i], frameGray);
                     FACE_RECOG_DEBUG(
-                        logDebug << "Max score for candidate " << i << " = " << maxScore << std::endl
+                        logDebug << "Max confidence for candidate " << i << " = " << maxConfidence << std::endl
                                  << "initCandidates: " << initCandidates[i].bbox() << std::endl;
                     );
-                    if (maxScore > conf->createScore) {
+                    if (maxConfidence > conf->createTrackConfidenceThreshold) {
                         initCandidates[i].increaseCreateCount();
                         FACE_RECOG_DEBUG(logDebug << "Create count = " << initCandidates[i].getCreateCount() << std::endl);
                     }
@@ -836,7 +837,7 @@ int main(int argc, char *argv[])
             // loop over candidates for track creation
             for (std::vector<Track>::iterator iter = initCandidates.begin(); iter != initCandidates.end();)
             {
-                if ((*iter).getCreateCount() >= conf->createThreshold)
+                if ((*iter).getCreateCount() >= conf->createTrackCountThreshold)
                 {
                     // reset creation counter
                     (*iter).setCreateCount(0);
