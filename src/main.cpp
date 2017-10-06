@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 
     // output bbox colors
     MultiColorType bboxColors = MultiColorType(conf->roiColorMode);
-    ColorCode bboxColorUnmatched = bboxColors.getColorCode(0);
+    ColorCode bboxColorNotMatched = bboxColors.getColorCode(0);
     ColorCode bboxColorConsidered = bboxColors.getColorCode(1);
     ColorCode bboxColorRecognized = bboxColors.getColorCode(2);
 
@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
     vector<Track> currentTracks, initCandidates, newCandidates;
     currentTracks.reserve(25);
     /*DETECTION VECTORS*/
-    vector<cv::Rect> mergedDet, unmatchedDets, newROIs;
+    vector<cv::Rect> mergedDet, NotMatchedDets, newROIs;
     vector<vector<cv::Rect> > combo(NB_FACE_MODELS);
     vector<size_t> usedDetectorIndexes;
 
@@ -622,7 +622,7 @@ int main(int argc, char *argv[])
             mergedDet = faceDetector->mergeDetections(combo);
             // reinit candidates
             for (size_t i = 0; i < initCandidates.size(); ++i)
-                initCandidates[i].markUnmatched();
+                initCandidates[i].markNotMatched();
 
             for (size_t i = 0; i < mergedDet.size(); ++i)
             {
@@ -673,7 +673,7 @@ int main(int argc, char *argv[])
             #pragma omp parallel for
             for (long i = 0; i < currentTracks.size(); ++i) {
                 currentTracks[i].track(image);
-                currentTracks[i].markUnmatched();   // no match with detection
+                currentTracks[i].markNotMatched();   // no match with detection
             }
             FACE_RECOG_DEBUG(sumTimeTrack += getDeltaTimePrecise(frameTime, MILLISECONDS));
         }
@@ -775,18 +775,18 @@ int main(int argc, char *argv[])
         //----------------------------------------------------------------------------------------------------------------------------------------
         if (isNewDetection)
         {
-            // Create unmatchedDets
+            // Create unmatched detections
             for (size_t i = 0; i < mergedDet.size(); ++i)
             {
                 if (find(usedDetectorIndexes.begin(), usedDetectorIndexes.end(), i) == usedDetectorIndexes.end()) {
-                    unmatchedDets.push_back(mergedDet[i]);
-                    FACE_RECOG_DEBUG(logDebug << "unmatched Detector: " << i << std::endl);
+                    NotMatchedDets.push_back(mergedDet[i]);
+                    FACE_RECOG_DEBUG(logDebug << "Not Matched with Detector: " << i << std::endl);
                 }
             }
             for (size_t i = 0; i < initCandidates.size(); ++i)
-                initCandidates[i].markUnmatched();
+                initCandidates[i].markNotMatched();
 
-            if ((initCandidates.size() >= 1) || (unmatchedDets.size() >= 1))
+            if ((initCandidates.size() >= 1) || (NotMatchedDets.size() >= 1))
             {
                 //--------------------------------------------------------------------------------------------------------------------------------
                 // HUNGARIAN MATCHING
@@ -794,17 +794,17 @@ int main(int argc, char *argv[])
                 frameTime = getTimeNowPrecise();
                 if (conf->useHungarianMatching)
                 {
-                    association.extendSet(initCandidates, unmatchedDets);
-                    association.computeCost(initCandidates, unmatchedDets);
-                    association.matchCandidates(initCandidates, unmatchedDets, newCandidates);
+                    association.extendSet(initCandidates, NotMatchedDets);
+                    association.computeCost(initCandidates, NotMatchedDets);
+                    association.matchCandidates(initCandidates, NotMatchedDets, newCandidates);
                     /*REMOVE FAKE TRACKS*/
                     association.reduceSet(initCandidates);
                 }
                 else
                 {
-                    for (size_t i = 0; i < unmatchedDets.size(); ++i)
+                    for (size_t i = 0; i < NotMatchedDets.size(); ++i)
                     {
-                        Track newTrack(conf, unmatchedDets[i]);
+                        Track newTrack(conf, NotMatchedDets[i]);
                         newCandidates.push_back(newTrack);
                     }
                 }
@@ -820,7 +820,7 @@ int main(int argc, char *argv[])
                 for (size_t i = 0; i < newCandidates.size(); ++i)
                     initCandidates.push_back(newCandidates[i]);
                 newCandidates.clear();  // clear the set of candidates from current frame
-                unmatchedDets.clear();  // clear unmatched detections from current frame
+                NotMatchedDets.clear(); // clear unmatched detections from current frame
 
                 //--------------------------------------------------------------------------------------------------------------------------------
                 // EVALUATE CONFIDENCE OF INIT CANDIDATES
@@ -1136,9 +1136,9 @@ int main(int argc, char *argv[])
                 // display original ROI before update if available and requested
                 bool showUpdate = conf->useLocalSearchROI && conf->displayOldROI && currentTracks[i].getROI().isUpdatedROI();
 
-                ColorCode color = (eyeOK && currentTracks[i].isRecognized()) ? bboxColorRecognized   // recognized
-                    : (eyeOK && currentTracks[i].isConsidered()) ? bboxColorConsidered               // considered
-                    : bboxColorUnmatched;                                                            // unmatched | no eyes
+                ColorCode color = (eyeOK && currentTracks[i].isRecognized()) ? bboxColorRecognized   // Recognized
+                    : (eyeOK && currentTracks[i].isConsidered()) ? bboxColorConsidered               // Considered
+                    : bboxColorNotMatched;                                                           // NotMatched | no eyes
 
                 // draw old face roi (original detection)
                 if (showUpdate)
