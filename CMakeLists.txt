@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.8)
 
 # project
 set(FaceRecog_PROJECT "FaceRecog")
-project(${FaceRecog_PROJECT})
+project(${FaceRecog_PROJECT} "CXX")
 
 #--------------------------------------------------------------------------------------------------
 # general configurations and settings

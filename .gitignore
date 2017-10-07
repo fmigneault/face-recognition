@@ -23,6 +23,7 @@ debug.log
 *.exe
 *.d
 *.o
+build/
 [Dd]ebug/
 [Dd]ebugPublic/
 Properties/
@@ -34,8 +35,9 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-bld-vc14-x64/
-lib-vc14-x64/
+bld*/
+lib*/
+sln*/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -46,6 +48,9 @@ _ReSharper.Caches/
 *.config
 packages/
 tessdata/
+
+# Visual Studio Code
+.vscode/
 
 # Profiler files
 *.psess
@@ -62,8 +67,6 @@ tessdata/
 *.mkv
 *.ogv
 *.png
-.vscode/
-build/
 chokepoint_good/
 data/
 images/
@@ -73,7 +76,6 @@ NEG/REP[0-9]*/
 output/
 sam2_pretty_good/
 sam_success/
-sln/
 testoutput/
 testoutput_detector/
 working_girl/
