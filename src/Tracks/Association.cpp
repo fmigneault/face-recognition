@@ -36,11 +36,8 @@
  * what you give them.   Happy coding!
  */
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
-using namespace cv;
-using namespace std;
-using namespace config;
 
 void Association::clear()
 {

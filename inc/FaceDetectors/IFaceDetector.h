@@ -1,7 +1,7 @@
 #ifndef FACE_RECOG_IFACE_DETECTOR_H
 #define FACE_RECOG_IFACE_DETECTOR_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 #if CV_VERSION_MAJOR == 3
 /* Declaration of global variable */

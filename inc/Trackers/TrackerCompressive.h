@@ -1,7 +1,7 @@
 #ifndef FACE_RECOG_TRACKER_COMPRESSIVE_H
 #define FACE_RECOG_TRACKER_COMPRESSIVE_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 class ImageRep;

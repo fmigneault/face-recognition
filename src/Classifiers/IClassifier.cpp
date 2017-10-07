@@ -1,4 +1,4 @@
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config,
                                                         const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs,

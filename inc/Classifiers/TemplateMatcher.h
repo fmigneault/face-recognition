@@ -1,7 +1,7 @@
 #ifndef FACE_RECOG_TEMPLATE_MATCHER_H
 #define FACE_RECOG_TEMPLATE_MATCHER_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 #include "feHOG.h"
 
 class TemplateMatcher

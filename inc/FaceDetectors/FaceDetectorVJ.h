@@ -16,7 +16,7 @@
 #ifndef FACE_RECOG_FACE_DETECTOR_VJ_H
 #define FACE_RECOG_FACE_DETECTOR_VJ_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 class FaceDetectorVJ final : public IFaceDetector

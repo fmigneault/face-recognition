@@ -1,4 +1,4 @@
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_USE_FACE_NET
 
 

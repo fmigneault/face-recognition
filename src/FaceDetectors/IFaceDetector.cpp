@@ -1,4 +1,4 @@
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 int IFaceDetector::loadDetector(string name)

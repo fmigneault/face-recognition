@@ -50,31 +50,19 @@
  * what you give them.   Happy coding!
  */
 
-#ifndef FACE_RECOG_TrackerFastDT_H
-#define FACE_RECOG_TrackerFastDT_H
+#ifndef FACE_RECOG_TRACKER_STRUCK_H
+#define FACE_RECOG_TRACKER_STRUCK_H
 
-#include <vector>
-#include <Eigen/Core>
-#include <opencv/cv.h>
+#include "FaceRecog.h"
 
-#include "Configs/ConfigFile.h"
-#include "Trackers/ITracker.h"
-#include "Tracks/HaarFeatures.h"
-#include "Tracks/Kernels.h"
-#include "Tracks/LaRank.h"
-#include "Tracks/Rect.h"
 
-using namespace config;
-
-class ImageRep;
-
-class TrackerFastDT final : public ITracker
+class TrackerSTRUCK final : public ITracker
 {
 public:
-	TrackerFastDT(ConfigFile *configFile);
-	virtual ~TrackerFastDT();
-	TrackerFastDT(const TrackerFastDT &obj);  // copy constructor
-	TrackerFastDT & operator=(const TrackerFastDT &T); // assignment operator
+	TrackerSTRUCK(ConfigFile *configFile);
+	virtual ~TrackerSTRUCK();
+	TrackerSTRUCK(const TrackerSTRUCK &obj);		   // copy constructor
+	TrackerSTRUCK &operator=(const TrackerSTRUCK &T);  // assignment operator
 	virtual void initialize(const ImageRep& frame, FloatRect bb);
 	virtual void reset();
 	virtual cv::Rect track(const ImageRep& frame);
@@ -87,4 +75,4 @@ private:
 	void updateLearner(const ImageRep& image);
 };
 
-#endif /*FACE_RECOG_TrackerFastDT_H*/
+#endif /*FACE_RECOG_TRACKER_STRUCK_H*/

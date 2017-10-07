@@ -1,5 +1,5 @@
 // Ensemble of Template Matcher classifiers
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 ClassifierEnsembleTM::ClassifierEnsembleTM()
 {

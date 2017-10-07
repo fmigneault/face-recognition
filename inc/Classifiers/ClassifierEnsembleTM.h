@@ -2,7 +2,7 @@
 #define FACE_RECOG_CLASSIFIER_ENSEMBLE_TEMPLATE_MATCHER_H
 
 class TemplateMatcher;      // forward declaration needed
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 class ClassifierEnsembleTM final : public IClassifier
 {

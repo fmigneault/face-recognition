@@ -18,17 +18,17 @@ useCameraTrigger = 0
 # algorithms
 #==============================
 # Algorithms selection for face detection, tracking and recognition 
-FastDT = 1
-FRCNN = 0
-VJ = 0
-LBP = 0
-ImprovedLBP = 0
-YOLO = 0
-camshift = 0
-compressive = 0
+Camshift = 0
+Compressive = 0
 ESVM = 1
 FaceNet = 0
+FRCNN = 0
+ImprovedLBP = 0
+LBP = 0
+STRUCK = 1
 TM = 0
+VJ = 0
+YOLO = 0
 
 #==============================
 # face recognition
@@ -75,7 +75,7 @@ detectionFrameInterval = 5
 detectionFrameBufferSize = 20                            
 
 #==============================
-# training (Fast-DT)
+# training (STRUCK)
 #==============================
 # seed for random number generator.
 seed = 0

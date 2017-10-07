@@ -1,7 +1,7 @@
 #ifndef FACE_RECOG_CLASSIFIER_FACE_NET_H
 #define FACE_RECOG_CLASSIFIER_FACE_NET_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 class ClassifierFaceNet final : public IClassifier 

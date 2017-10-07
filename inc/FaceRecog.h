@@ -12,6 +12,7 @@ using namespace config;
 
 // Eigen
 #include <Eigen/Core>
+using namespace Eigen;
 
 // OpenCV
 #include <opencv2/opencv.hpp>
@@ -81,7 +82,22 @@ using namespace std;
 // FaceRecog Camera
 #include "Camera/CameraDefines.h"
 
-// FaceRecog Face Detectors/Trackers
+// FaceRecog Tracking Containers
+#include "Tracks/Association.h"
+#include "Tracks/CircularBuffer.h"
+#include "Tracks/HaarFeature.h"
+#include "Tracks/HaarFeatures.h"
+#include "Tracks/Hungarian.h"
+#include "Tracks/ImageRep.h"
+#include "Tracks/Kernels.h"
+#include "Tracks/LaRank.h"
+#include "Tracks/Rect.h"
+#include "Tracks/Sample.h"
+#include "Tracks/Sampler.h"
+#include "Tracks/Track.h"
+#include "Tracks/TrackROI.h"
+
+// FaceRecog Face Detectors
 #include "FaceDetectors/IFaceDetector.h"
 #include "FaceDetectors/EyeDetector.h"
 #ifdef FACE_RECOG_HAS_FRCNN
@@ -94,23 +110,23 @@ using namespace std;
 #include "FaceDetectors/FaceDetectorSSD.h"
 #endif/*FACE_RECOG_HAS_SSD*/
 #ifdef FACE_RECOG_HAS_YOLO
-    #include "FaceDetectors/FaceDetectorYolo.h"
+    #include "FaceDetectors/FaceDetectorYOLO.h"
 #endif/*FACE_RECOG_HAS_YOLO*/
-#ifdef FACE_RECOG_HAS_KCF
-#include "Trackers/FaceDetectorVJ.h"
-#endif/*FACE_RECOG_HAS_KCF*/
-#ifdef FACE_RECOG_HAS_KCF
-#include "Trackers/FaceDetectorVJ.h"
-#endif/*FACE_RECOG_HAS_KCF*/
-#ifdef FACE_RECOG_HAS_KCF
-#include "Trackers/FaceDetectorVJ.h"
-#endif/*FACE_RECOG_HAS_KCF*/
 
-// FaceRecog Tracking Containers
-#include "Tracks/Association.h"
-#include "Tracks/CircularBuffer.h"
-#include "Tracks/Hungarian.h"
-#include "Tracks/Track.h"
+// FaceRecog Trackers
+#include "Trackers/ITracker.h"
+#ifdef FACE_RECOG_HAS_CAMSHIFT
+#include "Trackers/TrackerCamshift.h"
+#endif/*FACE_RECOG_HAS_CAMSHIFT*/
+#ifdef FACE_RECOG_HAS_COMPRESSIVE
+#include "Trackers/TrackerCompressive.h"
+#endif/*FACE_RECOG_HAS_COMPRESSIVE*/
+#ifdef FACE_RECOG_HAS_STRUCK
+#include "Trackers/TrackerSTRUCK.h"
+#endif/*FACE_RECOG_HAS_STRUCK*/
+#ifdef FACE_RECOG_HAS_KCF
+#include "Trackers/TrackerKCF.h"
+#endif/*FACE_RECOG_HAS_KCF*/
 
 // FaceRecog Classifiers
 #include "Classifiers/TemplateMatcher.h"

@@ -13,7 +13,7 @@
     * Multiple updates and modifications applied to introduce improvements or combined use with projet
 */
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 FaceDetectorVJ::FaceDetectorVJ()

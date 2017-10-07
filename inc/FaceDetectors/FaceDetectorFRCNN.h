@@ -1,7 +1,7 @@
 #ifndef FACE_RECOG_FACE_DETECTOR_FRCNN_H
 #define FACE_RECOG_FACE_DETECTOR_FRCNN_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 class FaceDetectorFRCNN final : public IFaceDetector

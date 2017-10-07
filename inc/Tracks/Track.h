@@ -39,20 +39,8 @@
 #ifndef FACE_RECOG_TRACK_H
 #define FACE_RECOG_TRACK_H
 
-#include <opencv/cv.h>
+#include "FaceRecog.h"
 
-#include "Configs/ConfigFile.h"
-#include "Trackers/ITracker.h"
-#include "Trackers/TrackerCamshift.h"
-#include "Trackers/TrackerCompressive.h"
-#include "Trackers/TrackerFastDT.h"
-#include "Tracks/ImageRep.h"
-#include "Tracks/TrackROI.h"
-
-#include <iostream>
-#include <memory>
-
-using namespace config;
 
 class Track
 {

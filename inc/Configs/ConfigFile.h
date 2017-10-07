@@ -76,17 +76,17 @@ public:
     bool useCameraTrigger;
 
     // face detectors and trackers
-    bool FastDT;
-    bool FRCNN;
-    bool VJ;
-    bool LBP;
-    bool ImprovedLBP;
-    bool YOLO;
-    bool camshift;
-    bool compressive;
+    bool Camshift;
+    bool Compressive;
     bool ESVM;
     bool FaceNet;
+    bool FRCNN;
+    bool ImprovedLBP;
+    bool LBP;
+    bool STRUCK;
     bool TM;
+    bool VJ;
+    bool YOLO;
 
     // face recognition
     bool useFaceRecognition;

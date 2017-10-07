@@ -89,25 +89,29 @@ add_definitions(-DFaceRecog_ROOT_PATH="${FaceRecog_ROOT_DIR}")
 
 # === modules ===
 # --- Face Detection/Tracking ---
-face_recog_option(FaceRecog_USE_FRCNN       "Include FRCNN module [FD/FT]"                      OFF)
-face_recog_option(FaceRecog_USE_KCF         "Include KCF module [FT]"                           OFF)
-face_recog_option(FaceRecog_USE_SSD         "Include SSD module [FD]"                           OFF)
-face_recog_option(FaceRecog_USE_YOLO        "Include YOLO CNN module [FD/FT]"                   OFF)
+face_recog_option(FaceRecog_ENABLE_CAMSHIFT         "Include Camshift module [FT]"                      OFF)
+face_recog_option(FaceRecog_ENABLE_COMPRESSIVE      "Include Compressive tracking module [FT]"          OFF)
+face_recog_option(FaceRecog_ENABLE_FRCNN            "Include FRCNN module [FD/FT]"                      OFF)
+face_recog_option(FaceRecog_ENABLE_KCF              "Include KCF module [FT]"                           OFF)
+face_recog_option(FaceRecog_ENABLE_SSD              "Include SSD module [FD]"                           OFF)
+face_recog_option(FaceRecog_ENABLE_STRUCK           "Include STRUCK module [FT]"                        ON)
+face_recog_option(FaceRecog_ENABLE_VJ               "Include Viola-Jones Cascade module [FD]"           ON)
+face_recog_option(FaceRecog_ENABLE_YOLO             "Include YOLO CNN module [FD/FT]"                   OFF)
 
 # --- Face Recognition ---
-face_recog_option(BUILD_ESVM                "Build Exemplar-SVM (ESVM) module from sources"     OFF)
-face_recog_option(FaceRecog_USE_ESVM        "Include Exemplar-SVM (ESVM) module [FR]"           ON)
-face_recog_option(FaceRecog_USE_FaceNet     "Include FaceNet module [FR]"                       OFF)
+face_recog_option(BUILD_ESVM                        "Build Exemplar-SVM (ESVM) module from sources"     OFF)
+face_recog_option(FaceRecog_ENABLE_ESVM             "Include Exemplar-SVM (ESVM) module [FR]"           ON)
+face_recog_option(FaceRecog_ENABLE_FaceNet          "Include FaceNet module [FR]"                       OFF)
 
 face_recog_update_modules()
 
 # === packages ===
-face_recog_option(WITH_CUDA                 "Include NVidia Cuda Runtime support"               ON  if(NOT IOS AND NOT WINRT) )
-face_recog_option(WITH_OpenMP               "Include OpenMP support"                            ON)
-face_recog_option(WITH_Caffe                "Include Caffe library support"                     OFF)
-face_recog_option(WITH_Python               "Include Python support"                            OFF)
-face_recog_option(WITH_TensorFlow           "Include TensorFlow library support"                OFF)
-face_recog_option(WITH_FlyCapture2          "Include FlyCapture2 SDK support"                   OFF)
+face_recog_option(WITH_CUDA                         "Include NVidia Cuda Runtime support"               ON  if(NOT IOS AND NOT WINRT) )
+face_recog_option(WITH_OpenMP                       "Include OpenMP support"                            ON)
+face_recog_option(WITH_Caffe                        "Include Caffe library support"                     OFF)
+face_recog_option(WITH_Python                       "Include Python support"                            OFF)
+face_recog_option(WITH_TensorFlow                   "Include TensorFlow library support"                OFF)
+face_recog_option(WITH_FlyCapture2                  "Include FlyCapture2 SDK support"                   OFF)
 
 face_recog_find_packages()
 
@@ -176,3 +180,10 @@ install(FILES     ${FaceRecog_CONFIG_PATH}  DESTINATION ${INSTALL_CMAKE_DIR})
 if(${FaceRecog_BUILD_TESTS})
     install(TARGETS ${FaceRecog_TESTS} RUNTIME DESTINATION ${INSTALL_BINARY_DIR})
 endif()
+
+#--------------------------------------------------------------------------------------------------
+# display project status information
+#--------------------------------------------------------------------------------------------------
+
+face_recog_find_version()
+face_recog_display_summary()

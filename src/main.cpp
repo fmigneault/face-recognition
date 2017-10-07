@@ -14,7 +14,7 @@
         - FaceNet: face recognition using deep convolutional neural network
 */
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 /* DEBUG */
 #define FACE_RECOG_USE_EXCEPTION_LOGGING 1

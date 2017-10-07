@@ -19,7 +19,7 @@
         Copyright (C) 2011 Sam Hare, Oxford Brookes University, Oxford, UK
  */
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 namespace config {
 

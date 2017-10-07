@@ -16,7 +16,7 @@
 #ifndef FACE_RECOG_UTILITIES_H
 #define FACE_RECOG_UTILITIES_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 #include "Tracks/Track.h"
 
 namespace util {

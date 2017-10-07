@@ -1,7 +1,7 @@
 #ifndef CLASSIFIER_ENSEMBLE_ESVM_H
 #define CLASSIFIER_ENSEMBLE_ESVM_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 #include "esvmEnsemble.h"
 
 class ClassifierEnsembleESVM final : public IClassifier

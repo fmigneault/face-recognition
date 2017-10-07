@@ -37,8 +37,8 @@ macro(face_recog_add_sources)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Trackers/ITracker.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Trackers/TrackerCamshift.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Trackers/TrackerCompressive.h)
-    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Trackers/TrackerFastDT.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Trackers/TrackerKCF.h)
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Trackers/TrackerSTRUCK.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Tracks/Association.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Tracks/CircularBuffer.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Tracks/HaarFeature.h)
@@ -77,9 +77,9 @@ macro(face_recog_add_sources)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Python/PythonInterop.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Python/PythonModule.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerCamshift.cpp)
-    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerCompressive.cpp)
-    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerFastDT.cpp)
-    set(FaceRecog_HEADER_FILES ${FaceRecog_SOURCES_DIRS} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerKCF.cpp)
+    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerCompressive.cpp)    
+    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerKCF.cpp)
+    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerSTRUCK.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Tracks/Association.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Tracks/CircularBuffer.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Tracks/HaarFeature.cpp)
@@ -146,34 +146,66 @@ endmacro()
 #--------------------------------------------------------------------------------------------------
 # face_recog_update_modules
 #
-#   updates package requirements and defines for corresponding 'FaceRecog_USE_<module>' variables
+#   updates package requirements and defines for corresponding 'FaceRecog_ENABLE_<module>' variables
 #   this macro should be called before 'face_recog_find_packages' to accordingly apply the changes
 #   specified with corresponding 'WITH_<package>' variables
 #--------------------------------------------------------------------------------------------------
 macro(face_recog_update_modules)
 
     # FRCNN
-    if(${FaceRecog_USE_FRCNN})
-        message("FRCNN requires Python, option is enforced")
-        set(WITH_Python ON CACHE BOOL "Include Python library support" FORCE)
+    if(${FaceRecog_ENABLE_FRCNN})
+        if(NOT ${WITH_Python})
+            warn("FRCNN requires Python, option is enforced")
+            set(WITH_Python ON CACHE BOOL "Include Python library support" FORCE)
+        endif()
         add_definitions(-DFACE_RECOG_HAS_FRCNN)
     else()
         remove_definitions(-DFACE_RECOG_HAS_FRCNN)
     endif()
-    
+
+    if(${FaceRecog_ENABLE_KCF})
+        message("KCF selected, verify implementation to employ")
+        set(FaceRecog_KCF_IMPL)
+        set(FaceRecog_KCF_OPENCV    "OpenCV")
+        set(FaceRecog_KCF_JOAO_FARO "Joao Faro")
+        set(FaceRecog_KCF_IMPL ${FaceRecog_KCF_OPENCV} CACHE STRING "KCF implementation to employ")
+        set_property(CACHE FaceRecog_KCF_IMPL PROPERTY STRINGS ${FaceRecog_KCF_OPENCV} ${FaceRecog_KCF_JOAO_FARO})
+        add_definitions(-DFACE_RECOG_HAS_KCF)
+    endif()
+    if  (${FaceRecog_ENABLE_KCF} AND ${FaceRecog_KCF_IMPL} STREQUAL ${FaceRecog_KCF_OPENCV})
+        add_definitions(-DFACE_RECOG_KCF_OPENCV)
+    elif(${FaceRecog_ENABLE_KCF} AND ${FaceRecog_KCF_IMPL} STREQUAL ${FaceRecog_KCF_JOAO_FARO})
+        add_definitions(-DFACE_RECOG_KCF_JOAO_FARO)
+    else()
+        remove_definitions(-DFACE_RECOG_HAS_KCF)
+        remove_definitions(-DFACE_RECOG_KCF_OPENCV)
+        remove_definitions(-DFACE_RECOG_KCF_JOAO_FARO)
+    endif()
+
     # SSD
-    if(${FaceRecog_USE_SSD})
-        message("SSD requires Caffe, option is enforced")
-        set(WITH_Caffe ON CACHE BOOL "Include Caffe library support" FORCE)
+    if(${FaceRecog_ENABLE_SSD})
+        if(NOT ${WITH_Caffe})
+            warn("SSD requires Caffe, option is enforced")
+            set(WITH_Caffe ON CACHE BOOL "Include Caffe library support" FORCE)
+        endif()
         add_definitions(-DFACE_RECOG_HAS_SSD)
     else()
         remove_definitions(-DFACE_RECOG_HAS_SSD)
     endif()
     
+    # STRUCK
+    if(${FaceRecog_ENABLE_STRUCK})
+        add_definitions(-DFACE_RECOG_HAS_STRUCK)
+    else()
+        remove_definitions(-DFACE_RECOG_HAS_STRUCK)
+    endif()
+
     # YOLO
-    if(${FaceRecog_USE_YOLO})
-        message("YOLO requires Caffe, option is enforced")
-        set(WITH_Caffe ON CACHE BOOL "Include Caffe library support" FORCE)
+    if(${FaceRecog_ENABLE_YOLO})
+        if(NOT ${WITH_Caffe})
+            warn("YOLO requires Caffe, option is enforced")
+            set(WITH_Caffe ON CACHE BOOL "Include Caffe library support" FORCE)
+        endif()
         add_definitions(-DFACE_RECOG_HAS_YOLO)
     else()
         remove_definitions(-DFACE_RECOG_HAS_YOLO)
@@ -183,7 +215,7 @@ macro(face_recog_update_modules)
     if(NOT ${ESVM_ROOT_DIR})
         set(ESVM_ROOT_DIR "ESVM_ROOT_DIR-NOTFOUND")
     endif()
-    if(${FaceRecog_USE_ESVM})
+    if(${FaceRecog_ENABLE_ESVM})
         if(${BUILD_ESVM})            
             add_subdirectory(${ESVM_ROOT_DIR})
         else()
@@ -205,10 +237,12 @@ macro(face_recog_update_modules)
     endif()
     
     # FaceNet
-    if(${FaceRecog_USE_FaceNet})
-        message("FaceNet requires TensorFlow and Python, option are enforced")
-        set(WITH_Python     ON CACHE BOOL "Include Python library support" FORCE)
-        set(WITH_TensorFlow ON CACHE BOOL "Include TensorFlow library support" FORCE)
+    if(${FaceRecog_ENABLE_FaceNet})
+        if(NOT (${WITH_Python} AND ${WITH_TensorFlow}))
+            warn("FaceNet requires TensorFlow and Python, option are enforced")
+            set(WITH_Python     ON CACHE BOOL "Include Python library support" FORCE)
+            set(WITH_TensorFlow ON CACHE BOOL "Include TensorFlow library support" FORCE)
+        endif()
         add_definitions(-DFACE_RECOG_HAS_FACE_NET)
     else()
         remove_definitions(-DFACE_RECOG_HAS_FACE_NET)
@@ -342,4 +376,146 @@ macro(face_recog_find_packages)
         add_definitions(-DFACE_RECOG_HAS_FLYCAPTURE2=0)
     endif()
     
+endmacro()
+
+#--------------------------------------------------------------------------------------------------
+# face_recog_find_version
+#
+#   obtains version of FaceRecog
+#--------------------------------------------------------------------------------------------------
+macro(face_recog_find_version)    
+
+    set(FaceRecog_VERSION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inc/Configs/Version.h")
+    file(STRINGS "${FaceRecog_VERSION_FILE}" FaceRecog_VERSION_PARTS REGEX "#define FACE_RECOG_VERSION_[A-Z]+[ ]+" )
+
+    string(REGEX REPLACE ".+FACE_RECOG_VERSION_MAJOR[ ]+([0-9]+).*"      "\\1" FaceRecog_VERSION_MAJOR   "${FaceRecog_VERSION_PARTS}")
+    string(REGEX REPLACE ".+FACE_RECOG_VERSION_MINOR[ ]+([0-9]+).*"      "\\1" FaceRecog_VERSION_MINOR   "${FaceRecog_VERSION_PARTS}")
+    string(REGEX REPLACE ".+FACE_RECOG_VERSION_PATCH[ ]+([0-9]+).*"      "\\1" FaceRecog_VERSION_PATCH   "${FaceRecog_VERSION_PARTS}")
+    string(REGEX REPLACE ".+FACE_RECOG_VERSION_STATUS[ ]+\"([^\"]*)\".*" "\\1" FaceRecog_VERSION_STATUS  "${FaceRecog_VERSION_PARTS}")
+
+    set(FaceRecog_VERSION_PLAIN "${FaceRecog_VERSION_MAJOR}.${FaceRecog_VERSION_MINOR}.${FaceRecog_VERSION_PATCH}")
+    set(FaceRecog_VERSION       "${FaceRecog_VERSION_PLAIN}${FaceRecog_VERSION_STATUS}")
+
+    # create a dependency on the version file
+    # we never use the output of the following command but cmake will rerun automatically if the version file changes
+    configure_file("${FaceRecog_VERSION_FILE}" "${CMAKE_BINARY_DIR}/junk/version.junk" COPYONLY)
+
+endmacro()
+
+#--------------------------------------------------------------------------------------------------
+# face_recog_display_versions
+#
+#   displays cmake library versions
+#--------------------------------------------------------------------------------------------------
+macro(face_recog_display_versions)
+
+    foreach(lib IN ITEMS ${ARGN})
+        # try to find the library as is, otherwise try in all CAPS
+        set(lib_version "${lib}_VERSION")
+        if("${${lib_version}}" STREQUAL "")            
+            string(TOUPPER "${lib}_VERSION" lib_version)
+        endif()
+        set(padlib "${lib}:")      
+        padstr(padlib ${padlib} 20 " ")
+        set(lib_with "WITH_${lib}")
+
+        # check if library is found, and consider missing "WITH_<lib>" as REQUIRED library 
+        if((NOT "${${lib_version}}" STREQUAL "") AND (("${${lib_with}}" STREQUAL "") OR ("${${lib_with}}" STREQUAL "ON")))
+            status("    ${padlib}${${lib_version}}")
+        elseif("${${lib_with}}" STREQUAL "OFF")
+            status("    ${padlib}N/A (${lib_with} == ${${lib_with}})")
+        else()
+            status("    ${padlib}NOT FOUND")
+        endif()
+    endforeach()
+
+endmacro()
+
+#--------------------------------------------------------------------------------------------------
+# face_recog_display_summary
+#
+#   displays cmake parameters, modules and packages summary information
+#--------------------------------------------------------------------------------------------------
+macro(face_recog_display_summary)
+
+    status("")
+    status("================================================================================")
+    status("FaceRecog Configuration Summary")
+    status("")
+    status("--------------------------------------------------------------------------------")
+    status("FaceRecog Version:      ${FaceRecog_VERSION_PLAIN}")
+    status("    Major:              ${FaceRecog_VERSION_MAJOR}")
+    status("    Minor:              ${FaceRecog_VERSION_MINOR}")
+    status("    Patch:              ${FaceRecog_VERSION_PATCH}")
+    status("    Status:             ${FaceRecog_VERSION_STATUS}")
+    status("--------------------------------------------------------------------------------")
+    status("FaceRecog Options:")
+    status("    Enable Camshift:    ${FaceRecog_ENABLE_Camshift}")
+    status("    Enable Compressive: ${FaceRecog_ENABLE_Compressive}")
+    status("    Enable ESVM:        ${FaceRecog_ENABLE_ESVM}")
+    status("    Enable FRCNN:       ${FaceRecog_ENABLE_FRCNN}")
+    status("    Enable FaceNet:     ${FaceRecog_ENABLE_FaceNet}")
+    status("    Enable KCF:         ${FaceRecog_ENABLE_KCF}")
+    status("    Enable SSD:         ${FaceRecog_ENABLE_SSD}")
+    status("    Enable STRUCK:      ${FaceRecog_ENABLE_STRUCK}")
+    status("    Enable VJ:          ${FaceRecog_ENABLE_VJ}")
+    status("    Enable YOLO:        ${FaceRecog_ENABLE_YOLO}")
+    status("--------------------------------------------------------------------------------")
+    status("Libraries Version:")
+    face_recog_display_versions(Boost Caffe CUDA Eigen3 FlyCapture2 OpenCV OpenMP Protobuf Python TensorFlow)
+    status("--------------------------------------------------------------------------------")    
+    status("FaceRecog Build:")
+    status("    Build Directory:    ${CMAKE_CURRENT_BINARY_DIR}")
+    status("--------------------------------------------------------------------------------")    
+    status("FaceRecog Install:")
+    status("    Prefix:             ${CMAKE_INSTALL_PREFIX}")
+    status("    Binary:             ${INSTALL_BINARY_DIR}")
+    status("    CMake:              ${INSTALL_CMAKE_DIR}")
+    status("    Include:            ${INSTALL_INCLUDE_DIR}")
+    status("    Library:            ${INSTALL_LIBRARY_DIR}")
+    status("--------------------------------------------------------------------------------")
+    status("")
+    status("================================================================================")
+
+endmacro()
+
+#--------------------------------------------------------------------------------------------------
+# status, warn, error, fatal, dev, deprecated
+#
+#   shorthands for message(<mode> <message>) with corresponding modes
+#--------------------------------------------------------------------------------------------------
+macro(status msg)
+    message(STATUS ${msg})
+endmacro()
+macro(warn msg)
+    message(WARNING ${msg})
+endmacro()
+macro(error msg)
+    message(SEND_ERROR ${msg})
+endmacro()
+macro(fatal msg)
+    message(FATAL_ERROR ${msg})
+endmacro()
+macro(dev msg)
+    message(AUTHOR_WARNING ${msg})
+endmacro()
+macro(deprecated msg)
+    message(DEPRECATION ${msg})
+endmacro()
+
+#--------------------------------------------------------------------------------------------------
+# padstr
+#
+#   returns the <padded> string by padding <str> with specified number <n> of character <char> 
+#--------------------------------------------------------------------------------------------------
+macro(padstr padded str n char)
+
+    string(LENGTH ${str} len)
+    math(EXPR pad "${n} - ${len} - 1")
+    set(spaces "")
+    foreach(i RANGE ${pad})
+        string(APPEND spaces ${char})
+    endforeach()
+    set(${padded} "${str}${spaces}")
+
 endmacro()

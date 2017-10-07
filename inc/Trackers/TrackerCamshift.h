@@ -1,7 +1,7 @@
 #ifndef FACE_RECOG_TRACKER_CAMSHIFT_H
 #define FACE_RECOG_TRACKER_CAMSHIFT_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
 
 class ImageRep;

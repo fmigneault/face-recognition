@@ -10,7 +10,7 @@
     Modified for Python integration
  */
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_PYTHON
 
   
