@@ -1,29 +1,28 @@
-#ifndef FACE_RECOG_FACE_DETECTOR_FRCNN_H
+﻿#ifndef FACE_RECOG_FACE_DETECTOR_FRCNN_H
 #define FACE_RECOG_FACE_DETECTOR_FRCNN_H
 
 #include "FaceRecog.h"
 
-
 class FaceDetectorFRCNN final : public IFaceDetector
 {
-    public:
-        FaceDetectorFRCNN();
-        ~FaceDetectorFRCNN() {}
-        // specific to specialized class
-        void pyObjList2VecRect(PyObject* list);
-        // specialized overrides 
-        int findFaces(std::vector<std::vector<cv::Rect> >& faces) override;
-        std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect> >& faces) override { return m_faces; }
-        void assignImage(FACE_RECOG_MAT frame) override;
-        // unused overrides 
-        int loadDetector(std::string name) override { return 1; }
-        void flipFaces(size_t index, std::vector<std::vector<cv::Rect> >& faces) override { return; }
-        double evaluateConfidence(Target& target, FACE_RECOG_MAT& image)  override { return 1; }
-    private:
-        std::string folderPath = "../python";
-        std::string filePath = "../python";
-        std::string pyFunc  = "face_detect";
-        std::vector<cv::Rect> m_faces;
+public:
+    FaceDetectorFRCNN();
+    ~FaceDetectorFRCNN() {}
+    // specific to specialized class
+    void pyObjList2VecRect(PyObject* list);
+    // specialized overrides
+    int findFaces(std::vector<std::vector<cv::Rect> >& faces) override;
+    std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect> >& faces) override { return m_faces; }
+    void assignImage(FACE_RECOG_MAT frame) override;
+    // unused overrides
+    int loadDetector(std::string name) override { return 1; }
+    void flipFaces(size_t index, std::vector<std::vector<cv::Rect> >& faces) override { return; }
+    double evaluateConfidence(Target& target, FACE_RECOG_MAT& image)  override { return 1; }
+private:
+    std::string folderPath = "../python";
+    std::string filePath = "../python";
+    std::string pyFunc = "face_detect";
+    std::vector<cv::Rect> m_faces;
 };
 
 #endif/*FACE_RECOG_FACE_DETECTOR_FRCNN_H*/

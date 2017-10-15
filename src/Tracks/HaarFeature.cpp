@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -59,75 +59,75 @@
 using namespace std;
 
 HaarFeature::HaarFeature(const FloatRect& bb, int type) :
-	m_bb(bb)
+    m_bb(bb)
 {
-	assert(type < 6);
-	
-	switch (type)
-	{
-	case 0:
-		{
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width(), bb.height()/2));
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin()+bb.height()/2, bb.width(), bb.height()/2));
-			m_weights.push_back(1.f);
-			m_weights.push_back(-1.f);
-			m_factor = 255*1.f/2;
-			break;
-		}
-	case 1:
-		{
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width()/2, bb.height()));
-			m_rects.push_back(FloatRect(bb.xmin()+bb.width()/2, bb.ymin(), bb.width()/2, bb.height()));
-			m_weights.push_back(1.f);
-			m_weights.push_back(-1.f);
-			m_factor = 255*1.f/2;
-			break;
-		}
-	case 2:
-		{
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width()/3, bb.height()));
-			m_rects.push_back(FloatRect(bb.xmin()+bb.width()/3, bb.ymin(), bb.width()/3, bb.height()));
-			m_rects.push_back(FloatRect(bb.xmin()+2*bb.width()/3, bb.ymin(), bb.width()/3, bb.height()));
-			m_weights.push_back(1.f);
-			m_weights.push_back(-2.f);
-			m_weights.push_back(1.f);
-			m_factor = 255*2.f/3;
-			break;
-		}
-	case 3:
-		{
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width(), bb.height()/3));
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin()+bb.height()/3, bb.width(), bb.height()/3));
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin()+2*bb.height()/3, bb.width(), bb.height()/3));
-			m_weights.push_back(1.f);
-			m_weights.push_back(-2.f);
-			m_weights.push_back(1.f);
-			m_factor = 255*2.f/3;
-			break;
-		}
-	case 4:
-		{
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width()/2, bb.height()/2));
-			m_rects.push_back(FloatRect(bb.xmin()+bb.width()/2, bb.ymin()+bb.height()/2, bb.width()/2, bb.height()/2));
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin()+bb.height()/2, bb.width()/2, bb.height()/2));
-			m_rects.push_back(FloatRect(bb.xmin()+bb.width()/2, bb.ymin(), bb.width()/2, bb.height()/2));
-			m_weights.push_back(1.f);
-			m_weights.push_back(1.f);
-			m_weights.push_back(-1.f);
-			m_weights.push_back(-1.f);
-			m_factor = 255*1.f/2;
-			break;
-		}
-	case 5:
-		{
-			m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width(), bb.height()));
-			m_rects.push_back(FloatRect(bb.xmin()+bb.width()/4, bb.ymin()+bb.height()/4, bb.width()/2, bb.height()/2));
-			m_weights.push_back(1.f);
-			m_weights.push_back(-4.f);
-			m_factor = 255*3.f/4;
-			break;
-		}				
-	}
+    assert(type < 6);
+
+    switch (type)
+    {
+        case 0:
+        {
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width(), bb.height() / 2));
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin() + bb.height() / 2, bb.width(), bb.height() / 2));
+            m_weights.push_back(1.f);
+            m_weights.push_back(-1.f);
+            m_factor = 255 * 1.f / 2;
+            break;
+        }
+        case 1:
+        {
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width() / 2, bb.height()));
+            m_rects.push_back(FloatRect(bb.xmin() + bb.width() / 2, bb.ymin(), bb.width() / 2, bb.height()));
+            m_weights.push_back(1.f);
+            m_weights.push_back(-1.f);
+            m_factor = 255 * 1.f / 2;
+            break;
+        }
+        case 2:
+        {
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width() / 3, bb.height()));
+            m_rects.push_back(FloatRect(bb.xmin() + bb.width() / 3, bb.ymin(), bb.width() / 3, bb.height()));
+            m_rects.push_back(FloatRect(bb.xmin() + 2 * bb.width() / 3, bb.ymin(), bb.width() / 3, bb.height()));
+            m_weights.push_back(1.f);
+            m_weights.push_back(-2.f);
+            m_weights.push_back(1.f);
+            m_factor = 255 * 2.f / 3;
+            break;
+        }
+        case 3:
+        {
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width(), bb.height() / 3));
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin() + bb.height() / 3, bb.width(), bb.height() / 3));
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin() + 2 * bb.height() / 3, bb.width(), bb.height() / 3));
+            m_weights.push_back(1.f);
+            m_weights.push_back(-2.f);
+            m_weights.push_back(1.f);
+            m_factor = 255 * 2.f / 3;
+            break;
+        }
+        case 4:
+        {
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width() / 2, bb.height() / 2));
+            m_rects.push_back(FloatRect(bb.xmin() + bb.width() / 2, bb.ymin() + bb.height() / 2, bb.width() / 2, bb.height() / 2));
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin() + bb.height() / 2, bb.width() / 2, bb.height() / 2));
+            m_rects.push_back(FloatRect(bb.xmin() + bb.width() / 2, bb.ymin(), bb.width() / 2, bb.height() / 2));
+            m_weights.push_back(1.f);
+            m_weights.push_back(1.f);
+            m_weights.push_back(-1.f);
+            m_weights.push_back(-1.f);
+            m_factor = 255 * 1.f / 2;
+            break;
+        }
+        case 5:
+        {
+            m_rects.push_back(FloatRect(bb.xmin(), bb.ymin(), bb.width(), bb.height()));
+            m_rects.push_back(FloatRect(bb.xmin() + bb.width() / 4, bb.ymin() + bb.height() / 4, bb.width() / 2, bb.height() / 2));
+            m_weights.push_back(1.f);
+            m_weights.push_back(-4.f);
+            m_factor = 255 * 3.f / 4;
+            break;
+        }
+    }
 }
 
 HaarFeature::~HaarFeature()
@@ -136,15 +136,15 @@ HaarFeature::~HaarFeature()
 
 float HaarFeature::Eval(const Sample& s) const
 {
-	const ImageRep& image = s.GetImage(); // get the image where to evaluate the feature
-	const FloatRect& roi = s.GetROI();
-	float value = 0.f;
-	for (int i = 0; i < (int)m_rects.size(); ++i)// number of rectangles of the feature
-	{
-		const FloatRect& r = m_rects[i];
-		IntRect sampleRect((int)(roi.xmin()+r.xmin()*roi.width()+0.5f), (int)(roi.ymin()+r.ymin()*roi.height()+0.5f),
-			(int)(r.width()*roi.width()), (int)(r.height()*roi.height()));
-		value += m_weights[i]*image.Sum(sampleRect);
-	}
-	return value / (m_factor*roi.area()*m_bb.area());
+    const ImageRep& image = s.GetImage(); // get the image where to evaluate the feature
+    const FloatRect& roi = s.GetROI();
+    float value = 0.f;
+    for (int i = 0; i < (int)m_rects.size(); ++i)// number of rectangles of the feature
+    {
+        const FloatRect& r = m_rects[i];
+        IntRect sampleRect((int)(roi.xmin() + r.xmin()*roi.width() + 0.5f), (int)(roi.ymin() + r.ymin()*roi.height() + 0.5f),
+            (int)(r.width()*roi.width()), (int)(r.height()*roi.height()));
+        value += m_weights[i] * image.Sum(sampleRect);
+    }
+    return value / (m_factor*roi.area()*m_bb.area());
 }

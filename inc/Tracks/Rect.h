@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -53,118 +53,113 @@
 #ifndef FACE_RECOG_RECT_H
 #define FACE_RECOG_RECT_H
 
-#include <iostream>
-#include <algorithm>
-#include <opencv/cv.h>
+#include "FaceRecog.h"
 
 template <typename T>
 class struckRect
 {
 public:
-	struckRect() :
-		m_xmin(0),
-		m_ymin(0),
-		m_width(0),
-		m_height(0)
-	{
-	}
-	
-	struckRect(T xmin, T ymin, T width, T height) :
-		m_xmin(xmin),
-		m_ymin(ymin),
-		m_width(width),
-		m_height(height)
-	{
-	}
-	
-	template <typename T2>
-	struckRect(const struckRect<T2>& rOther) :
-		m_xmin((T)rOther.xmin()),
-		m_ymin((T)rOther.ymin()),
-		m_width((T)rOther.width()),
-		m_height((T)rOther.height())
-	{
-	}
+    struckRect() :
+        m_xmin(0),
+        m_ymin(0),
+        m_width(0),
+        m_height(0)
+    {
+    }
 
-	inline void set(T xmin, T ymin, T width, T height)
-	{
-		m_xmin = xmin;
-		m_ymin = ymin;
-		m_width = width;
-		m_height = height;
-	}
-	
-	inline T xmin() const { return m_xmin; }
-	inline void xmin(T val) { m_xmin = val; }
-	inline T ymin() const { return m_ymin; }
-	inline void ymin(T val) { m_ymin = val; }
-	inline T width() const { return m_width; }
-	inline void width(T val) { m_width = val; }
-	inline T height() const { return m_height; }
-	inline void height(T val) { m_height = val; }
-	
-	inline void translate(T x, T y) { m_xmin += x; m_ymin += y; }
+    struckRect(T xmin, T ymin, T width, T height) :
+        m_xmin(xmin),
+        m_ymin(ymin),
+        m_width(width),
+        m_height(height)
+    {
+    }
 
-	inline T xmax() const { return m_xmin + m_width; }
-	inline T ymax() const { return m_ymin + m_height; }
-	inline float xCentre() const { return (float)m_xmin + (float)m_width / 2; }
-	inline float yCentre() const { return (float)m_ymin + (float)m_height / 2; }
-	inline T area() const { return m_width * m_height; }
-	
-	inline cv::Rect toCvRect() const { 
-		cv::Rect bbox;
-		bbox.x = (int)m_xmin;
-		bbox.y = (int)m_ymin;
-		bbox.width = (int)m_width;
-		bbox.height = (int)m_height;
-		return bbox;
-	}
+    template <typename T2>
+    struckRect(const struckRect<T2>& rOther) :
+        m_xmin((T)rOther.xmin()),
+        m_ymin((T)rOther.ymin()),
+        m_width((T)rOther.width()),
+        m_height((T)rOther.height())
+    {
+    }
 
-	template <typename T2>
-	friend std::ostream& operator <<(std::ostream &rOS, const struckRect<T2>& rRect);
-	
-	template <typename T2>
-	float overlap(const struckRect<T2>& rOther) const;
-	template <typename T2>
-	bool isInside(const struckRect<T2>& rOther) const;
+    inline void set(T xmin, T ymin, T width, T height)
+    {
+        m_xmin = xmin;
+        m_ymin = ymin;
+        m_width = width;
+        m_height = height;
+    }
+
+    inline T xmin() const { return m_xmin; }
+    inline void xmin(T val) { m_xmin = val; }
+    inline T ymin() const { return m_ymin; }
+    inline void ymin(T val) { m_ymin = val; }
+    inline T width() const { return m_width; }
+    inline void width(T val) { m_width = val; }
+    inline T height() const { return m_height; }
+    inline void height(T val) { m_height = val; }
+
+    inline void translate(T x, T y) { m_xmin += x; m_ymin += y; }
+
+    inline T xmax() const { return m_xmin + m_width; }
+    inline T ymax() const { return m_ymin + m_height; }
+    inline float xCentre() const { return (float)m_xmin + (float)m_width / 2; }
+    inline float yCentre() const { return (float)m_ymin + (float)m_height / 2; }
+    inline T area() const { return m_width * m_height; }
+
+    inline cv::Rect toCvRect() const {
+        cv::Rect bbox;
+        bbox.x = (int)m_xmin;
+        bbox.y = (int)m_ymin;
+        bbox.width = (int)m_width;
+        bbox.height = (int)m_height;
+        return bbox;
+    }
+
+    template <typename T2>
+    friend std::ostream& operator <<(std::ostream &rOS, const struckRect<T2>& rRect);
+
+    template <typename T2>
+    float overlap(const struckRect<T2>& rOther) const;
+    template <typename T2>
+    bool isInside(const struckRect<T2>& rOther) const;
 
 private:
-	T m_xmin;
-	T m_ymin;
-	T m_width;
-	T m_height;
+    T m_xmin;
+    T m_ymin;
+    T m_width;
+    T m_height;
 };
-
-typedef struckRect<int> IntRect;
-typedef struckRect<float> FloatRect;
 
 template <typename T>
 std::ostream& operator <<(std::ostream &rOS, const struckRect<T>& rRect)
 {
-	rOS << "[origin: (" << rRect.m_xmin << ", " << rRect.m_ymin << ") size: (" << rRect.m_width << ", " << rRect.m_height << ")]";
-	return rOS;
+    rOS << "[origin: (" << rRect.m_xmin << ", " << rRect.m_ymin << ") size: (" << rRect.m_width << ", " << rRect.m_height << ")]";
+    return rOS;
 }
 
 template <typename T>
 template <typename T2>
 float struckRect<T>::overlap(const struckRect<T2>& rOther) const
 {
-	float x0 = std::max((float)xmin(), (float)rOther.xmin());
-	float x1 = std::min((float)xmax(), (float)rOther.xmax());
-	float y0 = std::max((float)ymin(), (float)rOther.ymin());
-	float y1 = std::min((float)ymax(), (float)rOther.ymax());
-	
-	if (x0 >= x1 || y0 >= y1) return 0.f;
-	
-	float areaInt = (x1-x0)*(y1-y0);
-	return areaInt/((float)area()+(float)rOther.area()-areaInt);
+    float x0 = std::max((float)xmin(), (float)rOther.xmin());
+    float x1 = std::min((float)xmax(), (float)rOther.xmax());
+    float y0 = std::max((float)ymin(), (float)rOther.ymin());
+    float y1 = std::min((float)ymax(), (float)rOther.ymax());
+
+    if (x0 >= x1 || y0 >= y1) return 0.f;
+
+    float areaInt = (x1 - x0)*(y1 - y0);
+    return areaInt / ((float)area() + (float)rOther.area() - areaInt);
 }
 
 template <typename T>
 template <typename T2>
 bool struckRect<T>::isInside(const struckRect<T2>& rOther) const
 {
-	return (xmin()>=rOther.xmin()) && (ymin()>=rOther.ymin()) && (xmax()<=rOther.xmax()) && (ymax()<=rOther.ymax());
+    return (xmin() >= rOther.xmin()) && (ymin() >= rOther.ymin()) && (xmax() <= rOther.xmax()) && (ymax() <= rOther.ymax());
 }
 
 

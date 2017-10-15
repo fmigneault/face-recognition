@@ -1,10 +1,10 @@
-#include "Classifiers/TemplateMatcher.h"
+﻿#include "Classifiers/TemplateMatcher.h"
 
 using namespace cv;
 using namespace std;
 
 TemplateMatcher::TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, const std::string negativeFileDir,
-                                 const std::vector<std::string>& positiveIDs, 
+                                 const std::vector<std::string>& positiveIDs,
                                  const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs)
 {
     setConstants();
@@ -20,12 +20,12 @@ TemplateMatcher::TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT> >
             enrolledPositiveIDs[pos] = std::to_string(pos);
     }
 
-    // load negatives to find features min/max    
+    // load negatives to find features min/max
     size_t nPatches = getPatchCount();
     size_t dimsNegatives[2]{ nPatches, 0 };
     xstd::mvector<2, FeatureVector> negativeSamples(dimsNegatives);
     for (size_t p = 0; p < nPatches; ++p)
-        DataFile::readSampleDataFile(negativeFileDir + "negatives-hog-patch" + std::to_string(p) + 
+        DataFile::readSampleDataFile(negativeFileDir + "negatives-hog-patch" + std::to_string(p) +
                                      sampleFileExt, negativeSamples[p], sampleFileFormat);
 
     // get positive sample representations

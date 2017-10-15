@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -53,45 +53,45 @@
 #ifndef FACE_RECOG_HAAR_FEATURES_H
 #define FACE_RECOG_HAAR_FEATURES_H
 
-#include "HaarFeature.h"
-#include "Sample.h"
+#include "FaceRecog.h"
 
-#include <Eigen/Core>
-#include <vector>
-
-class Config;
+/*
+    required includes to get full class
+    definitions for config class members
+*/
+#include "Tracks/Sample.h"
 
 class HaarFeatures //: public Features
 {
 public:
-	HaarFeatures();
-	void setCount(int c);
-	inline int getCount() const { return m_featureCount; }
-	void updateFeatureVector(const Sample& s);
-	void generateSystematic();
+    HaarFeatures();
+    void setCount(int c);
+    inline int getCount() const { return m_featureCount; }
+    void updateFeatureVector(const Sample& s);
+    void generateSystematic();
 
-	inline const Eigen::VectorXd& Eval(const Sample& s)
-	{
-		(this)->updateFeatureVector(s);
-		return m_featVec; // this is a VectorXd, size determined by the number of features
-	}
+    inline const Eigen::VectorXd& Eval(const Sample& s)
+    {
+        (this)->updateFeatureVector(s);
+        return m_featVec; // this is a VectorXd, size determined by the number of features
+    }
 
-	void eval(const MultiSample& s, std::vector<Eigen::VectorXd>& featVecs)
-	{
-		// default implementation
-		// evaluate features for each rectangle (sample) around the current b-box
-		featVecs.resize(s.GetRects().size());
-		for (int i = 0; i < (int)featVecs.size(); ++i)
-		{
-			// each element of featVecs correspond to a bbox. Each element is a nHaarFeat-dimensional vector containing the value of each haar fature computed for that windows
-			featVecs[i] = Eval(s.GetSample(i));
-		}
-	}
-	
+    void eval(const MultiSample& s, std::vector<Eigen::VectorXd>& featVecs)
+    {
+        // default implementation
+        // evaluate features for each rectangle (sample) around the current b-box
+        featVecs.resize(s.GetRects().size());
+        for (int i = 0; i < (int)featVecs.size(); ++i)
+        {
+            // each element of featVecs correspond to a bbox. Each element is a nHaarFeat-dimensional vector containing the value of each haar fature computed for that windows
+            featVecs[i] = Eval(s.GetSample(i));
+        }
+    }
+
 private:
-	std::vector<HaarFeature> m_features;
-	int m_featureCount;
-	Eigen::VectorXd m_featVec;
+    std::vector<HaarFeature> m_features;
+    int m_featureCount;
+    Eigen::VectorXd m_featVec;
 
 };
 

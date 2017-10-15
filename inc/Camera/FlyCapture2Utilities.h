@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_FLYCAPTURE2_UTILITIES_H
+﻿#ifndef FACE_RECOG_FLYCAPTURE2_UTILITIES_H
 #define FACE_RECOG_FLYCAPTURE2_UTILITIES_H
 
 /* Try to find if the FlyCapture2 SDK is available */
@@ -11,7 +11,7 @@
 #include "opencv\cv.h"
 
 bool EvaluateAndPrintCameraError(FlyCapture2::Error cameraError, std::string errorMessage);
-FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraIndex = 0, 
+FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraIndex = 0,
                                         bool useTrigger = false, FlyCapture2::Format7ImageSettings* frameConfig = nullptr);
 FlyCapture2::ErrorType SetupCameraTrigger(FlyCapture2::Camera* camera, bool useTrigger);
 bool PollForTriggerReady(FlyCapture2::Camera* camera, bool verbose = false);

@@ -1,4 +1,4 @@
-/*
+﻿/*
     Code modified for FaceRecod project
     -----------------------------------
 
@@ -90,14 +90,13 @@
 
 #include "FaceRecog.h"
 
-
 class TrackerKCF final : public ITracker
 {
 public:
     TrackerKCF(ConfigFile *configFile);
     virtual ~TrackerKCF();
-    TrackerKCF(const TrackerKCF &obj);  			// copy constructor
-    TrackerKCF & operator=(const TrackerKCF &T); 	// assignment operator
+    TrackerKCF(const TrackerKCF &obj);              // copy constructor
+    TrackerKCF & operator=(const TrackerKCF &T);    // assignment operator
     virtual void initialize(const ImageRep& frame, FloatRect bb);
     virtual void reset();
     virtual cv::Rect track(const ImageRep& frame);

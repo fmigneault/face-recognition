@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_MULTI_COLOR_TYPE_H
+﻿#ifndef FACE_RECOG_MULTI_COLOR_TYPE_H
 #define FACE_RECOG_MULTI_COLOR_TYPE_H
 
 #include "opencv2/imgproc.hpp"
@@ -11,7 +11,7 @@ enum ColorType
     BLACK,
     DARK_BLUE,
     BLUE,
-    DARK_GREEN,    
+    DARK_GREEN,
     TEAL,
     LIGHT_BLUE,
     GREEN,
@@ -43,12 +43,12 @@ const ColorCode bgrColorCode(const ColorType& colorType);
 
 class MultiColorType
 {
-public:    
+public:
     enum Value
     {
-        UNDEFINED_DEFAULT_BLACK  = -1,
-        GREEN_ORANGE_RED         =  0,
-        RED_ORANGE_GREEN         =  1,         
+        UNDEFINED_DEFAULT_BLACK = -1,
+        GREEN_ORANGE_RED        =  0,
+        RED_ORANGE_GREEN        =  1,
     };
     inline MultiColorType() { MultiColorType(0); }
     inline MultiColorType(Value type) { _type = type; }
@@ -60,7 +60,7 @@ public:
     static const std::vector<ColorCode> getColorCodes(const Value& multiColorType);
     static const ColorCode getColorCode(const Value& multiColorType, size_t index = 0);
     static const ColorCode getColorCode(const ColorType& colorType);
-private:    
+private:
     Value _type;
 };
 

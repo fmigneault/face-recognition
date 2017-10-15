@@ -1,15 +1,15 @@
-/*
+﻿/*
     Code modified for FaceRecod project
 
     Original code adaptation reference:
         FAST-DT: FAce STructured Detection and Tracking
         Francesco Comaschi (f.comaschi@tue.nl)
-        
+
         * Code to accompany the paper:
             Online Multi-Face Detection and Tracking using Detector Confidence and Structured SVMs
             F. Comaschi, S. Stuijk, T. Basten, H. Corporaal
             Advanced Video and Signal-Based Surveillance (AVSS), 2015
-        
+
     Original work:
         STRUCK: Structured Output Tracking with Kernels
         Sam Hare, Amir Saffari, Philip H. S. Torr
@@ -18,12 +18,12 @@
  */
 
 #include "FaceRecog.h"
-
+#ifdef FACE_RECOG_HAS_STRUCK
 
 TrackerSTRUCK::TrackerSTRUCK(ConfigFile *configFile) :
     m_pLearner(0),
     m_needsIntegralImage(false)
-{    
+{
     m_initialized = false;
     updateConfig(configFile);
     TrackerSTRUCK::reset();
@@ -71,12 +71,12 @@ TrackerSTRUCK & TrackerSTRUCK::operator=(const TrackerSTRUCK &obj)
         this->m_bb = obj.m_bb;
         this->m_needsIntegralHist = obj.m_needsIntegralHist;
         this->m_needsIntegralImage = obj.m_needsIntegralImage;
-        for (size_t i = 0; i < m_features.size(); ++i)	// free the storage pointed to by m_features
+        for (size_t i = 0; i < m_features.size(); ++i)  // free the storage pointed to by m_features
         {
-        if (m_features[i] != NULL)
-            delete m_features[i];
-        if (m_kernels[i] != NULL)
-            delete m_kernels[i];
+            if (m_features[i] != NULL)
+                delete m_features[i];
+            if (m_kernels[i] != NULL)
+                delete m_kernels[i];
         }
         m_features.clear();
         m_kernels.clear();
@@ -94,10 +94,10 @@ TrackerSTRUCK & TrackerSTRUCK::operator=(const TrackerSTRUCK &obj)
         }
 
         if (m_pLearner != 0)
-                delete m_pLearner;
+            delete m_pLearner;
         this->m_pLearner = new LaRank(m_config, *m_features.back(), *m_kernels.back());
-            *m_pLearner = *obj.m_pLearner; 	// TODO: define assignment operator for LaRank
-        return *this;                     	// return this IntList
+        *m_pLearner = *obj.m_pLearner;  // TODO: define assignment operator for LaRank
+        return *this;                       // return this IntList
     }
 }
 
@@ -124,10 +124,10 @@ void TrackerSTRUCK::reset()
     }
     m_features.clear();
     m_kernels.clear();
-    
+
     m_needsIntegralImage = false;
     m_needsIntegralHist = false;
-    
+
     size_t numFeatures = m_config->features.size();
 
     vector<int> featureCounts;
@@ -150,7 +150,7 @@ void TrackerSTRUCK::reset()
     }
     m_pLearner = new LaRank(m_config, *m_features.back(), *m_kernels.back());
 }
-    
+
 
 void TrackerSTRUCK::initialize(const ImageRep& image, FloatRect bb)
 {
@@ -181,7 +181,7 @@ cv::Rect TrackerSTRUCK::track(const ImageRep& image)
     double bestScore = -DBL_MAX;
     size_t bestInd = -1;
     for (size_t i = 0; i < keptRects.size(); ++i)
-    {		
+    {
         if (scores[i] > bestScore)
         {
             bestScore = scores[i];
@@ -215,3 +215,5 @@ void TrackerSTRUCK::updateLearner(const ImageRep& image)
     MultiSample sample(image, keptRects);
     m_pLearner->update(sample, 0);
 }
+
+endif/*FACE_RECOG_HAS_STRUCK*/

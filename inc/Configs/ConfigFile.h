@@ -1,23 +1,19 @@
-#ifndef FACE_RECOG_CONFIG_FILE_H
+﻿#ifndef FACE_RECOG_CONFIG_FILE_H
 #define FACE_RECOG_CONFIG_FILE_H
 
-#include <vector>
-#include <string>
-#include <ostream>
-#include <opencv/cv.h>
+#include "FaceRecog.h"
 
+/*
+    required includes to get full class
+    definitions for config class members
+*/
 #include "Camera/CameraType.h"
 #include "Classifiers/ClassifierType.h"
 #include "Tracks/CircularBuffer.h"
 
-namespace config {
 class ConfigFile
 {
 public:
-
-    /* ============
-        configs
-    ============ */
 
     enum FeatureType
     {
@@ -75,26 +71,34 @@ public:
     CameraType cameraType;
     bool useCameraTrigger;
 
-    // face detectors and trackers
-    bool Camshift;
-    bool Compressive;
-    bool ESVM;
-    bool FaceNet;
+    // face detection
     bool FRCNN;
-    bool ImprovedLBP;
-    bool LBP;
-    bool STRUCK;
-    bool TM;
-    bool VJ;
+    bool HaarCascadeFrontal;
+    bool HaarCascadeProfile;
+    bool LBPCascadeFrontal;
+    bool LBPCascadeProfile;
+    bool LBPCascadeFrontalImproved;
+    bool SSD;
     bool YOLO;
 
+    // face tracking
+    bool Camshift;
+    bool Compressive;
+    bool KCF;
+    bool STRUCK;
+
     // face recognition
+    bool ESVM;
+    bool FaceNet;
+    bool TM;
+
+    // face recognition parameters
     bool useFaceRecognition;
     bool useGeometricPositiveStills;
     bool useSyntheticPositiveStills;
     bool useReferenceNegativeStills;
     bool useGeometricNegativeStills;
-    int geometricTranslatePixels;    
+    int geometricTranslatePixels;
     int geometricScalingMinSize;
     double geometricScalingFactor;
     std::string NEGDirExtra;
@@ -103,7 +107,7 @@ public:
     double thresholdFaceConsidered;
     double thresholdFaceRecognized;
     int roiAccumulationSize;
-    ScoreMode roiAccumulationMode;
+    CircularBuffer::ScoreMode roiAccumulationMode;
 
     // tracker association parameters
     bool useHungarianMatching;
@@ -137,7 +141,7 @@ public:
     bool displayFrames;
     bool displayFrameRate;
     bool displayFrameNumber;
-    bool displaySequenceTrackID;    
+    bool displaySequenceTrackID;
     int displayWindowX;
     int displayWindowY;
     int displayWindowW;
@@ -165,8 +169,8 @@ public:
     ConfigFile(const std::string& path);
     std::string display() const;
     ClassifierType getClassifierType() const;
-
-    friend std::ostream& operator<< (std::ostream& out, const ConfigFile& conf);
+    bool requireAnyCascade();
+    friend std::ostream& operator<<(std::ostream& out, const ConfigFile& conf);
 
 private:
     void setDefaults();
@@ -174,6 +178,5 @@ private:
     static std::string FeatureName(FeatureType f);
     static std::string KernelName(KernelType k);
 };
-} // end namespace config
 
 #endif /*FACE_RECOG_CONFIG_FILE_H*/

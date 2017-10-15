@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_TEMPLATE_MATCHER_H
+﻿#ifndef FACE_RECOG_TEMPLATE_MATCHER_H
 #define FACE_RECOG_TEMPLATE_MATCHER_H
 
 #include "FaceRecog.h"
@@ -9,7 +9,7 @@ class TemplateMatcher
 public:
     TemplateMatcher() {};
     TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, const std::string negativesDir,
-                    const std::vector<std::string>& positiveIDs ={}, const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs ={});
+                    const std::vector<std::string>& positiveIDs = {}, const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs = {});
     std::vector<double> predict(const FACE_RECOG_MAT& roi);
     inline size_t getPositiveCount() { return enrolledPositiveIDs.size(); }
     inline size_t getPatchCount() { return patchCounts.area(); }

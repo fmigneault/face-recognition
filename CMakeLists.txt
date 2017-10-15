@@ -88,20 +88,23 @@ add_definitions(-DFaceRecog_ROOT_PATH="${FaceRecog_ROOT_DIR}")
 #--------------------------------------------------------------------------------------------------
 
 # === modules ===
-# --- Face Detection/Tracking ---
-face_recog_option(FaceRecog_ENABLE_CAMSHIFT         "Include Camshift module [FT]"                      OFF)
-face_recog_option(FaceRecog_ENABLE_COMPRESSIVE      "Include Compressive tracking module [FT]"          OFF)
-face_recog_option(FaceRecog_ENABLE_FRCNN            "Include FRCNN module [FD/FT]"                      OFF)
-face_recog_option(FaceRecog_ENABLE_KCF              "Include KCF module [FT]"                           OFF)
-face_recog_option(FaceRecog_ENABLE_SSD              "Include SSD module [FD]"                           OFF)
-face_recog_option(FaceRecog_ENABLE_STRUCK           "Include STRUCK module [FT]"                        ON)
-face_recog_option(FaceRecog_ENABLE_VJ               "Include Viola-Jones Cascade module [FD]"           ON)
-face_recog_option(FaceRecog_ENABLE_YOLO             "Include YOLO CNN module [FD/FT]"                   OFF)
+# --- Face Detection ---
+face_recog_option(FaceRecog_ENABLE_FRCNN            "[FD] Include FRCNN module"                         OFF)
+face_recog_option(FaceRecog_ENABLE_SSD              "[FD] Include SSD module"                           OFF)
+face_recog_option(FaceRecog_ENABLE_VJ               "[FD] Include Viola-Jones cascades module"          ON)
+face_recog_option(FaceRecog_ENABLE_YOLO             "[FD] Include YOLO CNN module"                      OFF)
+
+# --- Face Tracking ---
+face_recog_option(FaceRecog_ENABLE_CAMSHIFT         "[FT] Include Camshift module"                      OFF)
+face_recog_option(FaceRecog_ENABLE_COMPRESSIVE      "[FT] Include Compressive tracking module"          OFF)
+face_recog_option(FaceRecog_ENABLE_KCF              "[FT] Include KCF module"                           OFF)
+face_recog_option(FaceRecog_ENABLE_STRUCK           "[FT] Include STRUCK module"                        ON)
 
 # --- Face Recognition ---
 face_recog_option(BUILD_ESVM                        "Build Exemplar-SVM (ESVM) module from sources"     OFF)
-face_recog_option(FaceRecog_ENABLE_ESVM             "Include Exemplar-SVM (ESVM) module [FR]"           ON)
-face_recog_option(FaceRecog_ENABLE_FaceNet          "Include FaceNet module [FR]"                       OFF)
+face_recog_option(FaceRecog_ENABLE_ESVM             "[FR] Include Exemplar-SVM (ESVM) module"           ON)
+face_recog_option(FaceRecog_ENABLE_FaceNet          "[FR] Include FaceNet module"                       OFF)
+face_recog_option(FaceRecog_ENABLE_TM               "[FR] Include Template Matcher module"              OFF)
 
 face_recog_update_modules()
 

@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_ICLASSIFIER_H
+﻿#ifndef FACE_RECOG_ICLASSIFIER_H
 #define FACE_RECOG_ICLASSIFIER_H
 
 #include "FaceRecog.h"

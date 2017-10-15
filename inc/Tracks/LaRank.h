@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -53,86 +53,75 @@
 #ifndef FACE_RECOG_LARANK_H
 #define FACE_RECOG_LARANK_H
 
-#include "Configs/ConfigFile.h"
-#include "Tracks/HaarFeatures.h"
-#include "Tracks/Kernels.h"
-#include "Tracks/Rect.h"
-#include "Tracks/Sample.h"
-
-#include <vector>
-#include <Eigen/Core>
-
-#include <opencv/cv.h>
-
-using namespace config;
+#include "FaceRecog.h"
 
 class LaRank
 {
 public:
 
-	LaRank(ConfigFile *conf, HaarFeatures features, Kernel kernel);
-	~LaRank();
-	LaRank(const LaRank &obj);  // copy constructor
-	LaRank & operator=(const LaRank &T); // assignment operator
+    LaRank(ConfigFile *conf, HaarFeatures features, Kernel kernel);
+    ~LaRank();
+    LaRank(const LaRank &obj);  // copy constructor
+    LaRank & operator=(const LaRank &T); // assignment operator
 
-	
-	void eval(const MultiSample& x, std::vector<double>& results);
-	void update(const MultiSample& x, int y);
-	
+
+    void eval(const MultiSample& x, std::vector<double>& results);
+    void update(const MultiSample& x, int y);
+
 
 private:
 
-	struct SupportPattern
-	{
-		std::vector<Eigen::VectorXd> x; // vector of feature repsonses
-		std::vector<FloatRect> yv; // vector of samples
-		std::vector<cv::Mat> images;
-		int y; // y is the translation
-		int refCount;
-	};
+    struct SupportPattern
+    {
+        std::vector<Eigen::VectorXd> x; // vector of feature repsonses
+        std::vector<FloatRect> yv; // vector of samples
+        std::vector<cv::Mat> images;
+        int y; // y is the translation
+        int refCount;
+    };
 
-	struct SupportVector
-	{
-		SupportPattern* x;
-		int y;
-		double b;
-		double g;
-		cv::Mat image;
-	};
-	
+    struct SupportVector
+    {
+        SupportPattern* x;
+        int y;
+        double b;
+        double g;
+        cv::Mat image;
+    };
+
     ConfigFile *m_config;
-	HaarFeatures m_features;
-	Kernel m_kernel;
-	
-	std::vector<SupportPattern*> m_sps;
-	std::vector<SupportVector*> m_svs;
+    HaarFeatures m_features;
+    Kernel m_kernel;
 
-	
-	double m_C;
-	Eigen::MatrixXd m_K;
+    std::vector<SupportPattern*> m_sps;
+    std::vector<SupportVector*> m_svs;
 
-	inline double loss(const FloatRect& y1, const FloatRect& y2) const
-	{
-		// overlap loss
-		return 1.0-y1.overlap(y2);
-	}
-	
-	void SMOStep(int ipos, int ineg);
-	std::pair<int, double> minGradient(int ind);
-	void processNew(int ind);
-	void reprocess();
-	void processOld();
-	void optimize();
 
-	int addSupportVector(SupportPattern* x, int y, double g);
-	void removeSupportVector(int ind);
-	void removeSupportVectors(int ind1, int ind2);
-	void swapSupportVectors(int ind1, int ind2);
-	
-	void budgetMaintenance();
-	void budgetMaintenanceRemove();
+    double m_C;
+    Eigen::MatrixXd m_K;
 
-	double evaluate(const Eigen::VectorXd& x) const;
+    inline double loss(const FloatRect& y1, const FloatRect& y2) const
+    {
+        // overlap loss
+        return 1.0 - y1.overlap(y2);
+    }
+
+    void SMOStep(int ipos, int ineg);
+    std::pair<int, double> minGradient(int ind);
+    void processNew(int ind);
+    void reprocess();
+    void processOld();
+    void optimize();
+
+    int addSupportVector(SupportPattern* x, int y, double g);
+    void removeSupportVector(int ind);
+    void removeSupportVectors(int ind1, int ind2);
+    void swapSupportVectors(int ind1, int ind2);
+
+    void budgetMaintenance();
+    void budgetMaintenanceRemove();
+
+    double evaluate(const Eigen::VectorXd& x) const;
 };
 
 #endif /*FACE_RECOG_LARANK_H*/

@@ -1,13 +1,10 @@
-#include "Tracks/TrackROI.h"
-#include <stdexcept>
-#include <deque>
-#include <iterator>
+﻿#include "Tracks/TrackROI.h"
 
 cv::Rect ROI::getSubRect(size_t pos) const
 {
     if (pos < _subRoi.size())
         return _subRoi[pos];
-    
+
     throw std::out_of_range("Index out of sub-ROI range");
 }
 
@@ -18,12 +15,12 @@ void ROI::addSubRect(cv::Rect roi, size_t pos)
 
 size_t ROI::countSubROI() const
 {
-    return _subRoi.size();        
+    return _subRoi.size();
 }
 
 void ROI::setAllSubRect(std::vector<cv::Rect> vRect)
 {
-    _subRoi.clear();    
+    _subRoi.clear();
     _subRoi.assign(vRect.begin(), vRect.end());
 }
 
@@ -62,7 +59,7 @@ void TrackROI::setTrackSize(size_t trackSize)
 }
 
 void TrackROI::addROI(cv::Rect roi, size_t pos)
-{    
+{
     addROI(ROI(roi), pos);
 }
 

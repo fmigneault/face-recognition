@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -53,26 +53,27 @@
 #ifndef FACE_RECOG_HAAR_FEATURE_H
 #define FACE_RECOG_HAAR_FEATURE_H
 
+#include "FaceRecog.h"
+
+/*
+    required includes to get full class
+    definitions for config class members
+*/
 #include "Tracks/Rect.h"
-#include "Tracks/ImageRep.h"
-
-#include <vector>
-
-class Sample;
 
 class HaarFeature
 {
 public:
-	HaarFeature(const FloatRect& bb, int type);
-	~HaarFeature();
-	
-	float Eval(const Sample& s) const;
-	
+    HaarFeature(const FloatRect& bb, int type);
+    ~HaarFeature();
+
+    float Eval(const Sample& s) const;
+
 private:
-	FloatRect m_bb;
-	std::vector<FloatRect> m_rects;
-	std::vector<float> m_weights;
-	float m_factor;
+    FloatRect m_bb;
+    std::vector<FloatRect> m_rects;
+    std::vector<float> m_weights;
+    float m_factor;
 };
 
 #endif/*FACE_RECOG_HAAR_FEATURE_H*/

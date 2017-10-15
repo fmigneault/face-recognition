@@ -1,4 +1,4 @@
-#include "FaceRecog.h"
+﻿#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_PYTHON
 
 //#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
@@ -61,7 +61,7 @@ static void init_ar() {
     return NUMPY_IMPORT_ARRAY_RETVAL;
 }
 
-BOOST_PYTHON_MODULE (pbcvt) {
+BOOST_PYTHON_MODULE(pbcvt) {
     //using namespace XM;
     init_ar();
 

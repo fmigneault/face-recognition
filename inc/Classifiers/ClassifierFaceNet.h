@@ -1,10 +1,9 @@
-#ifndef FACE_RECOG_CLASSIFIER_FACE_NET_H
+﻿#ifndef FACE_RECOG_CLASSIFIER_FACE_NET_H
 #define FACE_RECOG_CLASSIFIER_FACE_NET_H
 
 #include "FaceRecog.h"
 
-
-class ClassifierFaceNet final : public IClassifier 
+class ClassifierFaceNet final : public IClassifier
 {
 public:
     ClassifierFaceNet();
@@ -15,8 +14,8 @@ public:
 private:
     std::string folderPath = "../python";
     std::string filePath = "../python";
-    std::string pyFuncInit  = "face_detect";
-    std::string pyFuncPredict  = "face_detect";
+    std::string pyFuncInit = "face_detect";
+    std::string pyFuncPredict = "face_detect";
     std::vector<cv::Rect> m_faces;
 };
 

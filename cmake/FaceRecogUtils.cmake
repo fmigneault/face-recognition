@@ -12,7 +12,8 @@ include(CMakeParseArguments)
 #   add files manually to ensure changes are detected and impose CMake re-run (update configs as necessary)
 #--------------------------------------------------------------------------------------------------
 macro(face_recog_add_sources)
-    # header files    
+    # header files
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/FaceRecog.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Camera/CameraDefines.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Camera/CameraType.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Camera/FlyCapture2Define.h)
@@ -24,8 +25,10 @@ macro(face_recog_add_sources)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/IClassifier.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/TemplateMatcher.h)    
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ConfigFile.h)
-    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ConsoleOptions.h)
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ConsoleOptions.h)    
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ForwardDeclares.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/Platform.h)
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/Version.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/FaceDetectors/EyeDetector.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/FaceDetectors/FaceDetectorFRCNN.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/FaceDetectors/FaceDetectorSSD.h)
@@ -152,6 +155,27 @@ endmacro()
 #--------------------------------------------------------------------------------------------------
 macro(face_recog_update_modules)
 
+    # Camshift Tracker
+    if(${FaceRecog_ENABLE_Camshift}})
+        add_definitions(DFACE_RECOG_HAS_CAMSHIFT)
+    else()
+        remove_definitions(-DFACE_RECOG_HAS_CAMSHIFT)
+    endif()
+    
+    # Cmopressive Tracker
+    if(${FaceRecog_ENABLE_Compressive}}})
+        add_definitions(-DFACE_RECOG_HAS_COMPRESSIVE)
+    else()
+        remove_definitions(-DFACE_RECOG_HAS_COMPRESSIVE)
+    endif()
+
+    # Viola-Jones Cascade Classifiers
+    if(${FaceRecog_ENABLE_VJ})
+        add_definitions(-DFACE_RECOG_HAS_VJ)
+    else()
+        remove_definitions(-DFACE_RECOG_HAS_VJ)
+    endif()
+
     # FRCNN
     if(${FaceRecog_ENABLE_FRCNN})
         if(NOT ${WITH_Python})
@@ -163,6 +187,7 @@ macro(face_recog_update_modules)
         remove_definitions(-DFACE_RECOG_HAS_FRCNN)
     endif()
 
+    # KCF
     if(${FaceRecog_ENABLE_KCF})
         message("KCF selected, verify implementation to employ")
         set(FaceRecog_KCF_IMPL)
@@ -246,6 +271,13 @@ macro(face_recog_update_modules)
         add_definitions(-DFACE_RECOG_HAS_FACE_NET)
     else()
         remove_definitions(-DFACE_RECOG_HAS_FACE_NET)
+    endif()
+    
+    # Template Matching
+    if(${FaceRecog_ENABLE_TM})
+        add_definitions(-DFACE_RECOG_HAS_TM)
+    else()
+        remove_definitions(-DFACE_RECOG_HAS_TM)
     endif()
        
 endmacro()

@@ -1,4 +1,4 @@
-#include "Utilities/MultiColorType.h"
+﻿#include "Utilities/MultiColorType.h"
 
 const ColorCode rgbColorCode(const ColorType& colorType)
 {

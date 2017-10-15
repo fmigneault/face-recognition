@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -36,73 +36,42 @@
  * what you give them.   Happy coding!
  */
 
-// FaceRecog
-#include "Configs/Platform.h"
-#include "Trackers/ITracker.h"
-#include "Tracks/Track.h"
-#include "Utilities/utilities.h"
-
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <string>
-#include <utility>
-
-#ifdef FACE_RECOG_LINUX
-#include <unistd.h>
-#endif
-
-using namespace std;
-using namespace config;
+#include "FaceRecog.h"
 
 Track::Track(ConfigFile *configFile)
-: _createCount(0)
-, _removeCount(0)
-, _isMatched(false)
-, _isValidatedWithEyeDetection(false)
+    : _createCount(0)
+    , _removeCount(0)
+    , _isMatched(false)
+    , _isValidatedWithEyeDetection(false)
 {
     configCheckAndSet(configFile);
-
-	if(m_config->camshift)
-		_tracker.reset(new TrackerCamshift(m_config));
-	else if(m_config->compressive)
-		_tracker.reset(new TrackerCompressive(m_config));
-	else 
-		_tracker.reset(new TrackerFastDT(m_config));
-
-    setTrackSize(m_config->roiAccumulationSize);
+    resetTracker();
+    setTrackSize(_config->roiAccumulationSize);
     _trackNumber = -1;
-	_recognizedState = UNKWOWN;
-	_recognizedPOIName = "";
+    _recognizedState = UNKWOWN;
+    _recognizedPOIName = "";
 }
 
 Track::Track(ConfigFile *configFile, const cv::Rect& rect, int targetNumber)
-: _createCount(0)
-, _removeCount(0)
-, _isMatched(false)
-, _isValidatedWithEyeDetection(false)
+    : _createCount(0)
+    , _removeCount(0)
+    , _isMatched(false)
+    , _isValidatedWithEyeDetection(false)
 {
     configCheckAndSet(configFile);
-    setTrackSize(m_config->roiAccumulationSize);
-	insertROI(rect);
-	
-    if(m_config->camshift)
-		_tracker.reset(new TrackerCamshift(m_config));
-	else if(m_config->compressive)
-        _tracker.reset(new TrackerCompressive(m_config));
-	else 
-        _tracker.reset(new TrackerFastDT(m_config));
-		    
+    setTrackSize(_config->roiAccumulationSize);
+    insertROI(rect);
+    resetTracker();
     _trackNumber = targetNumber;   // defaults to -1 if not specified
-	_recognizedState = UNKWOWN;
-	_recognizedPOIName = "";
+    _recognizedState = UNKWOWN;
+    _recognizedPOIName = "";
 }
 
 Track::Track(const Track& track)
-: _createCount(track._createCount)
-, _removeCount(track._removeCount)
-, _isMatched(track._isMatched)
-, _isValidatedWithEyeDetection(false)
+    : _createCount(track._createCount)
+    , _removeCount(track._removeCount)
+    , _isMatched(track._isMatched)
+    , _isValidatedWithEyeDetection(false)
 {
     insertROI(track.bbox());
     _tracker = track._tracker;
@@ -122,46 +91,66 @@ Track& Track::operator= (const Track& track)
     _bboxes = track._bboxes;
     _trackNumber = track._trackNumber;
     _isMatched = track._isMatched;
-	_isValidatedWithEyeDetection = track._isValidatedWithEyeDetection;
+    _isValidatedWithEyeDetection = track._isValidatedWithEyeDetection;
     _tracker = track._tracker;
     return *this;
 }
 
 Track::~Track()
 {
-	// the tracker destroyer will be invoked automatically
+    // the tracker destroyer will be invoked automatically
+}
+
+void Track::resetTracker()
+{
+    #ifdef FACE_RECOG_HAS_CAMSHIFT
+    if (_config->Camshift)
+        _tracker.reset(new TrackerCamshift(_config));
+    #endif/*FACE_RECOG_HAS_CAMSHIFT*/
+    #ifdef FACE_RECOG_HAS_COMPRESSIVE
+    if (_config->Compressive)
+        _tracker.reset(new TrackerCompressive(_config));
+    #endif/*FACE_RECOG_HAS_COMPRESSIVE*/
+    #ifdef FACE_RECOG_HAS_KCF
+    if (_config->KCF)
+        _tracker.reset(new TrackerKCF(_config));
+    #endif/*FACE_RECOG_HAS_KCF*/
+    #ifdef FACE_RECOG_HAS_STRUCK
+    if (_config->STRUCK)
+        _tracker.reset(new TrackerSTRUCK(_config));
+    #endif/*FACE_RECOG_HAS_STRUCK*/
 }
 
 void Track::configCheckAndSet(ConfigFile *configFile)
 {
-    assert(configFile);
-    m_config = configFile;
+    ASSERT_LOG(configFile, "Configuration file not specified for track");
+    _config = configFile;
 }
 
 void Track::reInitTracking(const ImageRep& frame)
 {
     cv::Rect b = bbox();
-	if ((b.width == 0) && (b.height == 0))
-	{
-		cout << "Error in reInitTracking, the track has no bbox assigned" << endl;
-		return;
-	}
-	FloatRect fbbox(b.x, b.y, b.width, b.height);    
+    if ((b.width == 0) && (b.height == 0))
+    {
+        cout << "Error in reInitTracking, the track has no bbox assigned" << endl;
+        return;
+    }
+    FloatRect fbbox(b.x, b.y, b.width, b.height);
     _tracker->initialize(frame, fbbox);
 }
 
 void Track::track(const ImageRep& frame)
 {
     cv::Rect b = bbox();
-	if ((b.width == 0) && (b.height == 0))
-	{
-		cout << "Error in track, the track has no bbox assigned" << endl;
-		return;
-	}
-	if (!_tracker->isInitialized())
-	{
-		cout << "Error in track, the track has no initialized tracker" << endl;
-		return;
-	}
-	insertROI(_tracker->track(frame));
+    if ((b.width == 0) && (b.height == 0))
+    {
+        cout << "Error in track, the track has no bbox assigned" << endl;
+        return;
+    }
+    if (!_tracker->isInitialized())
+    {
+        cout << "Error in track, the track has no initialized tracker" << endl;
+        return;
+    }
+    insertROI(_tracker->track(frame));
 }

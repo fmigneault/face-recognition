@@ -1,15 +1,6 @@
-#include "opencv2/core/version.hpp"
+﻿#include "FaceRecog.h"
 
-#include <opencv/highgui.h>
-#include <iostream>
-#include <omp.h>
-
-#include "Tracks/CircularBuffer.h"
-
-using namespace cv;
-using namespace std;
-
-CircularBuffer::CircularBuffer(size_t scoreAccumulationWindowSize) { scoreWindowSize = scoreAccumulationWindowSize;  }
+CircularBuffer::CircularBuffer(size_t scoreAccumulationWindowSize) { scoreWindowSize = scoreAccumulationWindowSize; }
 
 void CircularBuffer::addPredictions(size_t trackNumber, std::vector<double> scores)
 {
@@ -28,7 +19,7 @@ void CircularBuffer::removeTrackScores(size_t trackNumber)
 {
     latestWindowScores.erase(trackNumber);
     latestCumulScores.erase(trackNumber);
-    maxScores.erase(trackNumber);    
+    maxScores.erase(trackNumber);
 }
 
 void CircularBuffer::updateMax(size_t trackNumber, std::vector<double> scores)
@@ -99,7 +90,7 @@ void CircularBuffer::getMaxPositiveInfo(ScoreMode sm, size_t trackNumber, int& i
 }
 
 double CircularBuffer::getMaxPositiveScore(ScoreMode sm, size_t trackNumber, size_t POINumber)
-{    
+{
     int index = -1; double score = -DBL_MAX;
     getMaxPositiveInfo(sm, trackNumber, index, score);
     return score;

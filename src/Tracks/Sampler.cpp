@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -60,53 +60,53 @@ using namespace std;
 
 vector<FloatRect> Sampler::RadialSamples(FloatRect centre, int radius, int nr, int nt)
 {
-	vector<FloatRect> samples;
-	FloatRect s(centre);
-	float rstep = (float)radius/nr;
-	float tstep = 2*(float)M_PI/nt;
-	samples.push_back(centre);
-    
+    vector<FloatRect> samples;
+    FloatRect s(centre);
+    float rstep = (float)radius / nr;
+    float tstep = 2 * (float)M_PI / nt;
+    samples.push_back(centre);
+
     // note here that all the samples (bboxes) have the same width and height
-	for (int ir = 1; ir <= nr; ++ir)
-	{
-		float phase = (ir % 2)*tstep/2;
-		for (int it = 0; it < nt; ++it)
-		{
-			float dx = ir*rstep*cosf(it*tstep+phase);
-			float dy = ir*rstep*sinf(it*tstep+phase);
-			s.xmin(centre.xmin()+dx);
-			s.ymin(centre.ymin()+dy);
-			samples.push_back(s);
-		}
-	}
-	
-	return samples;
+    for (int ir = 1; ir <= nr; ++ir)
+    {
+        float phase = (ir % 2)*tstep / 2;
+        for (int it = 0; it < nt; ++it)
+        {
+            float dx = ir*rstep*cosf(it*tstep + phase);
+            float dy = ir*rstep*sinf(it*tstep + phase);
+            s.xmin(centre.xmin() + dx);
+            s.ymin(centre.ymin() + dy);
+            samples.push_back(s);
+        }
+    }
+
+    return samples;
 }
 
 vector<FloatRect> Sampler::PixelSamples(FloatRect centre, int radius, bool halfSample)
 {
-	vector<FloatRect> samples;
-	
-	IntRect s(centre);
-	samples.push_back(s);
-	
-	int r2 = radius*radius;
-	for (int iy = -radius; iy <= radius; ++iy)
-	{
-		for (int ix = -radius; ix <= radius; ++ix)
-		{
-			if (ix*ix+iy*iy > r2) continue;
-			if (iy == 0 && ix == 0) continue; // already put this one at the start
-			
-			int x = (int)centre.xmin() + ix;
-			int y = (int)centre.ymin() + iy;
-			if (halfSample && (ix % 2 != 0 || iy % 2 != 0)) continue;
-			
-			s.xmin(x);
-			s.ymin(y);
-			samples.push_back(s);
-		}
-	}
-	
-	return samples;
+    vector<FloatRect> samples;
+
+    IntRect s(centre);
+    samples.push_back(s);
+
+    int r2 = radius*radius;
+    for (int iy = -radius; iy <= radius; ++iy)
+    {
+        for (int ix = -radius; ix <= radius; ++ix)
+        {
+            if (ix*ix + iy*iy > r2) continue;
+            if (iy == 0 && ix == 0) continue; // already put this one at the start
+
+            int x = (int)centre.xmin() + ix;
+            int y = (int)centre.ymin() + iy;
+            if (halfSample && (ix % 2 != 0 || iy % 2 != 0)) continue;
+
+            s.xmin(x);
+            s.ymin(y);
+            samples.push_back(s);
+        }
+    }
+
+    return samples;
 }

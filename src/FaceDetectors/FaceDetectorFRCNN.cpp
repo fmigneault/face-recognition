@@ -1,4 +1,4 @@
-#include "FaceRecog.h"
+﻿#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_FRCNN
 
 
@@ -33,24 +33,24 @@ void FaceDetectorFRCNN::pyObjList2VecRect(PyObject* list)
 int FaceDetectorFRCNN::findFaces(std::vector<std::vector<cv::Rect> >& faces)
 {
    //setenv("PYTHONPATH", folderPath.c_str(), 1);
-   auto lastFrame = frames.back();
-   PyObject* ndata = NULL;
-   ndata = pbcvt::fromMatToNDArray(lastFrame);
-   
-   bp::handle<> handle(ndata);
-   bp::object ndmat = bp::object(handle);
-   std::vector<bp::object> args;
-   args.emplace_back(ndmat);
-   bp::object res = callPyFuncFromFile(pyFunc, filePath, args);
-   if (res.is_none())
-       return 0;
-   pyObjList2VecRect(res.ptr());
+    auto lastFrame = frames.back();
+    PyObject* ndata = NULL;
+    ndata = pbcvt::fromMatToNDArray(lastFrame);
 
-   /*
-   std::cout << "1" << std::endl;
-   PyObject* res = callPyUsingModule(pyFunc, filePath, ndata);
-   Py_CLEAR(ndata);*/
-   return 1;
+    bp::handle<> handle(ndata);
+    bp::object ndmat = bp::object(handle);
+    std::vector<bp::object> args;
+    args.emplace_back(ndmat);
+    bp::object res = callPyFuncFromFile(pyFunc, filePath, args);
+    if (res.is_none())
+        return 0;
+    pyObjList2VecRect(res.ptr());
+
+    /*
+    std::cout << "1" << std::endl;
+    PyObject* res = callPyUsingModule(pyFunc, filePath, ndata);
+    Py_CLEAR(ndata);*/
+    return 1;
 }
 
 void FaceDetectorFRCNN::assignImage(FACE_RECOG_MAT frame)

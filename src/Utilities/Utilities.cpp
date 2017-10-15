@@ -1,4 +1,4 @@
-#include "Configs/Platform.h"
+﻿#include "Configs/Platform.h"
 #include "Trackers/ITracker.h"
 #include "Tracks/Rect.h"
 #include "Tracks/Track.h"
@@ -29,7 +29,7 @@ using namespace std;
 namespace util {
 bool createDirIfNotExist(const string& dirName)
 {
-    struct stat st ={ 0 };
+    struct stat st = { 0 };
     if (stat(dirName.c_str(), &st) == -1)
     {
         #if defined(FACE_RECOG_LINUX)
@@ -93,11 +93,11 @@ int prepareEnrollROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
     for (size_t poi = 0; poi < POI_IDs.size(); ++poi) {
         // transfer original POI ROIs, and add additional images from geometric operations if requested
         if (!config.useGeometricPositiveStills)
-            POI_ROIs[poi].push_back(stillPOI[poi]);        
+            POI_ROIs[poi].push_back(stillPOI[poi]);
         else
-            POI_ROIs[poi] = imSyntheticGeneration(stillPOI[poi], 
-                                                  config.geometricTranslatePixels, 
-                                                  config.geometricScalingFactor, 
+            POI_ROIs[poi] = imSyntheticGeneration(stillPOI[poi],
+                                                  config.geometricTranslatePixels,
+                                                  config.geometricScalingFactor,
                                                   config.geometricScalingMinSize, true);  // output includes original
 
         // additional images from synthetic generation if available and requested
@@ -113,7 +113,7 @@ int prepareEnrollROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
     if (config.useReferenceNegativeStills)
     {
         // load at the very least other positive individual representations as counter-examples
-        for (size_t poi = 0; poi < POI_IDs.size(); ++poi) {            
+        for (size_t poi = 0; poi < POI_IDs.size(); ++poi) {
             for (size_t neg = 0; neg < POI_IDs.size(); ++neg)
                 if (poi != neg)
                     NEG_ROIs[poi].insert(NEG_ROIs[poi].end(), POI_ROIs[neg].begin(), POI_ROIs[neg].end());
@@ -127,9 +127,9 @@ int prepareEnrollROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
             if (config.useGeometricNegativeStills) {
                 size_t nExtraNegativesRaw = negROIs.size();
                 for (size_t neg = 0; neg < nExtraNegativesRaw; ++neg) {
-                    std::vector<FACE_RECOG_MAT> geometricNegROIs = imSyntheticGeneration(negROIs[neg], 
+                    std::vector<FACE_RECOG_MAT> geometricNegROIs = imSyntheticGeneration(negROIs[neg],
                                                                                          config.geometricTranslatePixels,
-                                                                                         config.geometricScalingFactor, 
+                                                                                         config.geometricScalingFactor,
                                                                                          config.geometricScalingMinSize, false);
                     negROIs.insert(negROIs.end(), geometricNegROIs.begin(), geometricNegROIs.end());
                 }
@@ -179,13 +179,17 @@ int loadDirectoryROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
         std::string imgNameEndLOC = imgName.substr(imgName.length() - locSuffix.length());
         cv::Mat poi;
 
+        // LBP improved is trained to obtain focused localized face region directly (without much background)
+        // Other cascades produce larger ROIs that usually require additional cropping to remove background
+        bool isFocusLocalized = config.LBPCascadeFrontalImproved;
+
         // generate ROI/LOC if not found, then add it to POI
         // ROI/LOC image must not already exist, current image must not end with either ROI/LOC suffixes
-        if (((!config.ImprovedLBP && !bfs::is_regular_file(imgPathROI)) || (config.ImprovedLBP && !bfs::is_regular_file(imgPathLOC)))
+        if (((!isFocusLocalized && !bfs::is_regular_file(imgPathROI)) || (isFocusLocalized && !bfs::is_regular_file(imgPathLOC)))
             && imgNameEndROI != roiSuffix && imgNameEndLOC != locSuffix)
         {
             if (cc.empty()) {
-                bfs::path ccFile(config.ImprovedLBP
+                bfs::path ccFile(isFocusLocalized
                                  ? "lbpcascades/lbpcascade_frontalface_improved.xml"
                                  : "haarcascades/haarcascade_frontalface_alt.xml");
                 cc.load((opencvSourcesDataPath / ccFile).string());
@@ -196,7 +200,7 @@ int loadDirectoryROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
             cc.detectMultiScale(img, facesROI, 1.05, 3, cv::CASCADE_SCALE_IMAGE, cv::Size(20, 20), img.size());
             if (facesROI.size() != 1) {
                 for (size_t roi = 0; roi < facesROI.size(); ++roi) {
-                    std::string imgPath = (basePathPOI / bfs::path(config.ImprovedLBP ? imgNameLOC : imgNameROI)).string();
+                    std::string imgPath = (basePathPOI / bfs::path(isFocusLocalized ? imgNameLOC : imgNameROI)).string();
                     imgPath += "_" + std::to_string(roi) + itr->path().extension().string();
                     cv::imwrite(imgPath, img(facesROI[roi]));
                 }
@@ -205,7 +209,7 @@ int loadDirectoryROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
                 return EXIT_FAILURE;
             }
             poi = img(facesROI[0]);
-            imgLoadedPath = (config.ImprovedLBP ? imgPathLOC : imgPathROI).string();
+            imgLoadedPath = (isFocusLocalized ? imgPathLOC : imgPathROI).string();
             cv::imwrite(imgLoadedPath, poi);  // available for next time
         }
         // otherwise, load the found POI image and remove any suffix
@@ -468,8 +472,8 @@ string getCudaSupportString(cv::cuda::DeviceInfo device)
 
 void printDeviceInfo(cv::ocl::Device device, string tab, ostream& out)
 {
-    string typeName = device.isAMD() ? "AMD" :
-                      device.isIntel() ? "Intel" :
+    string typeName = device.isAMD()    ? "AMD" :
+                      device.isIntel()  ? "Intel" :
                       device.isNVidia() ? "NVidia" : "Unknown";
     out << tab << "name:                  " << device.name() << endl;
     out << tab << "type name:             " << typeName << endl;

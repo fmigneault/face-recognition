@@ -1,6 +1,5 @@
-#include "FaceRecog.h"
-#ifdef FACE_RECOG_USE_FACE_NET
-
+﻿#include "FaceRecog.h"
+#ifdef FACE_RECOG_HAS_FACE_NET
 
 ClassifierFaceNet::ClassifierFaceNet()
 {
@@ -20,7 +19,7 @@ std::vector<double> ClassifierFaceNet::predict(cv::Mat roi)
 
     THROW("FUNCTION INCOMPLETE - PARTIAL DONE");
 
-    return std::vector<double> {1,2,3};
+    return std::vector<double> {1, 2, 3};
 }
 
-#endif/*FACE_RECOG_USE_FACE_NET*/
+#endif/*FACE_RECOG_HAS_FACE_NET*/

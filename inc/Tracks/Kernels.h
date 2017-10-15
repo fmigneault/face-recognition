@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -59,29 +59,29 @@
 class Kernel
 {
 public:
-	Kernel(): m_sigma(0){};
-	Kernel(double sigma) : m_sigma(sigma) {}
-	Kernel(const Kernel &obj) : m_sigma(obj.m_sigma) {}
-	Kernel & operator=(const Kernel &obj)
-	{
-		if (this == &obj) return *this;
-		else
-			this->m_sigma = obj.m_sigma;
-		return *this;
-	}
+    Kernel() : m_sigma(0) {};
+    Kernel(double sigma) : m_sigma(sigma) {}
+    Kernel(const Kernel &obj) : m_sigma(obj.m_sigma) {}
+    Kernel & operator=(const Kernel &obj)
+    {
+        if (this == &obj) return *this;
+        else
+            this->m_sigma = obj.m_sigma;
+        return *this;
+    }
 
-	inline double Eval(const Eigen::VectorXd& x1, const Eigen::VectorXd& x2) const
-	{
-		return exp(-m_sigma*(x1-x2).squaredNorm());
-	}
-	
-	inline double Eval(const Eigen::VectorXd& x) const
-	{
-		return 1.0;
-	}
+    inline double Eval(const Eigen::VectorXd& x1, const Eigen::VectorXd& x2) const
+    {
+        return exp(-m_sigma*(x1 - x2).squaredNorm());
+    }
+
+    inline double Eval(const Eigen::VectorXd& x) const
+    {
+        return 1.0;
+    }
 
 private:
-	double m_sigma;
+    double m_sigma;
 };
 
 

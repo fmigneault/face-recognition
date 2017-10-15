@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_PLATFORM_H
+﻿#ifndef FACE_RECOG_PLATFORM_H
 #define FACE_RECOG_PLATFORM_H
 
 /* Find platform to enable adequate parts of the code */

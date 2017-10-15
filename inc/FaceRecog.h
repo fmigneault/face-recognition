@@ -1,14 +1,14 @@
-#ifndef FACE_RECOG_CONFIG_H
+﻿#ifndef FACE_RECOG_CONFIG_H
 #define FACE_RECOG_CONFIG_H
+
+// FaceRecog Predefinition, Macros and Setups
+// include forward declarations first to resolve dependencies
+#include "Configs/ForwardDeclares.h"
+#include "Configs/Platform.h"
+#include "Configs/ConsoleOptions.h"
 
 // Common
 #include "CommonCpp.h"
-
-// FaceRecog Configs Files
-#include "Configs/ConfigFile.h"
-#include "Configs/ConsoleOptions.h"
-#include "Configs/Platform.h"
-using namespace config;
 
 // Eigen
 #include <Eigen/Core>
@@ -27,11 +27,6 @@ using namespace Eigen;
     #include "opencv2/core/cuda.hpp"
 #endif
 using namespace cv;
-
-// FaceRecog Utilities
-#include "Utilities/MatDefines.h"
-#include "Utilities/MultiColorType.h"
-#include "Utilities/utilities.h"
 
 // Python
 #ifdef FACE_RECOG_HAS_PYTHON
@@ -60,17 +55,18 @@ namespace bfs = boost::filesystem;
 using namespace xstd;
 
 // STD and other common libraries
-#include <stdio.h>
-#include <iostream>
+#include <deque>
+#include <fstream>
 #include <iomanip>
-#include <string>
+#include <iostream>
+#include <iterator>
 #include <memory>
 #include <omp.h>
-#include <fstream>
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdexcept>
+#include <stdio.h>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <vector>
 #if defined(FACE_RECOG_LINUX)
     #include <unistd.h>
@@ -79,8 +75,17 @@ using namespace xstd;
 #endif/*FACE_RECOG OS-SPECIFIC FILES*/
 using namespace std;
 
+// FaceRecog Configs
+#include "Configs/ConfigFile.h"
+
+// FaceRecog Utilities
+#include "Utilities/MatDefines.h"
+#include "Utilities/MultiColorType.h"
+#include "Utilities/utilities.h"
+
 // FaceRecog Camera
 #include "Camera/CameraDefines.h"
+#include "Camera/CameraType.h"
 
 // FaceRecog Tracking Containers
 #include "Tracks/Association.h"
@@ -99,7 +104,10 @@ using namespace std;
 
 // FaceRecog Face Detectors
 #include "FaceDetectors/IFaceDetector.h"
+#ifdef FACE_RECOG_HAS_VJ
 #include "FaceDetectors/EyeDetector.h"
+#include "FaceDetectors/FaceDetectorVJ.h"
+#endif/*FACE_RECOG_HAS_VJ*/
 #ifdef FACE_RECOG_HAS_FRCNN
     #ifndef FACE_RECOG_HAS_PYTHON
     #error Python is required to employ FRCNN
@@ -110,7 +118,7 @@ using namespace std;
 #include "FaceDetectors/FaceDetectorSSD.h"
 #endif/*FACE_RECOG_HAS_SSD*/
 #ifdef FACE_RECOG_HAS_YOLO
-    #include "FaceDetectors/FaceDetectorYOLO.h"
+#include "FaceDetectors/FaceDetectorYOLO.h"
 #endif/*FACE_RECOG_HAS_YOLO*/
 
 // FaceRecog Trackers
@@ -121,19 +129,18 @@ using namespace std;
 #ifdef FACE_RECOG_HAS_COMPRESSIVE
 #include "Trackers/TrackerCompressive.h"
 #endif/*FACE_RECOG_HAS_COMPRESSIVE*/
-#ifdef FACE_RECOG_HAS_STRUCK
-#include "Trackers/TrackerSTRUCK.h"
-#endif/*FACE_RECOG_HAS_STRUCK*/
 #ifdef FACE_RECOG_HAS_KCF
 #include "Trackers/TrackerKCF.h"
 #endif/*FACE_RECOG_HAS_KCF*/
+#ifdef FACE_RECOG_HAS_STRUCK
+#include "Trackers/TrackerSTRUCK.h"
+#endif/*FACE_RECOG_HAS_STRUCK*/
 
 // FaceRecog Classifiers
-#include "Classifiers/TemplateMatcher.h"
+#include "Classifiers/ClassifierType.h"
 #include "Classifiers/IClassifier.h"
-#include "Classifiers/ClassifierEnsembleTM.h"
 #ifdef FACE_RECOG_HAS_ESVM
-    #include "Classifiers/ClassifierEnsembleESVM.h"
+#include "Classifiers/ClassifierEnsembleESVM.h"
 #endif/*FACE_RECOG_HAS_ESVM*/
 #ifdef FACE_RECOG_HAS_FACE_NET
     #ifndef FACE_RECOG_HAS_PYTHON
@@ -141,6 +148,9 @@ using namespace std;
     #endif/*FACE_RECOG_HAS_PYTHON*/
     #include "Classifiers/ClassifierFaceNet.h"
 #endif/*FACE_RECOG_HAS_FACE_NET*/
+#if FACE_RECOG_HAS_TM
+#include "Classifiers/ClassifierEnsembleTM.h"
+#endif/*FACE_RECOG_HAS_TM*/
 
 // Macros
 #define INITIALIZE()                            PY_INITIALIZE()

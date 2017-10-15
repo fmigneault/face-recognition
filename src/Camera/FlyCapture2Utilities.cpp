@@ -1,6 +1,6 @@
-#include "Camera/FlyCapture2Utilities.h"
+﻿#include "Camera/FlyCapture2Utilities.h"
 /* Include functions if the SDK is found
- * 
+ *
  * References:
  *   Sample PGR camera capture for OpenCV
  *      <https://gist.github.com/kevinhughes27/5543668>
@@ -32,7 +32,7 @@ bool EvaluateAndPrintCameraError(FlyCapture2::Error cameraError, string errorMes
     return false;
 }
 
-FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraIndex, 
+FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraIndex,
                                         bool useTrigger, FlyCapture2::Format7ImageSettings* frameConfig)
 {
     if (camera == nullptr || cameraIndex < 0)
@@ -41,7 +41,7 @@ FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraI
     FlyCapture2::BusManager busMgr;
     FlyCapture2::PGRGuid pgrGuid;
     FlyCapture2::CameraInfo cameraInfo;
-    FlyCapture2::Error cameraError;    
+    FlyCapture2::Error cameraError;
     unsigned int numCameras = 0;
 
     cameraError = busMgr.GetNumOfCameras(&numCameras);
@@ -52,11 +52,11 @@ FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraI
         cout << "No PGR camera detected, cannot establish connection." << endl;
         return FlyCapture2::PGRERROR_NOT_FOUND;
     }
-    
-    cameraError = busMgr.GetCameraFromIndex(cameraIndex, &pgrGuid);    
+
+    cameraError = busMgr.GetCameraFromIndex(cameraIndex, &pgrGuid);
     if (EvaluateAndPrintCameraError(cameraError, "Failed to retrieve camera with index"))
         return cameraError.GetType();
-    
+
     cameraError = camera->Connect(&pgrGuid);
     if (EvaluateAndPrintCameraError(cameraError, "Failed to connect PGR camera"))
         return cameraError.GetType();
@@ -87,7 +87,7 @@ FlyCapture2::ErrorType ConnectCameraPGR(FlyCapture2::Camera* camera, int cameraI
             cout << "Invalid frame format settings specified for PGR camera" << endl;
             return FlyCapture2::PGRERROR_INVALID_SETTINGS;
         }
-        
+
         unsigned int packetByteSize = pckInfo.recommendedBytesPerPacket;
         cameraError = camera->SetFormat7Configuration(frameConfig, packetByteSize);
         if (EvaluateAndPrintCameraError(cameraError, "Failed to apply PGR camera frame format settings"))
@@ -144,7 +144,7 @@ bool PollForTriggerReady(FlyCapture2::Camera* camera, bool verbose)
 
     // Wait for trigger ready register
     do
-    {        
+    {
         cameraError = camera->ReadRegister(SOFTWARE_TRIGGER_REGISTER_ADDRESS, &registerValue);
         if (EvaluateAndPrintCameraError(cameraError, "Problem occurred while reading PGR camera register"))
             return false;
@@ -164,7 +164,7 @@ bool FireSoftwareTrigger(FlyCapture2::Camera* camera, bool verbose)
     FlyCapture2::Error cameraError = camera->WriteRegister(SOFTWARE_TRIGGER_REGISTER_ADDRESS, TRIGGER_FIRE_VALUE);
     return !EvaluateAndPrintCameraError(cameraError, "Failed to write register for PGR camera trigger");
 }
-               
+
 bool FireTriggerWhenReady(FlyCapture2::Camera* camera, bool verbose)
 {
     bool ready = PollForTriggerReady(camera, verbose);

@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -64,97 +64,97 @@ using namespace cv;
 static const int kNumBins = 16;
 
 ImageRep::ImageRep(const Mat& image, bool computeIntegral, bool computeIntegralHist, bool colour) :
-	m_channels(colour ? 3 : 1),
-	m_rect(0, 0, image.cols, image.rows)
-{	
-	m_images.clear();
-	m_integralImages.clear();
-	m_integralHistImages.clear();
-	for (int i = 0; i < m_channels; ++i)
-	{
-		m_images.push_back(Mat(image.rows, image.cols, CV_8UC1));
-		if (computeIntegral) m_integralImages.push_back(Mat(image.rows+1, image.cols+1, CV_32SC1));
-		if (computeIntegralHist)
-		{
-			for (int j = 0; j < kNumBins; ++j)
-			{
-				m_integralHistImages.push_back(Mat(image.rows+1, image.cols+1, CV_32SC1));
-			}
-		}
-	}
-		
-	if (colour)
-	{
-		assert(image.channels() == 3);
-		colour_image = image.clone(); // .getMat(ACCESS_READ);
-		split(image, m_images);
-	}
-	else
-	{
-		colour_image = image.clone(); // .getMat(ACCESS_READ);
-		assert(image.channels() == 1 || image.channels() == 3);
-		if (image.channels() == 3)
-		{
-			FACE_RECOG_NAMESPACE::cvtColor(image, m_images[0], CV_RGB2GRAY);
-		}
-		else if (image.channels() == 1)
-		{
-			image.copyTo(m_images[0]);
-		}
-	}
-	
-	if (computeIntegral)
-	{
-		for (int i = 0; i < m_channels; ++i)
-		{
-			//equalizeHist(m_images[i], m_images[i]);
-			integral(m_images[i], m_integralImages[i]);
-		}
-	}
-	
-	if (computeIntegralHist)
-	{
-		Mat tmp(image.rows, image.cols, CV_8UC1);
-		tmp.setTo(0);
-		for (int j = 0; j < kNumBins; ++j)
-		{
-			for (int y = 0; y < image.rows; ++y)
-			{
-				const uchar* src = m_images[0].ptr(y);
-				uchar* dst = tmp.ptr(y);
-				for (int x = 0; x < image.cols; ++x)
-				{
-					int bin = (int)(((float)*src/256)*kNumBins);
-					*dst = (bin == j) ? 1 : 0;
-					++src;
-					++dst;
-				}
-			}
-			
-			integral(tmp, m_integralHistImages[j]);			
-		}
-	}
+    m_channels(colour ? 3 : 1),
+    m_rect(0, 0, image.cols, image.rows)
+{
+    m_images.clear();
+    m_integralImages.clear();
+    m_integralHistImages.clear();
+    for (int i = 0; i < m_channels; ++i)
+    {
+        m_images.push_back(Mat(image.rows, image.cols, CV_8UC1));
+        if (computeIntegral) m_integralImages.push_back(Mat(image.rows + 1, image.cols + 1, CV_32SC1));
+        if (computeIntegralHist)
+        {
+            for (int j = 0; j < kNumBins; ++j)
+            {
+                m_integralHistImages.push_back(Mat(image.rows + 1, image.cols + 1, CV_32SC1));
+            }
+        }
+    }
+
+    if (colour)
+    {
+        assert(image.channels() == 3);
+        colour_image = image.clone(); // .getMat(ACCESS_READ);
+        split(image, m_images);
+    }
+    else
+    {
+        colour_image = image.clone(); // .getMat(ACCESS_READ);
+        assert(image.channels() == 1 || image.channels() == 3);
+        if (image.channels() == 3)
+        {
+            FACE_RECOG_NAMESPACE::cvtColor(image, m_images[0], CV_RGB2GRAY);
+        }
+        else if (image.channels() == 1)
+        {
+            image.copyTo(m_images[0]);
+        }
+    }
+
+    if (computeIntegral)
+    {
+        for (int i = 0; i < m_channels; ++i)
+        {
+            //equalizeHist(m_images[i], m_images[i]);
+            integral(m_images[i], m_integralImages[i]);
+        }
+    }
+
+    if (computeIntegralHist)
+    {
+        Mat tmp(image.rows, image.cols, CV_8UC1);
+        tmp.setTo(0);
+        for (int j = 0; j < kNumBins; ++j)
+        {
+            for (int y = 0; y < image.rows; ++y)
+            {
+                const uchar* src = m_images[0].ptr(y);
+                uchar* dst = tmp.ptr(y);
+                for (int x = 0; x < image.cols; ++x)
+                {
+                    int bin = (int)(((float)*src / 256)*kNumBins);
+                    *dst = (bin == j) ? 1 : 0;
+                    ++src;
+                    ++dst;
+                }
+            }
+
+            integral(tmp, m_integralHistImages[j]);
+        }
+    }
 }
 
 int ImageRep::Sum(const IntRect& rRect, int channel) const
 {
-	assert(rRect.xmin() >= 0 && rRect.ymin() >= 0 && rRect.xmax() <= m_images[0].cols && rRect.ymax() <= m_images[0].rows);
-	return m_integralImages[channel].at<int>(rRect.ymin(), rRect.xmin()) +
-			m_integralImages[channel].at<int>(rRect.ymax(), rRect.xmax()) -
-			m_integralImages[channel].at<int>(rRect.ymax(), rRect.xmin()) -
-			m_integralImages[channel].at<int>(rRect.ymin(), rRect.xmax());
+    assert(rRect.xmin() >= 0 && rRect.ymin() >= 0 && rRect.xmax() <= m_images[0].cols && rRect.ymax() <= m_images[0].rows);
+    return m_integralImages[channel].at<int>(rRect.ymin(), rRect.xmin()) +
+        m_integralImages[channel].at<int>(rRect.ymax(), rRect.xmax()) -
+        m_integralImages[channel].at<int>(rRect.ymax(), rRect.xmin()) -
+        m_integralImages[channel].at<int>(rRect.ymin(), rRect.xmax());
 }
 
 void ImageRep::Hist(const IntRect& rRect, Eigen::VectorXd& h) const
 {
-	assert(rRect.xmin() >= 0 && rRect.ymin() >= 0 && rRect.xmax() <= m_images[0].cols && rRect.ymax() <= m_images[0].rows);
-	int norm = rRect.area();
-	for (int i = 0; i < kNumBins; ++i)
-	{
-		int sum = m_integralHistImages[i].at<int>(rRect.ymin(), rRect.xmin()) +
-			m_integralHistImages[i].at<int>(rRect.ymax(), rRect.xmax()) -
-			m_integralHistImages[i].at<int>(rRect.ymax(), rRect.xmin()) -
-			m_integralHistImages[i].at<int>(rRect.ymin(), rRect.xmax());
-		h[i] = (float)sum/norm;
-	}
+    assert(rRect.xmin() >= 0 && rRect.ymin() >= 0 && rRect.xmax() <= m_images[0].cols && rRect.ymax() <= m_images[0].rows);
+    int norm = rRect.area();
+    for (int i = 0; i < kNumBins; ++i)
+    {
+        int sum = m_integralHistImages[i].at<int>(rRect.ymin(), rRect.xmin()) +
+            m_integralHistImages[i].at<int>(rRect.ymax(), rRect.xmax()) -
+            m_integralHistImages[i].at<int>(rRect.ymax(), rRect.xmin()) -
+            m_integralHistImages[i].at<int>(rRect.ymin(), rRect.xmax());
+        h[i] = (float)sum / norm;
+    }
 }

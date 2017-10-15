@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_PYTHON_INTEROP_H
+﻿#ifndef FACE_RECOG_PYTHON_INTEROP_H
 #define FACE_RECOG_PYTHON_INTEROP_H
 
 #include <boost/python.hpp>

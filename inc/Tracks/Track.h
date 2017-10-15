@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -41,6 +41,11 @@
 
 #include "FaceRecog.h"
 
+/*
+    required includes to get full class
+    definitions for config class members
+*/
+#include "Tracks/TrackROI.h"
 
 class Track
 {
@@ -54,16 +59,16 @@ public:
     enum RecognizedState { UNKWOWN, CONSIDERED, RECOGNIZED };
 
     // getters
-    inline cv::Rect bbox() const                { return getROI().getRect(); }
-    inline ROI getROI(size_t pos = 0) const     { return _bboxes.getROI(pos); }
-    inline int getTrackNumber() const           { return _trackNumber; }
-    inline int getCreateCount() const           { return _createCount; }
-    inline int getRemoveCount() const           { return _removeCount; }
-    inline bool isMatched() const               { return _isMatched; }
+    inline cv::Rect bbox() const                            { return getROI().getRect(); }
+    inline ROI getROI(size_t pos = 0) const                 { return _bboxes.getROI(pos); }
+    inline int getTrackNumber() const                       { return _trackNumber; }
+    inline int getCreateCount() const                       { return _createCount; }
+    inline int getRemoveCount() const                       { return _removeCount; }
+    inline bool isMatched() const                           { return _isMatched; }
     // setters
-    inline void setTrackNumber(int number)                  { _trackNumber = number; }        
+    inline void setTrackNumber(int number)                  { _trackNumber = number; }
     inline void markMatched()                               { _isMatched = true; _removeCount = 0; } // if matched to detections, reset removal count
-    inline void markUnmatched()                             { _isMatched = false; }
+    inline void markNotMatched()                            { _isMatched = false; }
     inline void insertROI(const ROI roi, size_t pos = 0)    { _bboxes.addROI(roi, pos); }   // add the ROI to the cumulated list at position or front
     inline void updateROI(const ROI roi, size_t pos = 0)    { _bboxes.setROI(roi, pos); }   // modify the specified ROI (replace, not insert)
     inline void setTrackSize(int trackSize)                 { _bboxes.setTrackSize(trackSize); }
@@ -85,13 +90,14 @@ public:
     void reInitTracking(const ImageRep& frame);
     void track(const ImageRep& frame);
     // shared config
-    ConfigFile *m_config;
     void configCheckAndSet(ConfigFile* configFile);
 
 private:
+    ConfigFile *_config;
+    void resetTracker();
     int _trackNumber = -1;
-    std::string _recognizedPOIName; 
-    TrackROI _bboxes;     // accumulation of ROI and sub-ROI
+    std::string _recognizedPOIName;
+    TrackROI _bboxes;   // accumulation of ROI and sub-ROI
     int _createCount;
     RecognizedState _recognizedState = UNKWOWN;
     bool _isValidatedWithEyeDetection;

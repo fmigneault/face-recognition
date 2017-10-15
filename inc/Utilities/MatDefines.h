@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_MAT_DEFINES_H
+﻿#ifndef FACE_RECOG_MAT_DEFINES_H
 #define FACE_RECOG_MAT_DEFINES_H
 
 #include "opencv2/core/version.hpp"
@@ -61,7 +61,7 @@
 
 /* Defines without CUDA - Mat for OpenCV 2 */
 #elif !FACE_RECOG_FORCE_CUDA && CV_VERSION_EPOCH == 2
-    
+
     #define FACE_RECOG_NAMESPACE cv
     #define FACE_RECOG_MAT cv::Mat
 

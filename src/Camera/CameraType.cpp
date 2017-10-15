@@ -1,6 +1,4 @@
-#include "Camera/CameraType.h"
-
-#include <string>
+﻿#include "FaceRecog.h"
 
 CameraType::CameraType(int value)
 {
@@ -11,8 +9,8 @@ CameraType::CameraType(int value)
 }
 
 const std::string CameraType::name() const
-{    
-    switch (_type) {                   
+{
+    switch (_type) {
         case CameraType::FILE_STREAM:       return "file stream";
         case CameraType::CV_VIDEO_CAPTURE:  return "OpenCV VideoCapture";
         case CameraType::PGR_FLYCAPTURE2:   return "PGR FlyCapture2";
@@ -20,13 +18,13 @@ const std::string CameraType::name() const
     }
 }
 
-std::ostream& operator<< (std::ostream& os, const CameraType& ct) 
-{ 
+std::ostream& operator<<(std::ostream& os, const CameraType& ct)
+{
     os << ct.name();
-    return os; 
+    return os;
 }
 
-std::istream& operator>> (std::istream& is, CameraType& ct)
+std::istream& operator>>(std::istream& is, CameraType& ct)
 {
     int v;
     is >> v;

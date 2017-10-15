@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -53,17 +53,13 @@
 #ifndef FACE_RECOG_SAMPLER_H
 #define FACE_RECOG_SAMPLER_H
 
-#include "Tracks/Rect.h"
-
-#include <vector>
-
-class Config;
+#include "FaceRecog.h"
 
 class Sampler
 {
-public:	
-	static std::vector<FloatRect> RadialSamples(FloatRect centre, int radius, int nr, int nt);
-	static std::vector<FloatRect> PixelSamples(FloatRect centre, int radius, bool halfSample = false);
+public:
+    static std::vector<FloatRect> RadialSamples(FloatRect centre, int radius, int nr, int nt);
+    static std::vector<FloatRect> PixelSamples(FloatRect centre, int radius, bool halfSample = false);
 };
 
 #endif /*FACE_RECOG_SAMPLER_H*/

@@ -1,4 +1,4 @@
-#include "FaceRecog.h"
+﻿#include "FaceRecog.h"
 
 std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config,
                                                         const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs,
@@ -7,6 +7,7 @@ std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config
 {
     std::shared_ptr<IClassifier> classifier = nullptr;
     ClassifierType classifierType = config.getClassifierType();
+    #ifdef FACE_RECOG_HAS_TM
     if (classifierType == ClassifierType::ENSEMBLE_TM)
     {
         if (positiveROIs.size() > 0)
@@ -14,8 +15,9 @@ std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config
         else
             classifier.reset(new ClassifierEnsembleTM());
     }
+    #endif/*FACE_RECOG_HAS_TM*/
     #ifdef FACE_RECOG_HAS_ESVM
-    else if (classifierType == ClassifierType::ENSEMBLE_ESVM)
+    if (classifierType == ClassifierType::ENSEMBLE_ESVM)
     {
         if (positiveROIs.size() > 0)
             classifier.reset(new ClassifierEnsembleESVM(positiveROIs, config.NEGDir, positiveIDs, additionalNegativeROIs));
@@ -24,7 +26,7 @@ std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config
     }
     #endif/*FACE_RECOG_HAS_ESVM*/
     #ifdef FACE_RECOG_HAS_FACE_NET
-    else if (classifierType == ClassifierType::CNN_FACE_NET)
+    if (classifierType == ClassifierType::CNN_FACE_NET)
     {
         if (positiveIDs.size() > 0)
             classifier.reset(new ClassifierFaceNet(positiveROIs, config.NEGDir, positiveIDs));

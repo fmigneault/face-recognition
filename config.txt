@@ -17,21 +17,27 @@ useCameraTrigger = 0
 #==============================
 # algorithms
 #==============================
-# Algorithms selection for face detection, tracking and recognition 
+# --- Face Detection ---
+FRCNN = 0
+HaarCascadeFrontal = 1
+HaarCascadeProfile = 1
+LBPCascadeFrontal = 0
+LBPCascadeProfile = 0
+LBPCascadeFrontalImproved = 0
+SSD = 0
+YOLO = 0
+# --- Face Tracking ---
 Camshift = 0
 Compressive = 0
+KCF = 0
+STRUCK = 1
+# --- Face Recognition ---
 ESVM = 1
 FaceNet = 0
-FRCNN = 0
-ImprovedLBP = 0
-LBP = 0
-STRUCK = 1
 TM = 0
-VJ = 0
-YOLO = 0
 
 #==============================
-# face recognition
+# face recognition parameters
 #==============================
 useFaceRecognition = 1
 #   employ positive images from geometric operations on original still
@@ -58,7 +64,7 @@ roiAccumulationSize = 20
 roiAccumulationMode = 1
 
 #==============================
-# detection and tracking
+# detection/tracking parameters
 #==============================
 searchRadius = 20
 useHungarianMatching = 0

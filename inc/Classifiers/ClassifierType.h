@@ -1,8 +1,7 @@
-#ifndef FACE_RECOG_CLASSIFIER_TYPE
+﻿#ifndef FACE_RECOG_CLASSIFIER_TYPE
 #define FACE_RECOG_CLASSIFIER_TYPE
 
-#include <iostream>
-#include <fstream>
+#include "FaceRecog.h"
 
 class ClassifierType
 {
@@ -19,11 +18,11 @@ public:
     ClassifierType(int value);
     const std::string name() const;
     inline bool isDefined() const { return _type != UNDEFINED; }
-    inline virtual bool operator== (const Value& classifierType) const { return _type == classifierType; }
-    inline virtual bool operator!= (const Value& classifierType) const { return _type != classifierType; }    
-    friend std::ostream& operator<< (std::ostream& os, const ClassifierType& ct);
-    friend std::istream& operator>> (std::istream& is, ClassifierType& ct);
-    friend std::istream& operator>> (std::istream& is, Value& v);
+    inline virtual bool operator==(const Value& classifierType) const { return _type == classifierType; }
+    inline virtual bool operator!=(const Value& classifierType) const { return _type != classifierType; }
+    friend std::ostream& operator<<(std::ostream& os, const ClassifierType& ct);
+    friend std::istream& operator>>(std::istream& is, ClassifierType& ct);
+    friend std::istream& operator>>(std::istream& is, Value& v);
 private:
     Value _type;
 };

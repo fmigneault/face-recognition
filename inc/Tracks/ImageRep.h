@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -66,22 +66,22 @@
 class ImageRep
 {
 public:
-	ImageRep(const cv::Mat& rImage, bool computeIntegral, bool computeIntegralHists, bool colour = false);
-	
-	int Sum(const IntRect& rRect, int channel = 0) const;
-	void Hist(const IntRect& rRect, Eigen::VectorXd& h) const;
-	
-	inline const cv::Mat& getImage(int channel = 0) const { return m_images[channel]; }
-	inline const cv::Mat& getColourImage() const { return colour_image; }
-	inline const IntRect& getRect() const { return m_rect; }
+    ImageRep(const cv::Mat& rImage, bool computeIntegral, bool computeIntegralHists, bool colour = false);
+
+    int Sum(const IntRect& rRect, int channel = 0) const;
+    void Hist(const IntRect& rRect, Eigen::VectorXd& h) const;
+
+    inline const cv::Mat& getImage(int channel = 0) const { return m_images[channel]; }
+    inline const cv::Mat& getColourImage() const { return colour_image; }
+    inline const IntRect& getRect() const { return m_rect; }
 
 private:
-	std::vector<cv::Mat> m_images;
+    std::vector<cv::Mat> m_images;
     cv::Mat colour_image;
-	std::vector<cv::Mat> m_integralImages;
-	std::vector<cv::Mat> m_integralHistImages;
-	int m_channels;
-	IntRect m_rect;
+    std::vector<cv::Mat> m_integralImages;
+    std::vector<cv::Mat> m_integralHistImages;
+    int m_channels;
+    IntRect m_rect;
 };
 
 #endif /*FACE_RECOG_IMAGE_REP_H*/

@@ -1,11 +1,7 @@
-#ifndef FACE_RECOG_EYE_DETECTOR_H
+﻿#ifndef FACE_RECOG_EYE_DETECTOR_H
 #define FACE_RECOG_EYE_DETECTOR_H
 
-#include <opencv/cv.h>
-#include "opencv2/core/version.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-
-#include "Utilities/MatDefines.h"
+#include "FaceRecog.h"
 
 class EyeDetector
 {

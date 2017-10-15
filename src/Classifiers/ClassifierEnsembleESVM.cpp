@@ -1,4 +1,4 @@
-#include "FaceRecog.h"
+﻿#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_ESVM
 
 ClassifierEnsembleESVM::ClassifierEnsembleESVM()
@@ -7,7 +7,7 @@ ClassifierEnsembleESVM::ClassifierEnsembleESVM()
 }
 
 ClassifierEnsembleESVM::ClassifierEnsembleESVM(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, std::string negativeFileDir,
-                                               const std::vector<std::string>& positiveIDs, 
+                                               const std::vector<std::string>& positiveIDs,
                                                const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs)
 {
     size_t nPositives = positiveROIs.size();

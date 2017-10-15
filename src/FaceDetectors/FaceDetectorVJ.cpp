@@ -1,4 +1,4 @@
-/*
+﻿/*
     Original Code Reference
 
     FAST-DT: FAce STructured Detection and Tracking
@@ -15,10 +15,9 @@
 
 #include "FaceRecog.h"
 
-
 FaceDetectorVJ::FaceDetectorVJ()
 {
-	SetDefaults();
+    SetDefaults();
 }
 
 FaceDetectorVJ::FaceDetectorVJ(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
@@ -50,18 +49,18 @@ int FaceDetectorVJ::loadDetector(string name, FlipMode faceFlipMode)
 {
     bool success_load_cascade = false;
     #if FACE_RECOG_USE_CUDA
-	Ptr<cv::cuda::CascadeClassifier> cascade = cv::cuda::CascadeClassifier::create(name);
+    Ptr<cv::cuda::CascadeClassifier> cascade = cv::cuda::CascadeClassifier::create(name);
     success_load_cascade = !cascade.empty();
     #else
     FACE_RECOG_NAMESPACE::CascadeClassifier cascade;
     success_load_cascade = cascade.load(name);
     #endif
 
-	if (!success_load_cascade)
-	{
-		cerr << "ERROR: Could not load classifier cascade " << name << endl;
-		return -1;
-	}
+    if (!success_load_cascade)
+    {
+        cerr << "ERROR: Could not load classifier cascade " << name << endl;
+        return -1;
+    }
 
     #if FACE_RECOG_USE_CUDA
     cascade->setScaleFactor(scaleFactor);
@@ -70,10 +69,10 @@ int FaceDetectorVJ::loadDetector(string name, FlipMode faceFlipMode)
     cascade->setMinNeighbors(minNeighbours);
     #endif
 
-	faceFinder.push_back(cascade);
-	stageCount.push_back(1);
+    faceFinder.push_back(cascade);
+    stageCount.push_back(1);
     faceFlipModes.push_back(faceFlipMode);
-	return 0;
+    return 0;
 }
 
 void FaceDetectorVJ::assignImage(FACE_RECOG_MAT frame)
@@ -85,42 +84,42 @@ void FaceDetectorVJ::assignImage(FACE_RECOG_MAT frame)
 
 int FaceDetectorVJ::findFaces(vector<vector<Rect> >& faces)
 {
-	size_t nClassifiers = faceFinder.size();
+    size_t nClassifiers = faceFinder.size();
     size_t nImages = frames.size();
-	if (nImages != nClassifiers)
-	{
-		cerr << "ERROR in findFaces, different number of images and classifiers" << endl;
-		return -1;
-	}
+    if (nImages != nClassifiers)
+    {
+        cerr << "ERROR in findFaces, different number of images and classifiers" << endl;
+        return -1;
+    }
 
     #pragma omp parallel for
-	for (long c = 0; c < nClassifiers; ++c)
-	{
+    for (long c = 0; c < nClassifiers; ++c)
+    {
         #if FACE_RECOG_USE_CUDA
         auto cascade_gpu = faceFinder[c];
         cascade_gpu->detectMultiScale(frames[c], foundObjects_gpu);
         cascade_gpu->convert(foundObjects_gpu, faces[c]);
         #else
-		faceFinder[c].detectMultiScale(frames[c], faces[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
+        faceFinder[c].detectMultiScale(frames[c], faces[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
         #endif
-	}
-	return 0;
+    }
+    return 0;
 }
 
 double FaceDetectorVJ::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
 {
-	/*EVALUATE CONFIDENCE FOR UNMATCHED TARGETS*/
+    /*EVALUATE CONFIDENCE FOR UNMATCHED TARGETS*/
     size_t nFaces = faceFinder.size();
-	if (nFaces != stageCount.size()) {
-		cerr << "ERROR in evaluateConfidence, different number of classifiers and stage count" << endl;
-		return -1;
-	}
+    if (nFaces != stageCount.size()) {
+        cerr << "ERROR in evaluateConfidence, different number of classifiers and stage count" << endl;
+        return -1;
+    }
 
-	vector<double> confidences(nFaces);
-	vector<Rect> trackersROI;
+    vector<double> confidences(nFaces);
+    vector<Rect> trackersROI;
 
     // get current bbox for confidence evaluation, with resize to specified config size
-	Rect face = track.bbox();
+    Rect face = track.bbox();
     std::vector<FACE_RECOG_MAT> croppedFaces(nFaces);
 
     double score = 0;

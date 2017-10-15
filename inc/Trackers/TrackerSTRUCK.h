@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -55,24 +55,29 @@
 
 #include "FaceRecog.h"
 
+/*
+    required includes to get full class
+    definitions for config class members
+*/
+#include "Trackers/ITracker.h"
 
 class TrackerSTRUCK final : public ITracker
 {
 public:
-	TrackerSTRUCK(ConfigFile *configFile);
-	virtual ~TrackerSTRUCK();
-	TrackerSTRUCK(const TrackerSTRUCK &obj);		   // copy constructor
-	TrackerSTRUCK &operator=(const TrackerSTRUCK &T);  // assignment operator
-	virtual void initialize(const ImageRep& frame, FloatRect bb);
-	virtual void reset();
-	virtual cv::Rect track(const ImageRep& frame);
+    TrackerSTRUCK(ConfigFile *configFile);
+    virtual ~TrackerSTRUCK();
+    TrackerSTRUCK(const TrackerSTRUCK &obj);           // copy constructor
+    TrackerSTRUCK &operator=(const TrackerSTRUCK &T);  // assignment operator
+    virtual void initialize(const ImageRep& frame, FloatRect bb);
+    virtual void reset();
+    virtual cv::Rect track(const ImageRep& frame);
 private:
-	std::vector<HaarFeatures*> m_features;
-	std::vector<Kernel*> m_kernels;
-	LaRank* m_pLearner;
-	bool m_needsIntegralImage;
-	bool m_needsIntegralHist;
-	void updateLearner(const ImageRep& image);
+    std::vector<HaarFeatures*> m_features;
+    std::vector<Kernel*> m_kernels;
+    LaRank* m_pLearner;
+    bool m_needsIntegralImage;
+    bool m_needsIntegralHist;
+    void updateLearner(const ImageRep& image);
 };
 
 #endif /*FACE_RECOG_TRACKER_STRUCK_H*/

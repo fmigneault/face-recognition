@@ -1,8 +1,7 @@
-#ifndef FACE_RECOG_TRACK_ROI_H
+﻿#ifndef FACE_RECOG_TRACK_ROI_H
 #define FACE_RECOG_TRACK_ROI_H
 
-#include "opencv2/core/core.hpp"
-#include <deque>
+#include "FaceRecog.h"
 
 /* Bounding box containers for accumulation of ROIs and sub-ROIs
  *   Default position (-1) will put the ROI/sub-ROI at the start of the container's accumulated ROIs (most recent first)
@@ -26,7 +25,7 @@ public:
     cv::Rect getSubRect(size_t pos = 0) const;
     std::vector<cv::Rect> getAllSubRect() const;
     size_t countSubROI() const;
-private:    
+private:
     cv::Rect _roi;                  // main ROI
     cv::Rect _roiOriginal;          // retain the last version of main ROI
     std::deque<cv::Rect> _subRoi;   // to contain sub-region of main ROI
@@ -44,7 +43,7 @@ public:
     void setTrackSize(size_t trackSize);
     void addROI(cv::Rect roi, size_t pos = 0);  // insert before position, front by default
     void addROI(ROI roi, size_t pos = 0);       // insert before position, front by default
-    void setROI(cv::Rect , size_t pos = 0);     // update at position, latest (most recently added) by default
+    void setROI(cv::Rect, size_t pos = 0);      // update at position, latest (most recently added) by default
     void setROI(ROI roi, size_t pos = 0);       // update at position, latest (most recently added) by default
     // getters
     inline size_t getTrackSize() const { return _trackSize; }

@@ -1,4 +1,4 @@
-#include "FaceDetectors/EyeDetector.h"
+﻿#include "FaceDetectors/EyeDetector.h"
 #include <iostream>
 #include <string>
 
@@ -39,7 +39,7 @@ int EyeDetector::loadDetector(std::string name)
     else
         std::cout << "Cascade " << name << " successfully loaded" << std::endl;
 
-    #if FACE_RECOG_USE_CUDA    
+    #if FACE_RECOG_USE_CUDA
     cascade->setScaleFactor(_scaleFactor);
     cascade->setMinObjectSize(_minSize);
     cascade->setMaxObjectSize(_maxSize);
@@ -51,10 +51,10 @@ int EyeDetector::loadDetector(std::string name)
 
 // Search only locally within the specified ROI, or globally if no ROI was specified
 void EyeDetector::findEyes(FACE_RECOG_MAT image, cv::Rect faceROI)
-{    
+{
     _searchImage = image(faceROI);
     _foundEyes.clear();
-    _cascade.detectMultiScale(_searchImage, _foundEyes, _scaleFactor, _nmsThreshold, CV_HAAR_SCALE_IMAGE, _minSize, _maxSize);    
+    _cascade.detectMultiScale(_searchImage, _foundEyes, _scaleFactor, _nmsThreshold, CV_HAAR_SCALE_IMAGE, _minSize, _maxSize);
 };
 
 // Return the absolute position of the ROIs of found eyes within the image specified

@@ -1,4 +1,4 @@
-/*
+﻿/*
     Original Code Reference
 
         FAST-DT: FAce STructured Detection and Tracking
@@ -17,10 +17,10 @@
 #define FACE_RECOG_UTILITIES_H
 
 #include "FaceRecog.h"
-#include "Tracks/Track.h"
 
 namespace util {
 
+/* Function declarations */
 double overlap(const Rect& r1, const Rect& r2);
 Rect getBiggestSquare(const Rect& r1, const Size& imageSize);
 Rect getConstSizedRect(const Rect& r1, int sideLength, const Size& imageSize);

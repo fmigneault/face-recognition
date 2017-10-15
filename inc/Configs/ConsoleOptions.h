@@ -1,4 +1,4 @@
-#ifndef FACE_RECOG_CONSOLE_OPTIONS_H
+﻿#ifndef FACE_RECOG_CONSOLE_OPTIONS_H
 #define FACE_RECOG_CONSOLE_OPTIONS_H
 
 /*
@@ -24,9 +24,8 @@ http://codereview.stackexchange.com/questions/42467/user-defined-color-implement
 #include "Platform.h"
 
 #ifdef FACE_RECOG_WINDOWS
-    #define CONSOLE_COLOR_ENABLED 
+#define CONSOLE_COLOR_ENABLED
 #endif
-
 
 ////////////////////////////////////////////////// LINUX (TODO)
 // http://bluesock.org/~willg/dev/ansi.html
@@ -42,7 +41,7 @@ http://codereview.stackexchange.com/questions/42467/user-defined-color-implement
         #endif
         #include <windows.h>
     #endif
-    
+
     enum COLOR
     {
         /* Text foreground colors */
@@ -56,11 +55,11 @@ http://codereview.stackexchange.com/questions/42467/user-defined-color-implement
         YELLOW_FADE_TEXT        = 0x06,
         WHITE_FADE_TEXT         = 0x07,
         // Standard text colors
-        GRAY_TEXT               = 0x08, 
-        BLUE_TEXT               = 0x09, 
+        GRAY_TEXT               = 0x08,
+        BLUE_TEXT               = 0x09,
         GREEN_TEXT              = 0x0A,
         TEAL_TEXT               = 0x0B,
-        RED_TEXT                = 0x0C, 
+        RED_TEXT                = 0x0C,
         PINK_TEXT               = 0x0D,
         YELLOW_TEXT             = 0x0E,
         WHITE_TEXT              = 0x0F,
@@ -74,14 +73,14 @@ http://codereview.stackexchange.com/questions/42467/user-defined-color-implement
         PINK_FADE_BACKGROUND    = 0x50,
         YELLOW_FADE_BACKGROUND  = 0x60,
         WHITE_FADE_BACKGROUND   = 0x70,
-        // Standard text background color 
-        GRAY_BACKGROUND         = 0x80, 
+        // Standard text background color
+        GRAY_BACKGROUND         = 0x80,
         BLUE_BACKGROUND         = 0x90,
-        GREEN_BACKGROUND        = 0xA0, 
+        GREEN_BACKGROUND        = 0xA0,
         TEAL_BACKGROUND         = 0xB0,
-        RED_BACKGROUND          = 0xC0, 
+        RED_BACKGROUND          = 0xC0,
         PINK_BACKGROUND         = 0xD0,
-        YELLOW_BACKGROUND       = 0xE0, 
+        YELLOW_BACKGROUND       = 0xE0,
         WHITE_BACKGROUND        = 0xF0,
     };
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
     On-line Face Detection, Tracking and Recognition
 
     Includes:
@@ -7,7 +7,7 @@
         - Camshift: tracker
         - Compressive Tracking: tracker
         - FRCNN: Faster R-CNN face detection (Faster Region-based Convolutional Neural Networks)
-        - KCF: Kernelized Correlation Filters tracker 
+        - KCF: Kernelized Correlation Filters tracker
         - SSD: Single Shot MultiBox Detector (CNN)
         - YOLO: Real-Time Object Detection using CNN
         - EoESVM: Ensemble of Exemplar-SVM face recognition
@@ -24,9 +24,9 @@
 int main(int argc, char *argv[])
 {
     #if FACE_RECOG_USE_EXCEPTION_LOGGING
-    try {        
+    try {
     #endif/*FACE_RECOG_USE_EXCEPTION_LOGGING*/
-    
+
     INITIALIZE();
 
     /********************************************************************************************************************************************/
@@ -165,8 +165,8 @@ int main(int argc, char *argv[])
     FACE_RECOG_DEBUG(
         logstream logOutBBox(logOutBBoxFilePath, false, true);
         logstream logTiming(logTimingFilePath, conf->verboseDebug, conf->outputDebug);
-        logstream logDebug(logDebugFilePath, conf->verboseDebug, conf->outputDebug);        
-    );    
+        logstream logDebug(logDebugFilePath, conf->verboseDebug, conf->outputDebug);
+    );
 
     logOutput << *conf;     // output/display configs read from file
     logOutput.ofss.flush(); // wait for output completion before moving on (many configs, sometime not enough time to complete before next calls)
@@ -179,17 +179,19 @@ int main(int argc, char *argv[])
     bfs::path opencvSourcesData = opencvRootPath / bfs::path("data/");
     if (!bfs::is_directory(opencvSourcesData))  // if not found under the default 'git source' dir structure, try the 'installed' one
         opencvSourcesData = opencvRootPath / bfs::path("etc/");
+    #if FACE_RECOG_HAS_VJ
     bfs::path lbpCascadesDir = opencvSourcesData / bfs::path("lbpcascades/");
     bfs::path haarCascadesDir = opencvSourcesData / bfs::path("haarcascades/");
     ASSERT_LOG_FINALIZE(bfs::is_directory(opencvSourcesData) && bfs::is_directory(lbpCascadesDir) && bfs::is_directory(haarCascadesDir),
                         "OpenCV source data directory not found to access 'CascadeClassifier' models", logOutput, EXIT_FAILURE);
+    #endif/*FACE_RECOG_HAS_VJ*/
 
     /********************************************************************************************************************************************/
     /* CLASSIFIER                                                                                                                               */
     /********************************************************************************************************************************************/
     bfs::path POI_rootDir(conf->POIDir);
     std::vector<std::string> POI_IDs;
-    std::vector<std::vector<FACE_RECOG_MAT> > POI_ROIs, NEG_ROIs;    
+    std::vector<std::vector<FACE_RECOG_MAT> > POI_ROIs, NEG_ROIs;
     if (conf->useFaceRecognition) {
         ASSERT_LOG_FINALIZE(util::prepareEnrollROIs(*conf, opencvSourcesData, POI_ROIs, POI_IDs, NEG_ROIs, logOutput) == EXIT_SUCCESS,
                             "Error on POI loading", logOutput, EXIT_FAILURE);
@@ -207,10 +209,10 @@ int main(int argc, char *argv[])
     if (conf->useFaceRecognition) {
         classifier = buildSpecializedClassifier(*conf, POI_ROIs, POI_IDs, NEG_ROIs);
         if (classifier == nullptr) {
-            logOutput << "Classifier not properly initialized!" << std::endl
-                      << "    Verify that required sources and defines are provided for requested classifier type in 'config'" << std::endl
-                      << "    specified type:    [" << conf->getClassifierType().name() << "]" << std::endl
-                      << "    evaluated address: [" << classifier << "]" << std::endl;
+            logOutput << "Classifier not properly initialized!" << std::endl;
+            logOutput << "    Verify that required sources and defines are provided for requested classifier type in 'config'" << std::endl;
+            logOutput << "    specified type:    [" << conf->getClassifierType().name() << "]" << std::endl;
+            logOutput << "    evaluated address: [" << classifier << "]" << std::endl;
             FINALIZE(EXIT_FAILURE);
         }
     }
@@ -315,7 +317,7 @@ int main(int argc, char *argv[])
         plotData = xstd::mvector<2, cv::Mat>(plotDims);
         plotTrackID = std::vector<int>(conf->plotMaxTracks, -1);
         // min/max 'y-axis' inverted to match 'y' pixels increasing downward
-        double plotMinY = conf->roiAccumulationMode == ScoreMode::CUMUL ? conf->roiAccumulationSize : 1.0;
+        double plotMinY = conf->roiAccumulationMode == CircularBuffer::ScoreMode::CUMUL ? conf->roiAccumulationSize : 1.0;
         double plotMaxY = 0;
         for (size_t trk = 0; trk < conf->plotMaxTracks; ++trk) {
             for (size_t poi = 0; poi < nPlotPOI; ++poi) {
@@ -424,7 +426,7 @@ int main(int argc, char *argv[])
         for (int c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c)
         {
             // load face detector, flip last one for right profile if using 3 Cascades
-            int success = vj.loadDetector(faceModelPaths[c], (NB_FACE_MODELS - 1 == c && conf->FastDT) ? HORIZONTAL : NONE);
+            int success = vj.loadDetector(faceModelPaths[c], (NB_FACE_MODELS - 1 == c && conf->use3CascadesLocalSearch) ? HORIZONTAL : NONE);
             ASSERT_LOG_FINALIZE(success == 0, "Failed loading local face detector file: '" + faceModelPaths[c] + "'\n", logOutput, EXIT_FAILURE);
             logOutput << "Done loading local face cascade " << c << ": '" << bfs::path(faceModelPaths[c]).stem().string() << "'" << std::endl;
         }
@@ -495,7 +497,7 @@ int main(int argc, char *argv[])
     {
         videoStream = new VideoCapture;
         // ignore config camera index parameters if '-v' enforced via command line
-        if (optArgV) 
+        if (optArgV)
             isVideoOpen = ((VideoCapture*)videoStream)->open(framesPath);
         else
             isVideoOpen = ((VideoCapture*)videoStream)->open(conf->cameraIndex);
@@ -539,8 +541,8 @@ int main(int argc, char *argv[])
         // update frame label or end loop when end reached with input files
         if (optArgP && frameCounter >= testSequenceFileNames[sequenceCounter].size()) break;
         currentFrameLabel = (optArgP || optArgT) ? testSequenceFileNames[sequenceCounter][frameCounter] : std::to_string(frameCounter);
-                        
-        FACE_RECOG_DEBUG(logDebug << "Delta: " << getDeltaTimePrecise(frameTimePrev, MILLISECONDS) << "ms" << std::endl); 
+
+        FACE_RECOG_DEBUG(logDebug << "Delta: " << getDeltaTimePrecise(frameTimePrev, MILLISECONDS) << "ms" << std::endl);
         frameTimePrev = getTimeNowPrecise();
 
         if (conf->cameraType == CameraType::CV_VIDEO_CAPTURE || conf->cameraType == CameraType::FILE_STREAM)
@@ -611,7 +613,7 @@ int main(int argc, char *argv[])
             for (int i = 0; i < NB_FACE_MODELS; ++i)
                 faceDetector->assignImage(frameGray);
             faceDetector->findFaces(combo);
-           
+
             FACE_RECOG_DEBUG(
                 deltaTime = getDeltaTimePrecise(frameTime, MILLISECONDS);
                 sumTimeDetect += deltaTime;
@@ -681,9 +683,9 @@ int main(int argc, char *argv[])
         //----------------------------------------------------------------------------------------------------------------------------------------
         // RECENTER TRACKERS
         //----------------------------------------------------------------------------------------------------------------------------------------
-        usedDetectorIndexes.clear();        
+        usedDetectorIndexes.clear();
         if (isNewDetection)
-        {            
+        {
             // MATCH DETECTOR WITH TRACKER IF IoU > thresh
             FACE_RECOG_DEBUG(logDebug << "Number of detections = " << mergedDet.size() << std::endl);
             cv::Rect currentResizedTrackBbox;
@@ -697,13 +699,13 @@ int main(int argc, char *argv[])
                     currentResizedTrackBbox = util::getConstSizedRect(currentTracks[i].bbox(), maxSize, frame.size());
                     currentResizedMergedDetBbox = util::getConstSizedRect(mergedDet[j], maxSize, frame.size());
                     FACE_RECOG_DEBUG(
-                        logDebug << "Track #" << i << std::endl
-                                 << "Overlap Resized: " << util::overlap(currentResizedTrackBbox, currentResizedMergedDetBbox) << std::endl
-                                 << "Overlap Original: " << util::overlap(currentTracks[i].bbox(), mergedDet[j]) << std::endl
-                                 << "InitTrack: " << currentTracks[i].bbox() << std::endl
-                                 << "Init Merged Det: " << mergedDet[j] << std::endl
-                                 << "Resized Track Det: " << currentResizedTrackBbox << std::endl
-                                 << "Resized Merged Det: " << currentResizedMergedDetBbox << std::endl;
+                        logDebug << "Track #" << i << std::endl;
+                        logDebug << "Overlap Resized: " << util::overlap(currentResizedTrackBbox, currentResizedMergedDetBbox) << std::endl;
+                        logDebug << "Overlap Original: " << util::overlap(currentTracks[i].bbox(), mergedDet[j]) << std::endl;
+                        logDebug << "InitTrack: " << currentTracks[i].bbox() << std::endl;
+                        logDebug << "Init Merged Det: " << mergedDet[j] << std::endl;
+                        logDebug << "Resized Track Det: " << currentResizedTrackBbox << std::endl;
+                        logDebug << "Resized Merged Det: " << currentResizedMergedDetBbox << std::endl;
                     );
                     if (util::intersect(currentResizedTrackBbox, currentResizedMergedDetBbox, conf->face.overlapThreshold)) {
                         currentTracks[i].insertROI(mergedDet[j]);
@@ -735,7 +737,7 @@ int main(int argc, char *argv[])
                         if (onImageEdge)
                             logDebug << "BBOX " << i << " is on edge of image" << std::endl;
                     );
-                    if ((maxConfidence <= conf->removeTrackConfidenceOutBounds && onImageEdge) || 
+                    if ((maxConfidence <= conf->removeTrackConfidenceOutBounds && onImageEdge) ||
                         (maxConfidence <= conf->removeTrackConfidenceInBounds)) {
                         currentTracks[i].increaseRemoveCount();
                         FACE_RECOG_DEBUG(logDebug << "Remove count = " << currentTracks[i].getRemoveCount() << std::endl);
@@ -755,8 +757,8 @@ int main(int argc, char *argv[])
                 for (std::vector<Track>::iterator iter = currentTracks.begin(); iter != currentTracks.end();)
                 {
                     FACE_RECOG_DEBUG(
-                        logDebug << "RemoveCount: " << (*iter).getRemoveCount() << std::endl
-                                 << "RemoveThresh: " << conf->removeTrackCountThresholdOutBounds << std::endl;
+                        logDebug << "RemoveCount: " << (*iter).getRemoveCount() << std::endl;
+                        logDebug << "RemoveThresh: " << conf->removeTrackCountThresholdOutBounds << std::endl;
                     );
                     if ((*iter).getRemoveCount() >= conf->removeTrackCountThresholdOutBounds) {
                         if (conf->useFaceRecognition)
@@ -829,8 +831,8 @@ int main(int argc, char *argv[])
                 {
                     double maxConfidence = faceDetector->evaluateConfidence(initCandidates[i], frameGray);
                     FACE_RECOG_DEBUG(
-                        logDebug << "Max confidence for candidate " << i << " = " << maxConfidence << std::endl
-                                 << "initCandidates: " << initCandidates[i].bbox() << std::endl;
+                        logDebug << "Max confidence for candidate " << i << " = " << maxConfidence << std::endl;
+                        logDebug << "initCandidates: " << initCandidates[i].bbox() << std::endl;
                     );
                     if (maxConfidence > conf->createTrackConfidenceThreshold) {
                         initCandidates[i].increaseCreateCount();
@@ -1122,7 +1124,7 @@ int main(int argc, char *argv[])
             if (trackCount == 0)
                 logResult << std::endl; // move to next line immediately if there are no results to output
         }
-        
+
         for (size_t i = 0; i < trackCount; ++i)
         {
             //------------------------------------------------------------------------------------------------------------------------------------
@@ -1231,7 +1233,7 @@ int main(int argc, char *argv[])
                 if (currentTracks[i].isValidatedEyeDetection() || !conf->useEyesDetection)
                     logOutBBox << currentFrameLabel << " " << util::rectPointCoordinates(currentTracks[i].bbox(), " ") << std::endl;
             );
-        }        
+        }
 
         //----------------------------------------------------------------------------------------------------------------------------------------
         // PLOT DISPLAY
@@ -1293,21 +1295,21 @@ int main(int argc, char *argv[])
     /********************************************************************************************************************************************/
 
     FACE_RECOG_DEBUG(
-        double dblTotalFrames = (double)frameCounter;        
+        double dblTotalFrames = (double)frameCounter;
         double avgTimeDetect = sumTimeDetect / (double)totalFramesDetect;
         double avgTimeTrack = sumTimeTrack / dblTotalFrames;
         double avgTimeDetectLocal = sumTimeDetectLocal / (double)totalFramesDetectLocal;
         double avgTimeDetectPerFrame = sumTimeDetect / dblTotalFrames;
         double avgTimeTrackPerFrame = sumTimeTrack / dblTotalFrames;
 
-        logTiming << "Number of frames in video: " << frameCounter << std::endl << setprecision(6)
-                  << "Average time per detection: " << avgTimeDetect << "ms" << std::endl                  
-                  << "Average time per tracking: " << avgTimeTrack << "ms" << std::endl
-                  << "Average time per local detection: " << avgTimeDetectLocal << "ms" << std::endl
-                  << "Average time per detection with respect to original video: " << avgTimeDetectPerFrame << "ms" << std::endl
-                  << "Average time per tracking with respect to original video: " << avgTimeTrackPerFrame << "ms" << std::endl;
+        logTiming << "Number of frames in video: " << frameCounter << std::endl << setprecision(6);
+        logTiming << "Average time per detection: " << avgTimeDetect << "ms" << std::endl;
+        logTiming << "Average time per tracking: " << avgTimeTrack << "ms" << std::endl;
+        logTiming << "Average time per local detection: " << avgTimeDetectLocal << "ms" << std::endl;
+        logTiming << "Average time per detection with respect to original video: " << avgTimeDetectPerFrame << "ms" << std::endl;
+        logTiming << "Average time per tracking with respect to original video: " << avgTimeTrackPerFrame << "ms" << std::endl;
     );
-    
+
     FINALIZE(EXIT_SUCCESS);
 
     #if FACE_RECOG_USE_EXCEPTION_LOGGING

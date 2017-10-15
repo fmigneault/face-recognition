@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  TU Eindhoven
  *  Eindhoven, The Netherlands
  *
@@ -53,28 +53,16 @@
 #ifndef FACE_RECOG_ITRACKER_H
 #define FACE_RECOG_ITRACKER_H
 
-#include <vector>
-#include <Eigen/Core>
-#include <opencv/cv.h>
-
-#include "Configs/ConfigFile.h"
-#include "Tracks/HaarFeatures.h"
-#include "Tracks/Kernels.h"
-#include "Tracks/LaRank.h"
-#include "Tracks/Rect.h"
-
-using namespace config;
-
-class ImageRep;
+#include "FaceRecog.h"
 
 class ITracker
 {
 public:
-	virtual ~ITracker() {}
+    virtual ~ITracker() {}
     // required derived method overloads
-	virtual void initialize(const ImageRep& frame, FloatRect bb) = 0;
-	virtual void reset() = 0;
-	virtual cv::Rect track(const ImageRep& frame) = 0;
+    virtual void initialize(const ImageRep& frame, FloatRect bb) = 0;
+    virtual void reset() = 0;
+    virtual cv::Rect track(const ImageRep& frame) = 0;
     // shared config
     void updateConfig(ConfigFile *configFile) { m_config = configFile; }
     ConfigFile *m_config;

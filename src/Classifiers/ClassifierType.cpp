@@ -1,6 +1,4 @@
-#include "Classifiers/ClassifierType.h"
-
-#include <string>
+﻿#include "FaceRecog.h"
 
 ClassifierType::ClassifierType(int value)
 {
@@ -20,19 +18,19 @@ const std::string ClassifierType::name() const
     }
 }
 
-std::ostream& operator<< (std::ostream& os, const ClassifierType& ct)
+std::ostream& operator<<(std::ostream& os, const ClassifierType& ct)
 {
     os << ct.name();
     return os;
 }
 
-std::istream& operator>> (std::istream& is, ClassifierType& ct)
+std::istream& operator>>(std::istream& is, ClassifierType& ct)
 {
     is >> ct._type;
     return is;
 }
 
-std::istream& operator>> (std::istream& is, ClassifierType::Value& v)
+std::istream& operator>>(std::istream& is, ClassifierType::Value& v)
 {
     int value;
     is >> value;
