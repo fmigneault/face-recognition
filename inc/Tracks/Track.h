@@ -41,10 +41,7 @@
 
 #include "FaceRecog.h"
 
-/*
-    required includes to get full class
-    definitions for config class members
-*/
+ /* required includes */
 #include "Tracks/TrackROI.h"
 
 class Track

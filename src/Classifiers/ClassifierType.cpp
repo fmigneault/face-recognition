@@ -1,4 +1,5 @@
-﻿#include "FaceRecog.h"
+﻿#include "Classifiers/ClassifierType.h"
+#include "FaceRecog.h"
 
 ClassifierType::ClassifierType(int value)
 {

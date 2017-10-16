@@ -1,6 +1,5 @@
-﻿#include "FaceDetectors/EyeDetector.h"
-#include <iostream>
-#include <string>
+﻿#include "Detectors/EyeDetector.h"
+#include "FaceRecog.h"
 
 EyeDetector::EyeDetector()
 {
@@ -27,7 +26,7 @@ int EyeDetector::loadDetector(std::string name)
     Ptr<cv::cuda::CascadeClassifier> _cascade = cv::cuda::CascadeClassifier::create(name);
     success_load_cascade = !_cascade.empty();
     #else
-    FACE_RECOG_NAMESPACE::CascadeClassifier cascade;
+    FACE_RECOG_NAMESPACE::CascadeClassifier _cascade;
     success_load_cascade = _cascade.load(name);
     #endif
 
@@ -46,21 +45,46 @@ int EyeDetector::loadDetector(std::string name)
     cascade->setMinNeighbors(_nmsThreshold);
     #endif
 
+    _eyeCascades.push_back(_cascade);
     return 0;
 }
 
-// Search only locally within the specified ROI, or globally if no ROI was specified
-void EyeDetector::findEyes(FACE_RECOG_MAT image, cv::Rect faceROI)
+void EyeDetector::assignImage(const FACE_RECOG_MAT& frame)
 {
-    _searchImage = image(faceROI);
-    _foundEyes.clear();
-    _cascade.detectMultiScale(_searchImage, _foundEyes, _scaleFactor, _nmsThreshold, CV_HAAR_SCALE_IMAGE, _minSize, _maxSize);
+    _searchImage = frame;
+}
+
+double EyeDetector::evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image)
+{
+    return (track.getROI().getSubRect().area()) ? 1.0 : 0.0;
+}
+
+void EyeDetector::flipDetections(size_t index, vector<vector<Rect> >& faces) {}
+
+// Return detections from the specified ROI
+int EyeDetector::detect(vector<vector<Rect> >& bboxes)
+{
+    #pragma omp parallel for
+    for (long c = 0; c < _eyeCascades.size(); ++c)
+    {
+        std::vector<cv::Rect> _foundEyes;
+
+        #if FACE_RECOG_USE_CUDA
+        auto _cascade = _eyeCascades[c];
+        _cascade->detectMultiScale(frames[c], foundObjects_gpu);
+        _cascade->convert(foundObjects_gpu, bboxes[c]);
+        #else
+        _eyeCascades[c].detectMultiScale(_searchImage, _foundEyes, _scaleFactor, _nmsThreshold, CV_HAAR_SCALE_IMAGE, _minSize, _maxSize);
+        #endif
+
+        bboxes[c] = getFoundEyes(_foundEyes);
+    }
 };
 
-// Return the absolute position of the ROIs of found eyes within the image specified
-std::vector<cv::Rect> EyeDetector::getFoundEyes()
+// Return the absolute position of the ROIs of found eyes within the image specified using found relative positions
+std::vector<cv::Rect> EyeDetector::getFoundEyes(std::vector<cv::Rect> relRect)
 {
-    std::vector<cv::Rect> absRect(_foundEyes);
+    std::vector<cv::Rect> absRect(relRect);
     for (size_t i = 0; i < absRect.size(); i++)
     {
         cv::Size whole;

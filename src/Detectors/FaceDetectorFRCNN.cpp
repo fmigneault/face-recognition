@@ -1,14 +1,11 @@
-﻿#include "FaceRecog.h"
+﻿#include "Detectors/FaceDetectorFRCNN.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_FRCNN
 
-
-FaceDetectorFRCNN::FaceDetectorFRCNN()
+FaceDetectorFRCNN::FaceDetectorFRCNN(std::string basePath)
 {
-    //folderPath = ".";
-    folderPath = "/home/livia/code/facerecog/python/py-faster-rcnn/tools/";
-    //filePath = "getImg.py";
-    //filePath = "face_detect_cpp";
-    filePath = "/home/livia/code/facerecog/python/py-faster-rcnn/tools/face_detect_cpp.py";
+    folderPath = (basePath / bfs::path("py-faster-rcnn/tools/")).string();
+    filePath = (bfs::path(basePath) / bfs::path("face_detect_cpp.py")).string();
     pyFunc = "face_detect";
 }
 
@@ -30,7 +27,7 @@ void FaceDetectorFRCNN::pyObjList2VecRect(PyObject* list)
     }
 }
 
-int FaceDetectorFRCNN::findFaces(std::vector<std::vector<cv::Rect> >& faces)
+int FaceDetectorFRCNN::detect(std::vector<std::vector<cv::Rect> >& bboxes)
 {
    //setenv("PYTHONPATH", folderPath.c_str(), 1);
     auto lastFrame = frames.back();

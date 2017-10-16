@@ -17,6 +17,7 @@
         Copyright (C) 2011 Sam Hare, Oxford Brookes University, Oxford, UK
  */
 
+#include "Trackers/TrackerSTRUCK.h"
 #include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_STRUCK
 
@@ -216,4 +217,4 @@ void TrackerSTRUCK::updateLearner(const ImageRep& image)
     m_pLearner->update(sample, 0);
 }
 
-endif/*FACE_RECOG_HAS_STRUCK*/
+#endif/*FACE_RECOG_HAS_STRUCK*/

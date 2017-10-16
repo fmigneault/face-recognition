@@ -55,11 +55,11 @@
 
 #include "FaceRecog.h"
 
-/*
-    required includes to get full class
-    definitions for config class members
-*/
+ /* required includes */
 #include "Tracks/Rect.h"
+template <typename T>       class struckRect;
+typedef struckRect<int>     IntRect;
+typedef struckRect<float>   FloatRect;
 
 class HaarFeature
 {

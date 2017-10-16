@@ -55,6 +55,7 @@ namespace bfs = boost::filesystem;
 using namespace xstd;
 
 // STD and other common libraries
+#include <cassert>
 #include <deque>
 #include <fstream>
 #include <iomanip>
@@ -64,6 +65,7 @@ using namespace xstd;
 #include <omp.h>
 #include <stdexcept>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -103,22 +105,23 @@ using namespace std;
 #include "Tracks/TrackROI.h"
 
 // FaceRecog Face Detectors
-#include "FaceDetectors/IFaceDetector.h"
+#include "Detectors/DetectorType.h"
+#include "Detectors/IDetector.h"
 #ifdef FACE_RECOG_HAS_VJ
-#include "FaceDetectors/EyeDetector.h"
-#include "FaceDetectors/FaceDetectorVJ.h"
+#include "Detectors/EyeDetector.h"
+#include "Detectors/FaceDetectorVJ.h"
 #endif/*FACE_RECOG_HAS_VJ*/
 #ifdef FACE_RECOG_HAS_FRCNN
     #ifndef FACE_RECOG_HAS_PYTHON
     #error Python is required to employ FRCNN
     #endif/*FACE_RECOG_HAS_PYTHON*/
-    #include "FaceDetectors/FaceDetectorFRCNN.h"
+    #include "Detectors/FaceDetectorFRCNN.h"
 #endif/*FACE_RECOG_HAS_FRCNN*/
 #ifdef FACE_RECOG_HAS_SSD
-#include "FaceDetectors/FaceDetectorSSD.h"
+#include "Detectors/FaceDetectorSSD.h"
 #endif/*FACE_RECOG_HAS_SSD*/
 #ifdef FACE_RECOG_HAS_YOLO
-#include "FaceDetectors/FaceDetectorYOLO.h"
+#include "Detectors/FaceDetectorYOLO.h"
 #endif/*FACE_RECOG_HAS_YOLO*/
 
 // FaceRecog Trackers

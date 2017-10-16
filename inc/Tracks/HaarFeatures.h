@@ -55,10 +55,7 @@
 
 #include "FaceRecog.h"
 
-/*
-    required includes to get full class
-    definitions for config class members
-*/
+ /* required includes */
 #include "Tracks/Sample.h"
 
 class HaarFeatures //: public Features

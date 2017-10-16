@@ -55,10 +55,8 @@
 
 #include "FaceRecog.h"
 
-/*
-    required includes to get full class
-    definitions for config class members
-*/
+ /* required includes */
+#include "Tracks/Rect.h"
 #include "Trackers/ITracker.h"
 
 class TrackerSTRUCK final : public ITracker

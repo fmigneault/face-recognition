@@ -25,12 +25,11 @@ class Sample;
 class Sampler;
 class Track;
 class TrackROI;
-template <typename T>       class struckRect;
-typedef struckRect<int>     IntRect;
-typedef struckRect<float>   FloatRect;
 
 // Face Detection
-class IFaceDetector;
+class DetectorType;
+class IDetector;
+class EyeDetector;
 #if FACE_RECOG_HAS_FRCNN
 class FaceDetectorFRCNN;
 #endif/*FACE_RECOG_HAS_FRCNN*/
@@ -60,8 +59,8 @@ class TrackerSTRUCK;
 #endif/*FACE_RECOG_HAS_STRUCK*/
 
 // Face Recognition
-class IClassifier;
 class ClassifierType;
+class IClassifier;
 #if FACE_RECOG_HAS_ESVM
 class ClassifierEnsembleESVM;
 #endif/*FACE_RECOG_HAS_ESVM*/

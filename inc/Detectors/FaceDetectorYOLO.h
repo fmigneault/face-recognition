@@ -6,8 +6,7 @@
 #endif/*_MSC_VER*/
 
 // FaceRecog
-#include "FaceDetectors/IFaceDetector.h"
-#include "Tracks/Target.h"
+#include "FaceRecog.h"
 
 // OpenCV
 #include <opencv2/core/core.hpp>
@@ -54,19 +53,24 @@ using std::string;
 using namespace std;
 namespace db = caffe::db;
 
-class FaceDetectorYOLO final : public IFaceDetector
+class FaceDetectorYOLO final : public IDetector
 {
 public:
-    FaceDetectorYOLO();
+    /*
+    Example model paths:
+        modelPathProto = "../yolo-face-deploy.prototxt";
+        modelPathCaffe = "../yolo-face.caffemodel";
+    */
+    FaceDetectorYOLO(std::string modelPathProto, std::string modelPathCaffe);
     ~FaceDetectorYOLO() {}
     // specialized overrides
-    int findFaces(std::vector<std::vector<cv::Rect>>& faces) override;
-    double evaluateConfidence(Target& target, FACE_RECOG_MAT& image) override;
+    int detect(std::vector<std::vector<cv::Rect>>& faces) override;
+    double evaluateConfidence(const Target& target, const FACE_RECOG_MAT& image) override;
     std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect>>& faces) override { return m_faces; }
-    void assignImage(FACE_RECOG_MAT frame) override;
+    void assignImage(const FACE_RECOG_MAT& frame) override;
     // unused overrides
     int loadDetector(std::string name) override { return 1; }
-    void flipFaces(size_t index, std::vector<std::vector<cv::Rect>>& faces) override { return; }
+    void flipDetections(size_t index, std::vector<std::vector<cv::Rect>>& faces) override { return; }
 private:
     void loadData(cv::Mat& image);
     void getBox(std::vector<float> result, float* pro_obj, int* idx_class, std::vector<std::vector<int> >& bboxs, float thresh, cv::Mat image);

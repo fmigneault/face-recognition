@@ -53,10 +53,8 @@
 #define _USE_MATH_DEFINES   // Must be on top to compile without error on Windows
 #include <cmath>
 
-#include "Configs/ConfigFile.h"
 #include "Tracks/Sampler.h"
-
-using namespace std;
+#include "FaceRecog.h"
 
 vector<FloatRect> Sampler::RadialSamples(FloatRect centre, int radius, int nr, int nt)
 {

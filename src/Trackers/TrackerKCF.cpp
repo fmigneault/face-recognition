@@ -1,4 +1,5 @@
-﻿#include "FaceRecog.h"
+﻿#include "Trackers/TrackerKCF.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_KCF
 
 TrackerKCF::TrackerKCF(ConfigFile *configFile) :

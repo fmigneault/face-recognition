@@ -1,30 +1,5 @@
-﻿#include "Configs/Platform.h"
-#include "Trackers/ITracker.h"
-#include "Tracks/Rect.h"
-#include "Tracks/Track.h"
-#include "Utilities/utilities.h"
-
-#if defined(FACE_RECOG_LINUX)
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#elif defined(FACE_RECOG_WINDOWS)
-#include <direct.h>
-#endif
-
-#if FACE_RECOG_USE_CUDA
-#include "opencv2/core/cuda.hpp"
-#include "opencv2/core/ocl.hpp"
-#endif
-
-#include <fstream>
-
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-namespace bfs = boost::filesystem;
-
-using namespace cv;
-using namespace std;
+﻿#include "Utilities/Utilities.h"
+#include "FaceRecog.h"
 
 namespace util {
 bool createDirIfNotExist(const string& dirName)
@@ -328,6 +303,39 @@ double rectDist(const Rect& r1, const Rect& r2)
     return J > 0 ? 1.f - J : 1.f;
 }
 
+#if FACE_RECOG_EXPERIMENTAL_MERGEDET
+vector<Rect> mergeDetections(vector<vector<Rect> >& combo, double overlapThreshold, bool frontalOnly)
+{
+    vector<Rect> detections;
+
+    // assume only the first detector as frontal if specified
+    size_t nDetectors = frontalOnly ? 1 : combo.size();
+
+    // loop over face detector models
+    for (size_t d = 0; d < nDetectors; ++d) {
+        for (size_t i = 0; i < combo[d].size(); ++i) {
+            // first detector as reference for initial detections
+            if (d == 0)
+                detections.push_back(combo[0][i]);
+            else {
+                // test other detector detections against first one
+                for (size_t j = 0; j < detections.size(); ++j) {
+                    Rect oldDet = detections[j];
+                    Rect newDet = combo[d][i];
+                    if (util::intersect(oldDet, newDet, overlapThreshold))
+                        break; // do not insert new detection already seen
+                }
+                // add new detections not detected by previous detectors
+                if (j >= detections.size())
+                    detections.push_back(combo[d][i]);
+            }
+        }
+    }
+    return detections;
+}
+#else/*!FACE_RECOG_EXPERIMENTAL_MERGEDET*/
+/*TODO: this has to be done for a generic number of faces
+(this implementation is for compatibility with Duffner&Obodez experiments)*/
 vector<Rect> mergeDetections(vector<vector<Rect> >& combo, double overlapThreshold, bool frontalOnly)
 {
     vector<Rect> result;
@@ -376,6 +384,7 @@ vector<Rect> mergeDetections(vector<vector<Rect> >& combo, double overlapThresho
         result.push_back(frontLeft[i]);
     return result;
 }
+#endif/*FACE_RECOG_EXPERIMENTAL_MERGEDET*/
 
 string rectPointCoordinates(const Rect& r, const string& sep)
 {

@@ -55,6 +55,9 @@
 
 #include "FaceRecog.h"
 
+ /* required includes */
+#include "Tracks/Rect.h"
+
 class LaRank
 {
 public:

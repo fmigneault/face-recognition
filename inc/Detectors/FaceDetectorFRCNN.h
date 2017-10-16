@@ -3,21 +3,21 @@
 
 #include "FaceRecog.h"
 
-class FaceDetectorFRCNN final : public IFaceDetector
+class FaceDetectorFRCNN final : public IDetector
 {
 public:
-    FaceDetectorFRCNN();
+    FaceDetectorFRCNN(std::string basePath);
     ~FaceDetectorFRCNN() {}
     // specific to specialized class
     void pyObjList2VecRect(PyObject* list);
     // specialized overrides
-    int findFaces(std::vector<std::vector<cv::Rect> >& faces) override;
+    int detect(std::vector<std::vector<cv::Rect> >& bboxes) override;
     std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect> >& faces) override { return m_faces; }
-    void assignImage(FACE_RECOG_MAT frame) override;
+    void assignImage(const FACE_RECOG_MAT& frame) override;
     // unused overrides
     int loadDetector(std::string name) override { return 1; }
-    void flipFaces(size_t index, std::vector<std::vector<cv::Rect> >& faces) override { return; }
-    double evaluateConfidence(Target& target, FACE_RECOG_MAT& image)  override { return 1; }
+    void flipDetections(size_t index, std::vector<std::vector<cv::Rect> >& faces) override { return; }
+    double evaluateConfidence(const Target& target, const FACE_RECOG_MAT& image)  override { return 1; }
 private:
     std::string folderPath = "../python";
     std::string filePath = "../python";

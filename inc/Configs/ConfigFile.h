@@ -3,10 +3,7 @@
 
 #include "FaceRecog.h"
 
-/*
-    required includes to get full class
-    definitions for config class members
-*/
+/* required includes */
 #include "Camera/CameraType.h"
 #include "Classifiers/ClassifierType.h"
 #include "Tracks/CircularBuffer.h"
@@ -169,7 +166,7 @@ public:
     ConfigFile(const std::string& path);
     std::string display() const;
     ClassifierType getClassifierType() const;
-    bool requireAnyCascade();
+    bool requireAnyCascade() const;
     friend std::ostream& operator<<(std::ostream& out, const ConfigFile& conf);
 
 private:

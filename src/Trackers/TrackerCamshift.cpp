@@ -1,4 +1,5 @@
-﻿#include "FaceRecog.h"
+﻿#include "Trackers/TrackerCamshift.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_CAMSHIFT
 
 TrackerCamshift::TrackerCamshift(ConfigFile *configFile)

@@ -53,10 +53,13 @@
 #ifndef FACE_RECOG_SAMPLE_H
 #define FACE_RECOG_SAMPLE_H
 
-#include "Tracks/ImageRep.h"
-#include "Tracks/Rect.h"
+#include "FaceRecog.h"
 
-#include <vector>
+ /* required includes */
+#include "Tracks/Rect.h"
+template <typename T>       class struckRect;
+typedef struckRect<int>     IntRect;
+typedef struckRect<float>   FloatRect;
 
 class Sample
 {

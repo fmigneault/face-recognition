@@ -1,4 +1,5 @@
-﻿#include "FaceRecog.h"
+﻿#include "Classifiers/ClassifierFaceNet.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_FACE_NET
 
 ClassifierFaceNet::ClassifierFaceNet()

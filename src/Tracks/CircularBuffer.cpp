@@ -1,4 +1,5 @@
-﻿#include "FaceRecog.h"
+﻿#include "Tracks/CircularBuffer.h"
+#include "FaceRecog.h"
 
 CircularBuffer::CircularBuffer(size_t scoreAccumulationWindowSize) { scoreWindowSize = scoreAccumulationWindowSize; }
 

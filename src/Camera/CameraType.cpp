@@ -1,4 +1,5 @@
-﻿#include "FaceRecog.h"
+﻿#include "Camera/CameraType.h"
+#include "FaceRecog.h"
 
 CameraType::CameraType(int value)
 {

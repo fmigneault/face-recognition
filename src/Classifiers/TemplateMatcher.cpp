@@ -1,7 +1,5 @@
 ﻿#include "Classifiers/TemplateMatcher.h"
-
-using namespace cv;
-using namespace std;
+#include "FaceRecog.h"
 
 TemplateMatcher::TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, const std::string negativeFileDir,
                                  const std::vector<std::string>& positiveIDs,

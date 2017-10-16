@@ -1,4 +1,5 @@
 ﻿#include "Tracks/TrackROI.h"
+#include "FaceRecog.h"
 
 cv::Rect ROI::getSubRect(size_t pos) const
 {

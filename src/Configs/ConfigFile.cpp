@@ -19,6 +19,7 @@
         Copyright (C) 2011 Sam Hare, Oxford Brookes University, Oxford, UK
  */
 
+#include "Configs/ConfigFile.h"
 #include "FaceRecog.h"
 
 std::string ConfigFile::FeatureName(FeatureType f)
@@ -200,7 +201,7 @@ bool ConfigFile::FeatureKernelPair::isValid()
     return FeatureName(feature) != "" && KernelName(kernel) != "";
 }
 
-bool ConfigFile::requireAnyCascade()
+bool ConfigFile::requireAnyCascade() const
 {
     return HaarCascadeFrontal ^ HaarCascadeProfile ^ LBPCascadeFrontal ^ LBPCascadeProfile ^ LBPCascadeFrontalImproved;
 }

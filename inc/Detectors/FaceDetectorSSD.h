@@ -1,10 +1,9 @@
 ﻿#ifndef FACE_RECOG_FACE_DETECTOR_SSD_H
 #define FACE_RECOG_FACE_DETECTOR_SSD_H
 
-#include "FaceRecogConfig.h"
+#include "FaceRecog.h"
 
-
-class FaceDetectorSSD final : public IFaceDetector
+class FaceDetectorSSD final : public IDetector
 {
 public:
     FaceDetectorSSD();
@@ -13,20 +12,20 @@ public:
     void initializeParameters(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
                               cv::Size evalSize, int minNeighbours, double overlapThreshold);
     FaceDetectorSSD(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
-                   cv::Size evalSize, int minNeighbours, double overlapThreshold);
-    void SetDefaults();
+                    cv::Size evalSize, int minNeighbours, double overlapThreshold);
+    void setDefaults();
     int loadDetector(std::string name, FlipMode faceFlipMode = NONE);
     // specialized overrides
-    void assignImage(FACE_RECOG_MAT frame) override;
-    int findFaces(std::vector<std::vector<cv::Rect> >& faces) override;
-    double evaluateConfidence(Track& track, FACE_RECOG_MAT& image) override;
-    void flipFaces(size_t index, vector<vector<Rect> >& faces) override;
+    void assignImage(const FACE_RECOG_MAT& frame) override;
+    int detect(std::vector<std::vector<cv::Rect> >& bboxes) override;
+    double evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image) override;
+    void flipDetections(size_t index, vector<vector<Rect> >& faces) override;
     vector<Rect> mergeDetections(vector<vector<Rect> >& faces) override;
 
 private:
     #if FACE_RECOG_USE_CUDA
     vector<Ptr<FACE_RECOG_NAMESPACE::CascadeClassifier>> faceFinder;
-    FACE_RECOG_MAT foundObjects_gpu;   // Buffer to transfer gpu objects found with 'detectMultiScale' to 'vector<Rect>'
+    FACE_RECOG_MAT foundObjects_gpu;        // Buffer to transfer gpu objects found with 'detectMultiScale' to 'vector<Rect>'
     #else
     std::vector<FACE_RECOG_NAMESPACE::CascadeClassifier> faceFinder;
     #endif

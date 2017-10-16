@@ -53,8 +53,6 @@
 #ifndef FACE_RECOG_RECT_H
 #define FACE_RECOG_RECT_H
 
-#include "FaceRecog.h"
-
 template <typename T>
 class struckRect
 {
@@ -133,8 +131,11 @@ private:
     T m_height;
 };
 
+typedef struckRect<int>     IntRect;
+typedef struckRect<float>   FloatRect;
+
 template <typename T>
-std::ostream& operator <<(std::ostream &rOS, const struckRect<T>& rRect)
+std::ostream& operator<<(std::ostream &rOS, const struckRect<T>& rRect)
 {
     rOS << "[origin: (" << rRect.m_xmin << ", " << rRect.m_ymin << ") size: (" << rRect.m_width << ", " << rRect.m_height << ")]";
     return rOS;
@@ -161,6 +162,5 @@ bool struckRect<T>::isInside(const struckRect<T2>& rOther) const
 {
     return (xmin() >= rOther.xmin()) && (ymin() >= rOther.ymin()) && (xmax() <= rOther.xmax()) && (ymax() <= rOther.ymax());
 }
-
 
 #endif /*FACE_RECOG_RECT_H*/

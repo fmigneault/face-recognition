@@ -20,6 +20,7 @@
 #define FACE_RECOG_USE_EXCEPTION_LOGGING 1
 #define FACE_RECOG_DISABLE_COLOR_CONSOLE 1
 #define FACE_RECOG_USE_PSEUDO_INPUT_ARGS 0
+#define FACE_RECOG_EXPERIMENTAL_MERGEDET 0
 
 int main(int argc, char *argv[])
 {
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
     bfs::path opencvSourcesData = opencvRootPath / bfs::path("data/");
     if (!bfs::is_directory(opencvSourcesData))  // if not found under the default 'git source' dir structure, try the 'installed' one
         opencvSourcesData = opencvRootPath / bfs::path("etc/");
-    #if FACE_RECOG_HAS_VJ
+    #ifdef FACE_RECOG_HAS_VJ
     bfs::path lbpCascadesDir = opencvSourcesData / bfs::path("lbpcascades/");
     bfs::path haarCascadesDir = opencvSourcesData / bfs::path("haarcascades/");
     ASSERT_LOG_FINALIZE(bfs::is_directory(opencvSourcesData) && bfs::is_directory(lbpCascadesDir) && bfs::is_directory(haarCascadesDir),
@@ -189,6 +190,7 @@ int main(int argc, char *argv[])
     /********************************************************************************************************************************************/
     /* CLASSIFIER                                                                                                                               */
     /********************************************************************************************************************************************/
+
     bfs::path POI_rootDir(conf->POIDir);
     std::vector<std::string> POI_IDs;
     std::vector<std::vector<FACE_RECOG_MAT> > POI_ROIs, NEG_ROIs;
@@ -220,57 +222,9 @@ int main(int argc, char *argv[])
     NEG_ROIs.clear();
 
     /********************************************************************************************************************************************/
-    /* CONFIGURATION FILES                                                                                                                      */
-    /********************************************************************************************************************************************/
-    int tmpFaceModelCount = 0;
-    const int MAX_NB_FACE_MODELS = 3;
-    string faceModelPaths[MAX_NB_FACE_MODELS];
-    if (conf->VJ) {
-        tmpFaceModelCount = 1;
-        faceModelPaths[0] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).string();
-    }
-    else if (conf->ImprovedLBP) {
-        tmpFaceModelCount = 1;
-        faceModelPaths[0] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_frontalface_improved.xml")).string();
-    }
-    else if (conf->LBP) {
-        tmpFaceModelCount = 3;
-        faceModelPaths[0] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_frontalface.xml")).string();
-        faceModelPaths[1] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_profileface.xml")).string();
-        faceModelPaths[2] = (opencvSourcesData / bfs::path("lbpcascades/lbpcascade_profileface.xml")).string();
-    }
-    else if (conf->YOLO) {
-        tmpFaceModelCount = 1;
-    }
-    else if (conf->FastDT) {
-        tmpFaceModelCount = 3;
-        faceModelPaths[0] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).string();
-        faceModelPaths[1] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_profileface.xml")).string();
-        faceModelPaths[2] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_profileface.xml")).string();
-    }
-    ASSERT_LOG_FINALIZE(tmpFaceModelCount != 0, "Undefined face detector/tracker from specified 'config'", logOutput, EXIT_FAILURE);
-    const int NB_FACE_MODELS = tmpFaceModelCount;
-
-    FACE_RECOG_DEBUG(
-        logDebug << "CC[0] " << faceModelPaths[0] << std::endl;
-        logDebug << "CC[1] " << faceModelPaths[1] << std::endl;
-        logDebug << "CC[2] " << faceModelPaths[2] << std::endl;
-    );
-
-    const int LEFT_EYE = 0, RIGHT_EYE = 1;
-    const int NB_EYE_MODELS = 2;
-    string eyeModelPaths[2];
-    eyeModelPaths[LEFT_EYE] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_lefteye_2splits.xml")).string();
-    eyeModelPaths[RIGHT_EYE] = (opencvSourcesData / bfs::path("haarcascades/haarcascade_righteye_2splits.xml")).string();
-    //string eyeModelPaths[NB_EYE_MODELS][2];
-    //eyeModelPaths[0][LEFT_EYE] = eyeModelPaths[0][RIGHT_EYE] = "haarcascade_eye.xml";
-    //eyeModelPaths[1][LEFT_EYE] = eyeModelPaths[1][RIGHT_EYE] = "haarcascade_eye_tree_eyeglasses.xml";
-    //eyeModelPaths[2][LEFT_EYE] = "haarcascade_lefteye_2splits.xml";
-    //eyeModelPaths[2][RIGHT_EYE] = "haarcascade_righteye_2splits.xml";
-
-    /********************************************************************************************************************************************/
     /* OUTPUT AND TIMERS                                                                                                                        */
     /********************************************************************************************************************************************/
+
     // Display all available devices, activate OpenCL and set device index to use
     #if CV_VERSION_MAJOR == 3
     util::setAndDisplayDevices(conf->deviceIndex, logOutput.ofss);
@@ -382,72 +336,30 @@ int main(int argc, char *argv[])
     logResult << std::endl;
 
     /********************************************************************************************************************************************/
-    /* LOAD DETECTORS                                                                                                                           */
+    /* LOAD FACE DETECTORS                                                                                                                      */
     /********************************************************************************************************************************************/
     Association association(conf);
 
     // main face detector
-    std::shared_ptr<IFaceDetector> faceDetector = nullptr, localFaceDetector = nullptr;
-    if (conf->YOLO) {
-        #ifdef FACE_RECOG_HAS_YOLO
-        faceDetector = std::make_shared<FaceDetectorYOLO>();
-        #endif/*FACE_RECOG_HAS_YOLO*/
-    }
-    else if (conf->FRCNN) {
-        #ifdef FACE_RECOG_HAS_FRCNN
-        faceDetector = std::make_shared<FaceDetectorFRCNN>();
-        #endif/*FACE_RECOG_HAS_FRCNN*/
-    }
-    else if (conf->SSD) {
-        #ifdef FACE_RECOG_HAS_SSD
-        faceDetector = std::make_shared<FaceDetectorSSD>();
-        #endif/*FACE_RECOG_HAS_SSD*/
-    }
-    else {
-        FaceDetectorVJ vj(conf->face.scaleFactor, conf->face.nmsThreshold, conf->face.minSize, conf->face.maxSize,
-                          conf->face.confidenceSize, conf->face.minNeighbours, conf->face.overlapThreshold);
-        for (int c = 0; c < NB_FACE_MODELS; ++c)
-        {
-            // load face detector, flip last one for right profile if using Fast-DT
-            int success = vj.loadDetector(faceModelPaths[c], (NB_FACE_MODELS - 1 == c && conf->FastDT) ? HORIZONTAL : NONE);
-            ASSERT_LOG_FINALIZE(success == 0, "Failed loading face detector file: '" + faceModelPaths[c] + "'\n", logOutput, EXIT_FAILURE);
-            logOutput << "Done loading face cascade " << c << ": '" << bfs::path(faceModelPaths[c]).stem().string() << "'" << std::endl;
-        }
-        faceDetector = std::make_shared<FaceDetectorVJ>(vj);
-    }
-    ASSERT_LOG_FINALIZE(faceDetector != nullptr, "Face detector not initialized", logOutput, EXIT_FAILURE);
+    std::shared_ptr<IDetector> faceDetector = buildSpecializedDetector(*conf, opencvSourcesData.string(), DetectorType::FACE_DETECTOR_GLOBAL);
+    size_t nFaceModels = faceDetector->modelCount();
 
     // localized search face detector
-    const int NB_FACE_MODELS_LOCAL_SEARCH = (conf->useLocalSearchROI ? (conf->use3CascadesLocalSearch ? 3 : 1) : 0);
-    if (conf->useLocalSearchROI)
-    {
-        FaceDetectorVJ vj(conf->face.scaleFactor, conf->face.nmsThreshold, conf->face.minSize, conf->face.maxSize,
-                          conf->face.confidenceSize, conf->face.minNeighbours, conf->face.overlapThreshold);
-        for (int c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c)
-        {
-            // load face detector, flip last one for right profile if using 3 Cascades
-            int success = vj.loadDetector(faceModelPaths[c], (NB_FACE_MODELS - 1 == c && conf->use3CascadesLocalSearch) ? HORIZONTAL : NONE);
-            ASSERT_LOG_FINALIZE(success == 0, "Failed loading local face detector file: '" + faceModelPaths[c] + "'\n", logOutput, EXIT_FAILURE);
-            logOutput << "Done loading local face cascade " << c << ": '" << bfs::path(faceModelPaths[c]).stem().string() << "'" << std::endl;
-        }
-        localFaceDetector = std::make_shared<FaceDetectorVJ>(vj);
-    }
+    std::shared_ptr<IDetector> localFaceDetector = buildSpecializedDetector(*conf, opencvSourcesData.string(), DetectorType::FACE_DETECTOR_GLOBAL);
+    size_t nLocalFaceModels = localFaceDetector->modelCount();
 
-    // eye detector
-    std::vector<EyeDetector> eyesDetector; // Left-Right eye detectors
-    if (conf->useEyesDetection)
-    {
-        eyesDetector.push_back(EyeDetector(conf->eyes.scaleFactor, conf->eyes.nmsThreshold, conf->eyes.minSize, conf->eyes.maxSize));
-        eyesDetector.push_back(EyeDetector(conf->eyes.scaleFactor, conf->eyes.nmsThreshold, conf->eyes.minSize, conf->eyes.maxSize));
-        ASSERT_LOG_FINALIZE(eyesDetector[LEFT_EYE].loadDetector(eyeModelPaths[LEFT_EYE]) == 0 &&
-                            eyesDetector[RIGHT_EYE].loadDetector(eyeModelPaths[RIGHT_EYE]) == 0,
-                            "Failed loading an eye detector file", logOutput, EXIT_FAILURE);
-        //for (int i = 0; i < NB_EYE_MODELS; ++i)
-        //{
-        //    eyesDetector[LEFT_EYE].loadDetector((string)opencv_root + "/" + eyeModelPaths[i][LEFT_EYE]);
-        //    eyesDetector[RIGHT_EYE].loadDetector((string)opencv_root + "/" + eyeModelPaths[i][RIGHT_EYE]);
-        //}
-    }
+    // left-right eye detectors
+    std::shared_ptr<IDetector> eyesDetector = buildSpecializedDetector(*conf, opencvSourcesData.string(), DetectorType::EYE_DETECTOR);
+    size_t nEyeModels = eyesDetector->modelCount();
+
+    FACE_RECOG_DEBUG(
+        for (size_t d = 0; d < nFaceModels; ++d)
+            logOutput << "Loaded global face detector model " << d << ": '" << bfs::path(faceDetector->getModelPath(d)).stem().string() << "'" << std::endl;
+        for (size_t d = 0; d < nLocalFaceModels; ++d)
+            logOutput << "Loaded local face detector model " << d << ": '" << bfs::path(localFaceDetector->getModelPath(d)).stem().string() << "'" << std::endl;
+        for (size_t d = 0; d < nEyeModels; ++d)
+            logOutput << "Loaded eye detector model " << d << ": '" << bfs::path(eyesDetector->getModelPath(d)).stem().string() << "'" << std::endl;
+    );
 
     /*TRAKING VECTORS*/
     int trackNumber = 0;
@@ -455,14 +367,14 @@ int main(int argc, char *argv[])
     currentTracks.reserve(25);
     /*DETECTION VECTORS*/
     vector<cv::Rect> mergedDet, NotMatchedDets, newROIs;
-    vector<vector<cv::Rect> > combo(NB_FACE_MODELS);
+    vector<vector<cv::Rect> > combo(nFaceModels);
     vector<size_t> usedDetectorIndexes;
 
     /********************************************************************************************************************************************/
     /* IMAGE BUFFERS                                                                                                                            */
     /********************************************************************************************************************************************/
     // each classifier needs a copy of the input frame
-    FACE_RECOG_MAT frame, frameGray, roi;
+    FACE_RECOG_MAT frame, frameGray, frameROI;
 
     // images for writing output (rectangle must be added to drawImg)
     cv::Mat drawImg(conf->displayWindowH, conf->displayWindowW, CV_8UC3);              // Buffer for display
@@ -597,7 +509,7 @@ int main(int argc, char *argv[])
         FACE_RECOG_NAMESPACE::cvtColor(frame, frameGray, CV_BGR2GRAY);
 
         // clean previously detected faces
-        for (int c = 0; c < NB_FACE_MODELS; ++c)
+        for (int c = 0; c < nFaceModels; ++c)
             combo[c].clear();
 
         bool isNewDetection = frameCounter == 0 || frameCounter % conf->detectionFrameInterval == 0;
@@ -610,9 +522,9 @@ int main(int argc, char *argv[])
             FACE_RECOG_DEBUG(frameTime = getTimeNowPrecise());
 
             faceDetector->cleanImages();
-            for (int i = 0; i < NB_FACE_MODELS; ++i)
+            for (int i = 0; i < nFaceModels; ++i)
                 faceDetector->assignImage(frameGray);
-            faceDetector->findFaces(combo);
+            faceDetector->detect(combo);
 
             FACE_RECOG_DEBUG(
                 deltaTime = getDeltaTimePrecise(frameTime, MILLISECONDS);
@@ -896,20 +808,20 @@ int main(int argc, char *argv[])
 
                 // update max size with enlarged bbox for localized search
                 cv::Rect localSearchBBox = util::getConstSizedRect(currentTracks[i].bbox(), expandedMaxSize, frame.size());
-                roi = FACE_RECOG_MAT(frameGray, localSearchBBox);
+                frameROI = FACE_RECOG_MAT(frameGray, localSearchBBox);
 
                 // execute localize search to find faces ROI
-                std::vector<std::vector<cv::Rect> > localComboFaces(NB_FACE_MODELS_LOCAL_SEARCH);
+                std::vector<std::vector<cv::Rect> > localComboFaces(nLocalFaceModels);
                 localFaceDetector->cleanImages();
-                for (int c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c)
-                    localFaceDetector->assignImage(roi);
-                localFaceDetector->findFaces(localComboFaces);
+                for (size_t c = 0; c < nLocalFaceModels; ++c)
+                    localFaceDetector->assignImage(frameROI);
+                localFaceDetector->detect(localComboFaces);
                 newROIs = localFaceDetector->mergeDetections(localComboFaces);
 
                 FACE_RECOG_DEBUG(
                     logDebug << "current bbox: " << currentTracks[i].bbox() << std::endl;
                     logDebug << "local bbox: " << localSearchBBox << std::endl;
-                    logDebug << "NB CC Local: " << NB_FACE_MODELS_LOCAL_SEARCH << std::endl;
+                    logDebug << "NB CC Local: " << nLocalFaceModels << std::endl;
                     logDebug << "combo size: " << localComboFaces.size() << std::endl;
                     logDebug << "localComboFaces: " << std::endl;
                     for (size_t ci = 0; ci < localComboFaces.size(); ++ci)
@@ -919,7 +831,7 @@ int main(int argc, char *argv[])
                     for (size_t ci = 0; ci < newROIs.size(); ++ci)
                         logDebug << "(ci=" << ci << "): " << newROIs[ci] << std::endl;
                     if (newROIs.size() > 0) {
-                        for (size_t c = 0; c < NB_FACE_MODELS_LOCAL_SEARCH; ++c) {
+                        for (size_t c = 0; c < nLocalFaceModels; ++c) {
                             if (newROIs[c].area() > 0) {
                                 logDebug << "combo bbox[" << c << "]: " << localComboFaces[c] << std::endl;
                                 logDebug << "newROI[" << c << "]: " << newROIs[c] << std::endl;
@@ -1006,23 +918,27 @@ int main(int argc, char *argv[])
             {
                 ROI roi = currentTracks[i].getROI(); // Get most recent ROI without eyes
                 #pragma omp parallel for
-                for (long iDet = 0; iDet < eyesDetector.size(); ++iDet)
+                for (long iDet = 0; iDet < nEyeModels; ++iDet)
                 {
                     // Get the search area, either the full face ROI or localized position if specified
                     cv::Rect searchArea = roi.getRect();
-                    // Top-Left 1/4 of face ROI (or Right if frame is flipped)
-                    if (conf->useEyeLocalizedPosition && ((iDet == LEFT_EYE && !conf->flipFrames) || (iDet == RIGHT_EYE && conf->flipFrames)))
-                        searchArea = cv::Rect(searchArea.x, searchArea.y, searchArea.width / 2, searchArea.height / 2);
-                    // Top-Right 1/4 of face ROI (or Left if frame is flipped)
-                    else if (conf->useEyeLocalizedPosition && ((iDet == RIGHT_EYE && !conf->flipFrames) || (iDet == LEFT_EYE && conf->flipFrames)))
-                        searchArea = cv::Rect(searchArea.x + searchArea.width / 2, searchArea.y, searchArea.width / 2, searchArea.height / 2);
-
-                    // Find eyes with each eye detector and add them to the current ROI
-                    eyesDetector[iDet].findEyes(frame, searchArea);
-                    vector<cv::Rect> eyes = eyesDetector[iDet].getFoundEyes();
-                    for (size_t iEye = 0; iEye < eyes.size(); ++iEye)
-                    {
-                        roi.addSubRect(eyes[iEye]);
+                    if (conf->useEyeLocalizedPosition) {
+                        std::shared_ptr<EyeDetector> eyesDetSpec = std::make_shared<EyeDetector>(eyesDetector);
+                        // Top-Left 1/4 of face ROI (or Right if frame is flipped)
+                        if ((iDet == eyesDetSpec->leftEyeIndex && !conf->flipFrames) || (iDet == eyesDetSpec->rightEyeIndex && conf->flipFrames))
+                            searchArea = cv::Rect(searchArea.x, searchArea.y, searchArea.width / 2, searchArea.height / 2);
+                        // Top-Right 1/4 of face ROI (or Left if frame is flipped)
+                        if ((iDet == eyesDetSpec->rightEyeIndex && !conf->flipFrames) || (iDet == eyesDetSpec->leftEyeIndex && conf->flipFrames))
+                            searchArea = cv::Rect(searchArea.x + searchArea.width / 2, searchArea.y, searchArea.width / 2, searchArea.height / 2);
+                    }
+                    eyesDetector->assignImage(FACE_RECOG_MAT(frameGray, searchArea));
+                }
+                // Find eyes with each eye detector and add them to the current ROI
+                vector<vector<cv::Rect> > eyes;
+                eyesDetector->detect(eyes);
+                for (size_t iEye = 0; iEye < eyes.size(); ++iEye) {
+                    for (size_t jEye = 0; jEye < eyes[iEye].size(); ++jEye) {
+                        roi.addSubRect(eyes[iEye][jEye]);
                         currentTracks[i].setValidateEyeDetection();
                     }
                 }

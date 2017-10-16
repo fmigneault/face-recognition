@@ -1,26 +1,27 @@
-﻿#include "FaceRecogConfig.h"
-
+﻿#include "Detectors/FaceDetectorSSD.h"
+#include "FaceRecog.h"
+#ifdef FACE_RECOG_HAS_SSD
 
 FaceDetectorSSD::FaceDetectorSSD()
 {
-    SetDefaults();
+    setDefaults();
 }
 
 FaceDetectorSSD::FaceDetectorSSD(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
                                cv::Size evalSize, int minNeighbours, double overlapThreshold)
 {
-    SetDefaults();
+    setDefaults();
     initializeParameters(scaleFactor, nmsThreshold, minSize, maxSize,
                          evalSize, minNeighbours, overlapThreshold);
 }
 
-void FaceDetectorSSD::SetDefaults()
+void FaceDetectorSSD::setDefaults()
 {
     initializeParameters(1.2, 4, Size(20, 20), Size(60, 60), Size(40, 40), 0, 0.1);
 }
 
 void FaceDetectorSSD::initializeParameters(double scaleFactor, int nmsThreshold, cv::Size minSize,
-                                          cv::Size maxSize, cv::Size evalSize, int minNeighbours, double overlapThreshold)
+                                           cv::Size maxSize, cv::Size evalSize, int minNeighbours, double overlapThreshold)
 {
     if (scaleFactor > 1)        this->scaleFactor = scaleFactor;
     if (nmsThreshold >= 0)      this->nmsThreshold = nmsThreshold;
@@ -61,14 +62,14 @@ int FaceDetectorSSD::loadDetector(string name, FlipMode faceFlipMode)
     return 0;
 }
 
-void FaceDetectorSSD::assignImage(FACE_RECOG_MAT frame)
+void FaceDetectorSSD::assignImage(const FACE_RECOG_MAT& frame)
 {
     size_t iFrame = frames.size();
     FlipMode fm = (iFrame < faceFlipModes.size()) ? faceFlipModes[iFrame] : NONE;
     frames.push_back(imFlip(frame, fm));
 }
 
-int FaceDetectorSSD::findFaces(vector<vector<Rect> >& faces)
+int FaceDetectorSSD::detect(vector<vector<Rect> >& bboxes)
 {
     size_t nClassifiers = faceFinder.size();
     size_t nImages = frames.size();
@@ -84,15 +85,15 @@ int FaceDetectorSSD::findFaces(vector<vector<Rect> >& faces)
         #if FACE_RECOG_USE_CUDA
         auto cascade_gpu = faceFinder[c];
         cascade_gpu->detectMultiScale(frames[c], foundObjects_gpu);
-        cascade_gpu->convert(foundObjects_gpu, faces[c]);
+        cascade_gpu->convert(foundObjects_gpu, bboxes[c]);
         #else
-        faceFinder[c].detectMultiScale(frames[c], faces[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
+        faceFinder[c].detectMultiScale(frames[c], bboxes[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
         #endif
     }
     return 0;
 }
 
-double FaceDetectorSSD::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
+double FaceDetectorSSD::evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image)
 {
     /*EVALUATE CONFIDENCE FOR UNMATCHED TARGETS*/
     size_t nFaces = faceFinder.size();
@@ -128,7 +129,7 @@ double FaceDetectorSSD::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
     //#endif
 }
 
-void FaceDetectorSSD::flipFaces(size_t index, vector<vector<Rect> >& faces)
+void FaceDetectorSSD::flipDetections(size_t index, vector<vector<Rect> >& faces)
 {
     for (size_t i = 0; i < faces[index].size(); ++i)
     {
@@ -150,7 +151,7 @@ vector<Rect> FaceDetectorSSD::mergeDetections(vector<vector<Rect> >& faces)
 
 
 
-#############################################################################################################################
+//#############################################################################################################################
 
 #include "SSD_Detector.h"
 
@@ -327,3 +328,5 @@ void SSD_Detector::Preprocess(const cv::Mat& img, std::vector<cv::Mat>* input_ch
           == net_->input_blobs()[0]->cpu_data())
         << "Input channels are not wrapping the input layer of the network.";
 }
+
+#endif/*FACE_RECOG_HAS_SSD*/

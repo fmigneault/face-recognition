@@ -36,6 +36,7 @@
  * what you give them.   Happy coding!
  */
 
+#include "Tracks/Association.h"
 #include "FaceRecog.h"
 
 void Association::clear()

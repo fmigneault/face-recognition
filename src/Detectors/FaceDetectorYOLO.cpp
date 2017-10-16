@@ -1,6 +1,6 @@
-﻿#include "FaceRecogConfig.h"
+﻿#include "Detectors/FaceDetectorYOLO.h"
+#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_YOLO
-
 
 template<typename Dtype>
 Dtype lap(Dtype x1_min, Dtype x1_max, Dtype x2_min, Dtype x2_max)
@@ -29,17 +29,16 @@ Dtype lap(Dtype x1_min, Dtype x1_max, Dtype x2_min, Dtype x2_max)
 template int lap(int x1_min, int x1_max, int x2_min, int x2_max);
 template float lap(float x1_min, float x1_max, float x2_min, float x2_max);
 
-FaceDetectorYOLO::FaceDetectorYOLO()
+FaceDetectorYOLO::FaceDetectorYOLO(std::string modelPathProto, std::string modelPathCaffe)
 {
-    std::string model = "../yolo-face-deploy.prototxt";
-    std::string proto = "../yolo-face.caffemodel";
+    modelPaths.push_back(modelPathCaffe);
     char *labelname[] = { "face" };
     Caffe::set_mode(Caffe::GPU);
-    net.reset(new caffe::Net<float>(model, caffe::TEST));
-    net->CopyTrainedLayersFromBinaryProto(proto);
+    net.reset(new caffe::Net<float>(modelPathProto, caffe::TEST));
+    net->CopyTrainedLayersFromBinaryProto(modelPathCaffe);
 }
 
-int FaceDetectorYOLO::findFaces(std::vector<std::vector<cv::Rect> >& faces)
+int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
 {
     m_faces.clear();
     loadData(frames[0]);

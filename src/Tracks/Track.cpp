@@ -36,6 +36,7 @@
  * what you give them.   Happy coding!
  */
 
+#include "Tracks/Track.h"
 #include "FaceRecog.h"
 
 Track::Track(ConfigFile *configFile)

@@ -50,6 +50,7 @@
  * what you give them.   Happy coding!
  */
 
+#include "Tracks/LaRank.h"
 #include "FaceRecog.h"
 
 static const int kMaxSVs = 2000; // TODO (only used when no budget)

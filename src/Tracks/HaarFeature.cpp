@@ -51,12 +51,7 @@
  */
 
 #include "Tracks/HaarFeature.h"
-#include "Tracks/Sample.h"
-
-#include <cassert>
-#include <iostream>
-
-using namespace std;
+#include "FaceRecog.h"
 
 HaarFeature::HaarFeature(const FloatRect& bb, int type) :
     m_bb(bb)

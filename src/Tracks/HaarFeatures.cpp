@@ -49,8 +49,9 @@
  * You are forbidden to forbid anyone else to use, share and improve
  * what you give them.   Happy coding!
  */
-#include "Configs/ConfigFile.h"
-#include "Tracks/HaarFeatures.h"
+
+#include "Tracks/HaarFeature.h"
+#include "FaceRecog.h"
 
 static const int kSystematicFeatureCount = 192;
 

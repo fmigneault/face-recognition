@@ -13,22 +13,23 @@
     * Multiple updates and modifications applied to introduce improvements or combined use with projet
 */
 
+#include "Detectors/FaceDetectorVJ.h"
 #include "FaceRecog.h"
 
 FaceDetectorVJ::FaceDetectorVJ()
 {
-    SetDefaults();
+    setDefaults();
 }
 
 FaceDetectorVJ::FaceDetectorVJ(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
                                cv::Size evalSize, int minNeighbours, double overlapThreshold)
 {
-    SetDefaults();
+    setDefaults();
     initializeParameters(scaleFactor, nmsThreshold, minSize, maxSize,
                          evalSize, minNeighbours, overlapThreshold);
 }
 
-void FaceDetectorVJ::SetDefaults()
+void FaceDetectorVJ::setDefaults()
 {
     initializeParameters(1.2, 4, Size(20, 20), Size(60, 60), Size(40, 40), 0, 0.1);
 }
@@ -45,20 +46,20 @@ void FaceDetectorVJ::initializeParameters(double scaleFactor, int nmsThreshold, 
     if (overlapThreshold >= 0)  this->overlapThreshold = overlapThreshold;
 }
 
-int FaceDetectorVJ::loadDetector(string name, FlipMode faceFlipMode)
+int FaceDetectorVJ::loadDetector(string modelPath, FlipMode faceFlipMode)
 {
     bool success_load_cascade = false;
     #if FACE_RECOG_USE_CUDA
-    Ptr<cv::cuda::CascadeClassifier> cascade = cv::cuda::CascadeClassifier::create(name);
+    Ptr<cv::cuda::CascadeClassifier> cascade = cv::cuda::CascadeClassifier::create(modelPath);
     success_load_cascade = !cascade.empty();
     #else
     FACE_RECOG_NAMESPACE::CascadeClassifier cascade;
-    success_load_cascade = cascade.load(name);
+    success_load_cascade = cascade.load(modelPath);
     #endif
 
     if (!success_load_cascade)
     {
-        cerr << "ERROR: Could not load classifier cascade " << name << endl;
+        cerr << "ERROR: Could not load classifier cascade " << modelPath << endl;
         return -1;
     }
 
@@ -71,18 +72,19 @@ int FaceDetectorVJ::loadDetector(string name, FlipMode faceFlipMode)
 
     faceFinder.push_back(cascade);
     stageCount.push_back(1);
+    modelPaths.push_back(modelPath);
     faceFlipModes.push_back(faceFlipMode);
     return 0;
 }
 
-void FaceDetectorVJ::assignImage(FACE_RECOG_MAT frame)
+void FaceDetectorVJ::assignImage(const FACE_RECOG_MAT& frame)
 {
     size_t iFrame = frames.size();
     FlipMode fm = (iFrame < faceFlipModes.size()) ? faceFlipModes[iFrame] : NONE;
     frames.push_back(imFlip(frame, fm));
 }
 
-int FaceDetectorVJ::findFaces(vector<vector<Rect> >& faces)
+int FaceDetectorVJ::detect(vector<vector<Rect> >& bboxes)
 {
     size_t nClassifiers = faceFinder.size();
     size_t nImages = frames.size();
@@ -98,15 +100,15 @@ int FaceDetectorVJ::findFaces(vector<vector<Rect> >& faces)
         #if FACE_RECOG_USE_CUDA
         auto cascade_gpu = faceFinder[c];
         cascade_gpu->detectMultiScale(frames[c], foundObjects_gpu);
-        cascade_gpu->convert(foundObjects_gpu, faces[c]);
+        cascade_gpu->convert(foundObjects_gpu, bboxes[c]);
         #else
-        faceFinder[c].detectMultiScale(frames[c], faces[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
+        faceFinder[c].detectMultiScale(frames[c], bboxes[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
         #endif
     }
     return 0;
 }
 
-double FaceDetectorVJ::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
+double FaceDetectorVJ::evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image)
 {
     /*EVALUATE CONFIDENCE FOR UNMATCHED TARGETS*/
     size_t nFaces = faceFinder.size();
@@ -142,22 +144,22 @@ double FaceDetectorVJ::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
     //#endif
 }
 
-void FaceDetectorVJ::flipFaces(size_t index, vector<vector<Rect> >& faces)
+void FaceDetectorVJ::flipDetections(size_t index, vector<vector<Rect> >& bboxes)
 {
-    for (size_t i = 0; i < faces[index].size(); ++i)
+    for (size_t i = 0; i < bboxes[index].size(); ++i)
     {
-        Rect face_i = faces[index][i];
-        faces[index][i].x = frames[index].cols - face_i.x - face_i.width;
+        Rect bbox = bboxes[index][i];
+        bboxes[index][i].x = frames[index].cols - bbox.x - bbox.width;
     }
 }
 
-vector<Rect> FaceDetectorVJ::mergeDetections(vector<vector<Rect> >& faces)
+vector<Rect> FaceDetectorVJ::mergeDetections(vector<vector<Rect> >& bboxes)
 {
-    size_t nFaces = faces.size();
-    bool frontalOnly = nFaces == 1;
+    size_t nBBox = bboxes.size();
+    bool frontalOnly = nBBox == 1;
     if (!frontalOnly)
-        for (size_t f = 0; f < nFaces; ++f)
-            if (faceFlipModes[f] == HORIZONTAL)
-                flipFaces(f, faces);
-    return util::mergeDetections(faces, overlapThreshold, frontalOnly);
+        for (size_t b = 0; b < nBBox; ++b)
+            if (faceFlipModes[b] == HORIZONTAL)
+                flipDetections(b, bboxes);
+    return util::mergeDetections(bboxes, overlapThreshold, frontalOnly);
 }

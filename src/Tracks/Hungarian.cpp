@@ -23,10 +23,8 @@
  ********************************************************************
  ********************************************************************/
 
-
-#include <stdio.h>
-#include <stdlib.h>
 #include "Tracks/Hungarian.h"
+#include "FaceRecog.h"
 
 #define INF (0x7FFFFFFF)
 #define C_VERBOSE (0)
