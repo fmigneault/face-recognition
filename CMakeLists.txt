@@ -26,8 +26,8 @@ endif()
 # Output setup
 set(CMAKE_DEBUG_POSTFIX "d")
 set(FaceRecog_LIBRARY_DEBUG     ${FaceRecog_PROJECT}${CMAKE_DEBUG_POSTFIX})
-set(FaceRecog_LIBRARY_RELEASE   ${FaceRecog_PROJECT}${CMAKE_RELEASE_POSTFIX})
-set(FaceRecog_EXE_NAME ${FaceRecog_PROJECT})
+set(FaceRecog_LIBRARY_RELEASE   ${FaceRecog_PROJECT})
+set(FaceRecog_EXE_NAME          ${FaceRecog_PROJECT})
 
 # Configuration types
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
@@ -135,6 +135,7 @@ source_group(TREE ${FaceRecog_SOURCES_DIRS} PREFIX "sources" FILES ${FaceRecog_S
 if(MSVC)
     set_target_properties(${FaceRecog_EXE_NAME} PROPERTIES LINKER_LANGUAGE C++)
 endif()
+set_target_properties(${FaceRecog_EXE_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_include_directories(${FaceRecog_EXE_NAME} PUBLIC ${FaceRecog_INCLUDE_DIRS})
 target_link_libraries(${FaceRecog_EXE_NAME} ${FaceRecog_LIBRARIES})
 foreach(lib ${FaceRecog_LIBRARIES_DEBUG})
