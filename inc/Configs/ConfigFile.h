@@ -1,9 +1,7 @@
 ﻿#ifndef FACE_RECOG_CONFIG_FILE_H
 #define FACE_RECOG_CONFIG_FILE_H
 
-#include "FaceRecog.h"
-
-/* required includes */
+#include "Utilities/Common.h"
 #include "Camera/CameraType.h"
 #include "Classifiers/ClassifierType.h"
 #include "Tracks/CircularBuffer.h"

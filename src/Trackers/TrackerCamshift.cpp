@@ -1,8 +1,9 @@
-﻿#include "Trackers/TrackerCamshift.h"
-#include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_CAMSHIFT
+﻿#ifdef FACE_RECOG_HAS_CAMSHIFT
 
-TrackerCamshift::TrackerCamshift(ConfigFile *configFile)
+#include "Trackers/TrackerCamshift.h"
+#include "FaceRecog.h"
+
+TrackerCamshift::TrackerCamshift(ConfigFile* configFile)
 {
     m_initialized = false;
     updateConfig(configFile);
@@ -64,21 +65,7 @@ cv::Rect TrackerCamshift::track(const ImageRep& image)
     return rectInsideFrame(image.getColourImage(), rotRec.boundingRect());
 }
 
-cv::Rect TrackerCamshift::rectInsideFrame(UMat frame, cv::Rect rect)
-{
-    cv::Rect bboxInsideFrame = rect;
-    if (rect.x + rect.width > frame.cols)
-        bboxInsideFrame.x = frame.cols - rect.width;
-    if (rect.y + rect.height > frame.rows)
-        bboxInsideFrame.y = frame.rows - rect.height;
-    if (rect.y < 0)
-        bboxInsideFrame.y = 0;
-    if (rect.x < 0)
-        bboxInsideFrame.x = 0;
-    return bboxInsideFrame;
-}
-
-cv::Rect TrackerCamshift::rectInsideFrame(Mat frame, cv::Rect rect)
+cv::Rect TrackerCamshift::rectInsideFrame(const FACE_RECOG_MAT& frame, cv::Rect rect)
 {
     cv::Rect bboxInsideFrame = rect;
     if (rect.x + rect.width > frame.cols)

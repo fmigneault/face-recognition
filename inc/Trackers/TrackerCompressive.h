@@ -1,18 +1,23 @@
 ﻿#ifndef FACE_RECOG_TRACKER_COMPRESSIVE_H
 #define FACE_RECOG_TRACKER_COMPRESSIVE_H
+#ifdef  FACE_RECOG_HAS_COMPRESSIVE
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
+#include "Tracks/Rect.h"
+#include "Tracks/ImageRep.h"
+#include "Trackers/ITracker.h"
 
 class TrackerCompressive final : public ITracker
 {
 public:
-    TrackerCompressive(ConfigFile *configFile);
+    TrackerCompressive(ConfigFile* configFile);
     virtual ~TrackerCompressive();
-    TrackerCompressive(const TrackerCompressive &obj);  // copy constructor
-    TrackerCompressive & operator=(const TrackerCompressive &T); // assignment operator
-    virtual void initialize(const ImageRep& frame, FloatRect bb);
-    virtual void reset();
-    virtual cv::Rect track(const ImageRep& frame);
+    TrackerCompressive(const TrackerCompressive& obj);              // copy constructor
+    TrackerCompressive & operator=(const TrackerCompressive& T);    // assignment operator
+    virtual void initialize(const ImageRep& frame, FloatRect bb) override;
+    virtual void reset() override;
+    virtual cv::Rect track(const ImageRep& frame) override;
 private:
     // FloatRect m_bb;
     cv::Rect bbox;
@@ -49,4 +54,5 @@ private:
 
 };
 
-#endif /*FACE_RECOG_TRACKER_COMPRESSIVE_H*/
+#endif/*FACE_RECOG_HAS_COMPRESSIVE*/
+#endif/*FACE_RECOG_TRACKER_COMPRESSIVE_H*/

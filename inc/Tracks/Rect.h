@@ -53,6 +53,8 @@
 #ifndef FACE_RECOG_RECT_H
 #define FACE_RECOG_RECT_H
 
+#include "Utilities/Common.h"
+
 template <typename T>
 class struckRect
 {

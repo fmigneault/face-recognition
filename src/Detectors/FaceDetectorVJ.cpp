@@ -13,6 +13,8 @@
     * Multiple updates and modifications applied to introduce improvements or combined use with projet
 */
 
+#ifdef FACE_RECOG_HAS_VJ
+
 #include "Detectors/FaceDetectorVJ.h"
 #include "FaceRecog.h"
 
@@ -163,3 +165,5 @@ vector<Rect> FaceDetectorVJ::mergeDetections(vector<vector<Rect> >& bboxes)
                 flipDetections(b, bboxes);
     return util::mergeDetections(bboxes, overlapThreshold, frontalOnly);
 }
+
+#endif/*FACE_RECOG_HAS_VJ*/

@@ -10,9 +10,9 @@
     Modified for Python integration
  */
 
-#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_PYTHON
 
+#include "FaceRecog.h"
 
 //#define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API

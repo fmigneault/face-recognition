@@ -1,7 +1,7 @@
 ﻿#ifndef FACE_RECOG_TRACK_ROI_H
 #define FACE_RECOG_TRACK_ROI_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
 
 /* Bounding box containers for accumulation of ROIs and sub-ROIs
  *   Default position (-1) will put the ROI/sub-ROI at the start of the container's accumulated ROIs (most recent first)

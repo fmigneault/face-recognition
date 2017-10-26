@@ -1,5 +1,6 @@
-﻿#include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_PYTHON
+﻿#ifdef FACE_RECOG_HAS_PYTHON
+
+#include "FaceRecog.h"
 
 //#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 

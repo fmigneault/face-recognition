@@ -53,7 +53,7 @@
 #ifndef FACE_RECOG_SAMPLER_H
 #define FACE_RECOG_SAMPLER_H
 
-#include "FaceRecog.h"
+#include "Tracks/Rect.h"
 
 class Sampler
 {

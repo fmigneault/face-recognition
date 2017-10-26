@@ -87,21 +87,27 @@
 */
 #ifndef FACE_RECOG_TRACKER_KCF_H
 #define FACE_RECOG_TRACKER_KCF_H
+#ifdef  FACE_RECOG_HAS_KCF
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
+#include "Tracks/Rect.h"
+#include "Tracks/ImageRep.h"
+#include "Trackers/ITracker.h"
 
 class TrackerKCF final : public ITracker
 {
 public:
-    TrackerKCF(ConfigFile *configFile);
+    TrackerKCF(ConfigFile* configFile);
     virtual ~TrackerKCF();
-    TrackerKCF(const TrackerKCF &obj);              // copy constructor
-    TrackerKCF & operator=(const TrackerKCF &T);    // assignment operator
-    virtual void initialize(const ImageRep& frame, FloatRect bb);
-    virtual void reset();
-    virtual cv::Rect track(const ImageRep& frame);
+    TrackerKCF(const TrackerKCF& obj);              // copy constructor
+    TrackerKCF & operator=(const TrackerKCF& T);    // assignment operator
+    virtual void initialize(const ImageRep& frame, FloatRect bb) override;
+    virtual void reset() override;
+    virtual cv::Rect track(const ImageRep& frame) override;
 private:
     bool isInitialized;
 };
 
-#endif /*FACE_RECOG_TRACKER_KCF_H*/
+#endif/*FACE_RECOG_HAS_KCF*/
+#endif/*FACE_RECOG_TRACKER_KCF_H*/

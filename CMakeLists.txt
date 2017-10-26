@@ -23,6 +23,12 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")    
 endif()
 
+# Output setup
+set(CMAKE_DEBUG_POSTFIX "d")
+set(FaceRecog_LIBRARY_DEBUG     ${FaceRecog_PROJECT}${CMAKE_DEBUG_POSTFIX})
+set(FaceRecog_LIBRARY_RELEASE   ${FaceRecog_PROJECT}${CMAKE_RELEASE_POSTFIX})
+set(FaceRecog_EXE_NAME ${FaceRecog_PROJECT})
+
 # Configuration types
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
@@ -89,32 +95,31 @@ add_definitions(-DFaceRecog_ROOT_PATH="${FaceRecog_ROOT_DIR}")
 
 # === modules ===
 # --- Face Detection ---
-face_recog_option(FaceRecog_ENABLE_FRCNN            "[FD] Include FRCNN module"                         OFF)
-face_recog_option(FaceRecog_ENABLE_SSD              "[FD] Include SSD module"                           OFF)
-face_recog_option(FaceRecog_ENABLE_VJ               "[FD] Include Viola-Jones cascades module"          ON)
-face_recog_option(FaceRecog_ENABLE_YOLO             "[FD] Include YOLO CNN module"                      OFF)
+face_recog_option(FaceRecog_ENABLE_FRCNN        "[FD] Include FRCNN module"                 OFF)
+face_recog_option(FaceRecog_ENABLE_SSD          "[FD] Include SSD module"                   OFF)
+face_recog_option(FaceRecog_ENABLE_VJ           "[FD] Include Viola-Jones cascades module"  ON)
+face_recog_option(FaceRecog_ENABLE_YOLO         "[FD] Include YOLO CNN module"              OFF)
 
 # --- Face Tracking ---
-face_recog_option(FaceRecog_ENABLE_CAMSHIFT         "[FT] Include Camshift module"                      OFF)
-face_recog_option(FaceRecog_ENABLE_COMPRESSIVE      "[FT] Include Compressive tracking module"          OFF)
-face_recog_option(FaceRecog_ENABLE_KCF              "[FT] Include KCF module"                           OFF)
-face_recog_option(FaceRecog_ENABLE_STRUCK           "[FT] Include STRUCK module"                        ON)
+face_recog_option(FaceRecog_ENABLE_CAMSHIFT     "[FT] Include Camshift module"              OFF)
+face_recog_option(FaceRecog_ENABLE_COMPRESSIVE  "[FT] Include Compressive tracking module"  OFF)
+face_recog_option(FaceRecog_ENABLE_KCF          "[FT] Include KCF module"                   OFF)
+face_recog_option(FaceRecog_ENABLE_STRUCK       "[FT] Include STRUCK module"                ON)
 
 # --- Face Recognition ---
-face_recog_option(BUILD_ESVM                        "Build Exemplar-SVM (ESVM) module from sources"     OFF)
-face_recog_option(FaceRecog_ENABLE_ESVM             "[FR] Include Exemplar-SVM (ESVM) module"           ON)
-face_recog_option(FaceRecog_ENABLE_FaceNet          "[FR] Include FaceNet module"                       OFF)
-face_recog_option(FaceRecog_ENABLE_TM               "[FR] Include Template Matcher module"              OFF)
+face_recog_option(FaceRecog_ENABLE_ESVM         "[FR] Include Exemplar-SVM (ESVM) module"   ON)
+face_recog_option(FaceRecog_ENABLE_FaceNet      "[FR] Include FaceNet module"               OFF)
+face_recog_option(FaceRecog_ENABLE_TM           "[FR] Include Template Matcher module"      ON)
 
 face_recog_update_modules()
 
 # === packages ===
-face_recog_option(WITH_CUDA                         "Include NVidia Cuda Runtime support"               ON  if(NOT IOS AND NOT WINRT) )
-face_recog_option(WITH_OpenMP                       "Include OpenMP support"                            ON)
-face_recog_option(WITH_Caffe                        "Include Caffe library support"                     OFF)
-face_recog_option(WITH_Python                       "Include Python support"                            OFF)
-face_recog_option(WITH_TensorFlow                   "Include TensorFlow library support"                OFF)
-face_recog_option(WITH_FlyCapture2                  "Include FlyCapture2 SDK support"                   OFF)
+face_recog_option(WITH_CUDA                     "Include NVidia Cuda Runtime support"       ON  if(NOT IOS AND NOT WINRT) )
+face_recog_option(WITH_OpenMP                   "Include OpenMP support"                    ON)
+face_recog_option(WITH_Caffe                    "Include Caffe library support"             OFF)
+face_recog_option(WITH_Python                   "Include Python support"                    OFF)
+face_recog_option(WITH_TensorFlow               "Include TensorFlow library support"        OFF)
+face_recog_option(WITH_FlyCapture2              "Include FlyCapture2 SDK support"           OFF)
 
 face_recog_find_packages()
 
@@ -122,7 +127,6 @@ face_recog_find_packages()
 # include/link
 #--------------------------------------------------------------------------------------------------
 
-set(FaceRecog_EXE_NAME ${FaceRecog_PROJECT})
 link_directories(${FaceRecog_LIBRARY_DIRS})
 add_executable(${FaceRecog_EXE_NAME} ${FaceRecog_SOURCE_FILES} ${FaceRecog_HEADER_FILES})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -133,10 +137,10 @@ if(MSVC)
 endif()
 target_include_directories(${FaceRecog_EXE_NAME} PUBLIC ${FaceRecog_INCLUDE_DIRS})
 target_link_libraries(${FaceRecog_EXE_NAME} ${FaceRecog_LIBRARIES})
-foreach(lib ${FaceRecog_LIBRARY_DEBUG})
+foreach(lib ${FaceRecog_LIBRARIES_DEBUG})
     target_link_libraries(${FaceRecog_EXE_NAME} debug ${lib})
 endforeach()
-foreach(lib ${FaceRecog_LIBRARY_RELEASE})
+foreach(lib ${FaceRecog_LIBRARIES_RELEASE})
     target_link_libraries(${FaceRecog_EXE_NAME} optimized ${lib})
 endforeach()
 
@@ -162,8 +166,11 @@ endforeach()
 #--------------------------------------------------------------------------------------------------
 
 # update config file
-set(FaceRecog_CONFIG_INC     ${INSTALL_INCLUDE_DIR})
-set(FaceRecog_CONFIG_LIB     ${INSTALL_LIBRARY_DIR}/${FaceRecog_LIBRARY})
+set(FaceRecog_CONFIG_BIN_DIR ${INSTALL_BINARY_DIR})
+set(FaceRecog_CONFIG_INC_DIR ${INSTALL_INCLUDE_DIR})
+set(FaceRecog_CONFIG_LIB_DIR ${INSTALL_LIBRARY_DIR})
+set(FaceRecog_CONFIG_LIB_DBG ${INSTALL_LIBRARY_DIR}/${FaceRecog_LIBRARY_DEBUG})
+set(FaceRecog_CONFIG_LIB_REL ${INSTALL_LIBRARY_DIR}/${FaceRecog_LIBRARY_RELEASE})
 set(FaceRecog_CONFIG_FILE    ${FaceRecog_PROJECT}Config.cmake)
 if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(FaceRecog_CONFIG_PATH ${FaceRecog_CONFIG_FILE})
@@ -178,8 +185,8 @@ install(TARGETS ${FaceRecog_EXE_NAME}
         RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
         LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR})
-install(FILES     ${FaceRecog_HEADER_FILES} DESTINATION ${INSTALL_INCLUDE_DIR})
-install(FILES     ${FaceRecog_CONFIG_PATH}  DESTINATION ${INSTALL_CMAKE_DIR})
+install(FILES ${FaceRecog_HEADER_FILES} DESTINATION ${INSTALL_INCLUDE_DIR})
+install(FILES ${FaceRecog_CONFIG_PATH}  DESTINATION ${INSTALL_CMAKE_DIR})
 if(${FaceRecog_BUILD_TESTS})
     install(TARGETS ${FaceRecog_TESTS} RUNTIME DESTINATION ${INSTALL_BINARY_DIR})
 endif()

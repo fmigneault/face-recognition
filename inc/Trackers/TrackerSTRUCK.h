@@ -52,23 +52,27 @@
 
 #ifndef FACE_RECOG_TRACKER_STRUCK_H
 #define FACE_RECOG_TRACKER_STRUCK_H
+#ifdef  FACE_RECOG_HAS_STRUCK
 
-#include "FaceRecog.h"
-
- /* required includes */
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
 #include "Tracks/Rect.h"
+#include "Tracks/ImageRep.h"
+#include "Tracks/LaRank.h"
+#include "Tracks/Kernels.h"
+#include "Tracks/HaarFeatures.h"
 #include "Trackers/ITracker.h"
 
 class TrackerSTRUCK final : public ITracker
 {
 public:
-    TrackerSTRUCK(ConfigFile *configFile);
+    TrackerSTRUCK(ConfigFile* configFile);
     virtual ~TrackerSTRUCK();
-    TrackerSTRUCK(const TrackerSTRUCK &obj);           // copy constructor
-    TrackerSTRUCK &operator=(const TrackerSTRUCK &T);  // assignment operator
-    virtual void initialize(const ImageRep& frame, FloatRect bb);
-    virtual void reset();
-    virtual cv::Rect track(const ImageRep& frame);
+    TrackerSTRUCK(const TrackerSTRUCK& obj);           // copy constructor
+    TrackerSTRUCK &operator=(const TrackerSTRUCK& T);  // assignment operator
+    virtual void initialize(const ImageRep& frame, FloatRect bb) override;
+    virtual void reset() override;
+    virtual cv::Rect track(const ImageRep& frame) override;
 private:
     std::vector<HaarFeatures*> m_features;
     std::vector<Kernel*> m_kernels;
@@ -78,4 +82,5 @@ private:
     void updateLearner(const ImageRep& image);
 };
 
-#endif /*FACE_RECOG_TRACKER_STRUCK_H*/
+#endif/*FACE_RECOG_HAS_STRUCK*/
+#endif/*FACE_RECOG_TRACKER_STRUCK_H*/

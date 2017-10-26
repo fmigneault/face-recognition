@@ -22,7 +22,6 @@
 /* Defines with CUDA */
 #if FACE_RECOG_FORCE_CUDA && CV_VERSION_MAJOR == 3
 
-    #include "opencv2/core/core.hpp"
     #include "opencv2/core/cuda.hpp"
     #include "opencv2/cudaarithm.hpp"
     #include "opencv2/cudabgsegm.hpp"

@@ -1,7 +1,9 @@
 ﻿#ifndef FACE_RECOG_CLASSIFIER_ENSEMBLE_TEMPLATE_MATCHER_H
 #define FACE_RECOG_CLASSIFIER_ENSEMBLE_TEMPLATE_MATCHER_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Classifiers/IClassifier.h"
 #include "Classifiers/TemplateMatcher.h"
 
 class ClassifierEnsembleTM final : public IClassifier

@@ -17,11 +17,12 @@
         Copyright (C) 2011 Sam Hare, Oxford Brookes University, Oxford, UK
  */
 
-#include "Trackers/TrackerSTRUCK.h"
-#include "FaceRecog.h"
 #ifdef FACE_RECOG_HAS_STRUCK
 
-TrackerSTRUCK::TrackerSTRUCK(ConfigFile *configFile) :
+#include "Trackers/TrackerSTRUCK.h"
+#include "FaceRecog.h"
+
+TrackerSTRUCK::TrackerSTRUCK(ConfigFile* configFile) :
     m_pLearner(0),
     m_needsIntegralImage(false)
 {

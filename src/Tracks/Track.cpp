@@ -39,7 +39,7 @@
 #include "Tracks/Track.h"
 #include "FaceRecog.h"
 
-Track::Track(ConfigFile *configFile)
+Track::Track(ConfigFile* configFile)
     : _createCount(0)
     , _removeCount(0)
     , _isMatched(false)
@@ -53,7 +53,7 @@ Track::Track(ConfigFile *configFile)
     _recognizedPOIName = "";
 }
 
-Track::Track(ConfigFile *configFile, const cv::Rect& rect, int targetNumber)
+Track::Track(ConfigFile* configFile, const cv::Rect& rect, int targetNumber)
     : _createCount(0)
     , _removeCount(0)
     , _isMatched(false)
@@ -122,7 +122,7 @@ void Track::resetTracker()
     #endif/*FACE_RECOG_HAS_STRUCK*/
 }
 
-void Track::configCheckAndSet(ConfigFile *configFile)
+void Track::configCheckAndSet(ConfigFile* configFile)
 {
     ASSERT_LOG(configFile, "Configuration file not specified for track");
     _config = configFile;

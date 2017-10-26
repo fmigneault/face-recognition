@@ -1,6 +1,7 @@
-﻿#include "Detectors/FaceDetectorSSD.h"
+﻿#ifdef FACE_RECOG_HAS_SSD
+
+#include "Detectors/FaceDetectorSSD.h"
 #include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_SSD
 
 FaceDetectorSSD::FaceDetectorSSD()
 {

@@ -1,21 +1,26 @@
 ﻿#ifndef FACE_RECOG_TRACKER_CAMSHIFT_H
 #define FACE_RECOG_TRACKER_CAMSHIFT_H
+#ifdef  FACE_RECOG_HAS_CAMSHIFT
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Configs/ConfigFile.h"
+#include "Tracks/Rect.h"
+#include "Tracks/ImageRep.h"
+#include "Trackers/ITracker.h"
 
 class TrackerCamshift final : public ITracker
 {
 public:
-    TrackerCamshift(ConfigFile *configFile);
+    TrackerCamshift(ConfigFile* configFile);
     virtual ~TrackerCamshift();
-    TrackerCamshift(const TrackerCamshift &obj);  // copy constructor
-    TrackerCamshift & operator=(const TrackerCamshift &T); // assignment operator
-    virtual void initialize(const ImageRep& frame, FloatRect bb);
-    virtual void reset();
-    virtual cv::Rect track(const ImageRep& frame);
+    TrackerCamshift(const TrackerCamshift& obj);            // copy constructor
+    TrackerCamshift & operator=(const TrackerCamshift& T);  // assignment operator
+    virtual void initialize(const ImageRep& frame, FloatRect bb) override;
+    virtual void reset() override;
+    virtual cv::Rect track(const ImageRep& frame) override;
 private:
-    cv::Rect rectInsideFrame(cv::Mat frame, cv::Rect rect);
-    cv::Rect rectInsideFrame(cv::UMat frame, cv::Rect rect);
+    cv::Rect rectInsideFrame(const FACE_RECOG_MAT& frame, cv::Rect rect);
     cv::TermCriteria term_crit;
     cv::MatND roi_hist;
     // we compute the histogram for all 3 channels channels
@@ -32,4 +37,5 @@ private:
     const float* ranges[2] = { hranges, sranges };
 };
 
-#endif /*FACE_RECOG_TRACKER_CAMSHIFT_H*/
+#endif/*FACE_RECOG_HAS_CAMSHIFT*/
+#endif/*FACE_RECOG_TRACKER_CAMSHIFT_H*/

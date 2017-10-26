@@ -1,7 +1,7 @@
 ﻿#ifndef FACE_RECOG_CAMERA_TYPE
 #define FACE_RECOG_CAMERA_TYPE
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
 
 class CameraType
 {

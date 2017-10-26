@@ -1,6 +1,7 @@
-﻿#include "Detectors/FaceDetectorFRCNN.h"
+﻿#ifdef FACE_RECOG_HAS_FRCNN
+
+#include "Detectors/FaceDetectorFRCNN.h"
 #include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_FRCNN
 
 FaceDetectorFRCNN::FaceDetectorFRCNN(std::string basePath)
 {

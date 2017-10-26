@@ -1,6 +1,7 @@
-﻿#include "Classifiers/ClassifierFaceNet.h"
+﻿#ifdef FACE_RECOG_HAS_FACE_NET
+
+#include "Classifiers/ClassifierFaceNet.h"
 #include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_FACE_NET
 
 ClassifierFaceNet::ClassifierFaceNet()
 {
@@ -13,7 +14,7 @@ ClassifierFaceNet::ClassifierFaceNet()
 
 ClassifierFaceNet::~ClassifierFaceNet() { }
 
-std::vector<double> ClassifierFaceNet::predict(cv::Mat roi)
+std::vector<double> ClassifierFaceNet::predict(const FACE_RECOG_MAT& roi)
 {
     std::vector<bp::object> args;
     bp::object res = callPyFuncFromFile(pyFuncInit, filePath, args);

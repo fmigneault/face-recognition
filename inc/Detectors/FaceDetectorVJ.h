@@ -15,8 +15,12 @@
 
 #ifndef FACE_RECOG_FACE_DETECTOR_VJ_H
 #define FACE_RECOG_FACE_DETECTOR_VJ_H
+#ifdef  FACE_RECOG_HAS_VJ
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Detectors/IDetector.h"
+#include "Tracks/Track.h"
 
 class FaceDetectorVJ final : public IDetector
 {
@@ -56,4 +60,5 @@ private:
     int minNeighbours;
 };
 
-#endif /* FACE_RECOG_FACE_DETECTOR_VJ_H */
+#endif/*FACE_RECOG_HAS_VJ*/
+#endif/*FACE_RECOG_FACE_DETECTOR_VJ_H*/

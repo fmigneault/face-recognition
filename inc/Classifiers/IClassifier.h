@@ -1,7 +1,9 @@
 ﻿#ifndef FACE_RECOG_ICLASSIFIER_H
 #define FACE_RECOG_ICLASSIFIER_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Configs/ConfigFile.h"
 
 class IClassifier
 {

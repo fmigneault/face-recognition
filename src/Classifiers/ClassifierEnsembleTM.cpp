@@ -1,7 +1,9 @@
 ﻿// Ensemble of Template Matcher classifiers
+
+#ifdef FACE_RECOG_HAS_TM
+
 #include "Classifiers/ClassifierEnsembleTM.h"
 #include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_TM
 
 ClassifierEnsembleTM::ClassifierEnsembleTM()
 {

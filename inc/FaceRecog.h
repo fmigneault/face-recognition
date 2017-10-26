@@ -1,89 +1,19 @@
-﻿#ifndef FACE_RECOG_CONFIG_H
-#define FACE_RECOG_CONFIG_H
+﻿#ifndef FACE_RECOG_H
+#define FACE_RECOG_H
 
-// FaceRecog Predefinition, Macros and Setups
-// include forward declarations first to resolve dependencies
-#include "Configs/ForwardDeclares.h"
-#include "Configs/Platform.h"
-#include "Configs/ConsoleOptions.h"
-
-// Common
-#include "CommonCpp.h"
-
-// Eigen
-#include <Eigen/Core>
-using namespace Eigen;
-
-// OpenCV
-#include <opencv2/opencv.hpp>
-#include <opencv2/plot.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/objdetect/objdetect.hpp"
-#include <opencv2/videoio/videoio.hpp>
-#if CV_VERSION_MAJOR == 3
-    #include "opencv2/core/ocl.hpp"
-    #include "opencv2/core/cuda.hpp"
-#endif
-using namespace cv;
-
-// Python
-#ifdef FACE_RECOG_HAS_PYTHON
-    #include <Python.h>
-    #include "Python/PythonInterop.h"
-    #include "Python/PyCvBoostConverter.h"
-    #define PY_INITIALIZE() Py_Initialize()
-    #define PY_FINALIZE()   Py_Finalize()
-#else/*!FACE_RECOG_HAS_PYTHON*/
-    #define PY_INITIALIZE()
-    #define PY_FINALIZE()
-#endif/*FACE_RECOG_HAS_PYTHON*/
-
-// Boost
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <boost/circular_buffer.hpp>
-#ifdef FACE_RECOG_HAS_PYTHON
-#include <boost/python.hpp>
-namespace bp = boost::python;
-#endif/*FACE_RECOG_HAS_PYTHON*/
-namespace bfs = boost::filesystem;
-
-// mvector
-#include "mvector.hpp"
-using namespace xstd;
-
-// STD and other common libraries
-#include <cassert>
-#include <deque>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <iterator>
-#include <memory>
-#include <omp.h>
-#include <stdexcept>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <vector>
-#if defined(FACE_RECOG_LINUX)
-    #include <unistd.h>
-#elif defined(FACE_RECOG_WINDOWS)
-    #include <direct.h>
-#endif/*FACE_RECOG OS-SPECIFIC FILES*/
-using namespace std;
-
-// FaceRecog Configs
-#include "Configs/ConfigFile.h"
-
-// FaceRecog Utilities
+// FaceRecog Dependencies and Utilities
+#include "Utilities/Common.h"
+#include "Utilities/Macros.h"
+#include "Utilities/ForwardDeclares.h"
 #include "Utilities/MatDefines.h"
 #include "Utilities/MultiColorType.h"
-#include "Utilities/utilities.h"
+#include "Utilities/Utilities.h"
+
+// FaceRecog Configs
+#include "Configs/Platform.h"
+#include "Configs/ConfigFile.h"
+#include "Configs/ConsoleOptions.h"
+#include "Configs/Version.h"
 
 // FaceRecog Camera
 #include "Camera/CameraDefines.h"
@@ -101,8 +31,8 @@ using namespace std;
 #include "Tracks/Rect.h"
 #include "Tracks/Sample.h"
 #include "Tracks/Sampler.h"
-#include "Tracks/Track.h"
 #include "Tracks/TrackROI.h"
+#include "Tracks/Track.h"
 
 // FaceRecog Face Detectors
 #include "Detectors/DetectorType.h"
@@ -155,18 +85,4 @@ using namespace std;
 #include "Classifiers/ClassifierEnsembleTM.h"
 #endif/*FACE_RECOG_HAS_TM*/
 
-// Macros
-#define INITIALIZE()                            PY_INITIALIZE()
-#define FINALIZE(out)                           PY_FINALIZE(); return out
-#define ASSERT_LOG_FINALIZE(test,msg,log,out)   if (!(test)) { log << msg; FINALIZE(out); }
-
-#if defined(NDEBUG) || (!defined(NDEBUG) && !defined(DEBUG) && !defined(_DEBUG))
-    #define FACE_RECOG_DEBUG(x)
-#else
-    #define FACE_RECOG_DEBUG(x) x
-#endif
-
-// Additional defines
-#define TRACK_RESERVE_SIZE 50   // value employed to reserve vector of tracks (only to reduce required reallocation on expanding size)
-
-#endif/*FACE_RECOG_CONFIG_H*/
+#endif/*FACE_RECOG_H*/

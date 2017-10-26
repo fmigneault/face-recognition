@@ -53,13 +53,9 @@
 #ifndef FACE_RECOG_HAAR_FEATURE_H
 #define FACE_RECOG_HAAR_FEATURE_H
 
-#include "FaceRecog.h"
-
- /* required includes */
+#include "Utilities/Common.h"
+#include "Tracks/Sample.h"
 #include "Tracks/Rect.h"
-template <typename T>       class struckRect;
-typedef struckRect<int>     IntRect;
-typedef struckRect<float>   FloatRect;
 
 class HaarFeature
 {

@@ -1,6 +1,7 @@
-﻿#include "Detectors/FaceDetectorYOLO.h"
+﻿#ifdef FACE_RECOG_HAS_YOLO
+
+#include "Detectors/FaceDetectorYOLO.h"
 #include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_YOLO
 
 template<typename Dtype>
 Dtype lap(Dtype x1_min, Dtype x1_max, Dtype x2_min, Dtype x2_max)
@@ -87,9 +88,9 @@ int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
     return 1;
 }
 
-double FaceDetectorYOLO::evaluateConfidence(Target& target, FACE_RECOG_MAT& image)
+double FaceDetectorYOLO::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
 {
-    Rect face = target.bbox();
+    Rect face = track.bbox();
     FACE_RECOG_MAT croppedFace = image(face).clone();
     m_faces.clear();
     loadData(croppedFace);
@@ -98,16 +99,16 @@ double FaceDetectorYOLO::evaluateConfidence(Target& target, FACE_RECOG_MAT& imag
     const float* begin = output_layer->cpu_data();
     const float* end = begin + output_layer->channels();
     std::vector<float> result(begin, end);
-    std::vector<std::vector<int> > bboxs;
+    std::vector<std::vector<int> > bboxes;
     float pro_obj[121][2];
     int idx_class[121];
     float threashold = 0.1;
     float overlap;
     float overlap_thresh = 0.8;
 
-    getBox(result, &pro_obj[0][0], idx_class, bboxs, threashold, frames[0]);
+    getBox(result, &pro_obj[0][0], idx_class, bboxes, threashold, frames[0]);
 
-    return bboxs.size();
+    return bboxes.size();
 }
 
 void FaceDetectorYOLO::assignImage(FACE_RECOG_MAT frame)

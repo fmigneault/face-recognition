@@ -53,9 +53,8 @@
 #ifndef FACE_RECOG_HAAR_FEATURES_H
 #define FACE_RECOG_HAAR_FEATURES_H
 
-#include "FaceRecog.h"
-
- /* required includes */
+#include "Utilities/Common.h"
+#include "Tracks/HaarFeature.h"
 #include "Tracks/Sample.h"
 
 class HaarFeatures //: public Features

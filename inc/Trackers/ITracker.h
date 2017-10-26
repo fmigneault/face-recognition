@@ -53,18 +53,21 @@
 #ifndef FACE_RECOG_ITRACKER_H
 #define FACE_RECOG_ITRACKER_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
+#include "Tracks/Rect.h"
+#include "Tracks/ImageRep.h"
 
 class ITracker
 {
 public:
     virtual ~ITracker() {}
-    // required derived method overloads
+    // pure virtual methods (mandatory overrides by derived classes)
     virtual void initialize(const ImageRep& frame, FloatRect bb) = 0;
     virtual void reset() = 0;
     virtual cv::Rect track(const ImageRep& frame) = 0;
     // shared config
-    void updateConfig(ConfigFile *configFile) { m_config = configFile; }
+    void updateConfig(ConfigFile* configFile) { m_config = configFile; }
     ConfigFile *m_config;
     inline const FloatRect& getBB() { return m_bb; }
     inline bool isInitialized() { return m_initialized; }

@@ -53,15 +53,8 @@
 #ifndef FACE_RECOG_IMAGE_REP_H
 #define FACE_RECOG_IMAGE_REP_H
 
+#include "Utilities/Common.h"
 #include "Tracks/Rect.h"
-#include "Utilities/MatDefines.h"
-
-#include <opencv/cv.h>
-#include <vector>
-
-#include <Eigen/Core>
-
-//#include "Eigen/src/Core"
 
 class ImageRep
 {

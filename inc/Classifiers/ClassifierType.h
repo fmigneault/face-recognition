@@ -1,7 +1,7 @@
 ﻿#ifndef FACE_RECOG_CLASSIFIER_TYPE
 #define FACE_RECOG_CLASSIFIER_TYPE
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
 
 class ClassifierType
 {

@@ -1,7 +1,11 @@
 ﻿#ifndef FACE_RECOG_FACE_DETECTOR_SSD_H
 #define FACE_RECOG_FACE_DETECTOR_SSD_H
+#ifdef  FACE_RECOG_HAS_SSD
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Detectors/IDetector.h"
+#include "Tracks/Track.h"
 
 class FaceDetectorSSD final : public IDetector
 {
@@ -41,5 +45,5 @@ private:
     int minNeighbours;
 };
 
-
-#endif /* FACE_RECOG_FACE_DETECTOR_SSD_H */
+#endif/*FACE_RECOG_HAS_SSD*/
+#endif/*FACE_RECOG_FACE_DETECTOR_SSD_H*/

@@ -50,7 +50,7 @@ void Association::clear()
     costMatrix = NULL;
 }
 
-Association::Association(ConfigFile *config)
+Association::Association(ConfigFile* config)
 {
     assert(config);
     _config = config;

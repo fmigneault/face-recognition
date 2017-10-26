@@ -1,7 +1,8 @@
 ﻿#ifndef FACE_RECOG_TEMPLATE_MATCHER_H
 #define FACE_RECOG_TEMPLATE_MATCHER_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
 #include "feHOG.h"
 
 class TemplateMatcher

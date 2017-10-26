@@ -53,10 +53,11 @@
 #ifndef FACE_RECOG_LARANK_H
 #define FACE_RECOG_LARANK_H
 
-#include "FaceRecog.h"
-
- /* required includes */
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
 #include "Tracks/Rect.h"
+#include "Tracks/Kernels.h"
+#include "Tracks/HaarFeatures.h"
 
 class LaRank
 {

@@ -1,6 +1,7 @@
-﻿#include "Classifiers/ClassifierEnsembleESVM.h"
+﻿#ifdef FACE_RECOG_HAS_ESVM
+
+#include "Classifiers/ClassifierEnsembleESVM.h"
 #include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_ESVM
 
 ClassifierEnsembleESVM::ClassifierEnsembleESVM()
 {

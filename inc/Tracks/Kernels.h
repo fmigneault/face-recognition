@@ -52,9 +52,7 @@
 #ifndef FACE_RECOG_KERNELS_H
 #define FACE_RECOG_KERNELS_H
 
-#include <Eigen/Core>
-#include <cmath>
-
+#include "Utilities/Common.h"
 
 class Kernel
 {

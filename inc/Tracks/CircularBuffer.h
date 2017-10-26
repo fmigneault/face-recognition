@@ -1,8 +1,7 @@
 ﻿#ifndef FACE_RECOG_CIRCULAR_BUFFER_H
 #define FACE_RECOG_CIRCULAR_BUFFER_H
 
-#include "FaceRecog.h"
-#include <boost/circular_buffer.hpp>
+#include "Utilities/Common.h"
 
 class CircularBuffer
 {

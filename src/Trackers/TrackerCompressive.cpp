@@ -1,8 +1,9 @@
-﻿#include "Trackers/TrackerCompressive.h"
-#include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_COMPRESSIVE
+﻿#ifdef FACE_RECOG_HAS_COMPRESSIVE
 
-TrackerCompressive::TrackerCompressive(ConfigFile *configFile) :
+#include "Trackers/TrackerCompressive.h"
+#include "FaceRecog.h"
+
+TrackerCompressive::TrackerCompressive(ConfigFile* configFile) :
     m_initialized(false)
 {
     updateConfig(configFile);

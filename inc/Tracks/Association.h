@@ -1,13 +1,16 @@
 ﻿#ifndef FACE_RECOG_ASSOCIATION_H
 #define FACE_RECOG_ASSOCIATION_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
+#include "Tracks/ImageRep.h"
+#include "Tracks/Track.h"
 
 class Association
 {
 public:
 
-    Association(ConfigFile *config);
+    Association(ConfigFile* config);
     ~Association();
 
     void extendSet(std::vector<Track>& tracks, std::vector<cv::Rect>& detections);
@@ -18,7 +21,7 @@ public:
                          std::vector<Track>& unmatched);
     void reduceSet(std::vector<Track>& tracks);
 private:
-    ConfigFile *_config;
+    ConfigFile* _config;
     int **costMatrix;
     int detTrackThresh;
     size_t m;

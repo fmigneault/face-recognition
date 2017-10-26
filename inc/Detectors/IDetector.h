@@ -1,7 +1,11 @@
 ﻿#ifndef FACE_RECOG_IFACE_DETECTOR_H
 #define FACE_RECOG_IFACE_DETECTOR_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Configs/ConfigFile.h"
+#include "Detectors/DetectorType.h"
+#include "Tracks/Track.h"
 
 class IDetector
 {

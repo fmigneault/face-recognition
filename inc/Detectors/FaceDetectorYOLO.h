@@ -1,57 +1,11 @@
 ﻿#ifndef FACE_RECOG_FACE_DETECTOR_YOLO_H
 #define FACE_RECOG_FACE_DETECTOR_YOLO_H
+#ifdef  FACE_RECOG_HAS_YOLO
 
-#ifdef _MSC_VER
-#define C_MSVC
-#endif/*_MSC_VER*/
-
-// FaceRecog
-#include "FaceRecog.h"
-
-// OpenCV
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/opencv.hpp>
-
-// STD
-#include <chrono>
-#include <fstream>
-#include <limits>
-#include <malloc.h>
-#include <stdio.h>
-#include <string>
-#include <vector>
-
-// Boost
-#include "boost/algorithm/string.hpp"
-#include <boost/math/special_functions/next.hpp>
-#include <boost/progress.hpp>
-#include <boost/random.hpp>
-
-// Google
-#include "google/protobuf/text_format.h"
-
-// Caffe
-#include "caffe/blob.hpp"
-#include "caffe/common.hpp"
-#include "caffe/common.hpp"
-#include "caffe/layer.hpp"
-#include "caffe/net.hpp"
-#include "caffe/proto/caffe.pb.h"
-#include "caffe/util/db.hpp"
-#include "caffe/util/format.hpp"
-#include "caffe/util/io.hpp"
-#include "caffe/util/math_functions.hpp"
-#include "caffe/util/rng.hpp"
-
-using caffe::Blob;
-using caffe::Caffe;
-using caffe::Datum;
-using caffe::Net;
-using caffe::Layer;
-using std::string;
-using namespace std;
-namespace db = caffe::db;
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Detectors/IDetector.h"
+#include "Tracks/Track.h"
 
 class FaceDetectorYOLO final : public IDetector
 {
@@ -65,7 +19,7 @@ public:
     ~FaceDetectorYOLO() {}
     // specialized overrides
     int detect(std::vector<std::vector<cv::Rect>>& faces) override;
-    double evaluateConfidence(const Target& target, const FACE_RECOG_MAT& image) override;
+    double evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image) override;
     std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect>>& faces) override { return m_faces; }
     void assignImage(const FACE_RECOG_MAT& frame) override;
     // unused overrides
@@ -81,4 +35,5 @@ private:
     boost::shared_ptr<Net<float> > net;
 };
 
+#endif/*FACE_RECOG_HAS_YOLO*/
 #endif/*FACE_RECOG_FACE_DETECTOR_YOLO_H*/

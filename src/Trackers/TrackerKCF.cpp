@@ -1,8 +1,9 @@
-﻿#include "Trackers/TrackerKCF.h"
-#include "FaceRecog.h"
-#ifdef FACE_RECOG_HAS_KCF
+﻿#ifdef FACE_RECOG_HAS_KCF
 
-TrackerKCF::TrackerKCF(ConfigFile *configFile) :
+#include "Trackers/TrackerKCF.h"
+#include "FaceRecog.h"
+
+TrackerKCF::TrackerKCF(ConfigFile* configFile) :
     isInitialized(false)
 {
     updateConfig(configFile);

@@ -21,7 +21,7 @@ Source:
 http://codereview.stackexchange.com/questions/42467/user-defined-color-implementation-in-windows-console
 */
 
-#include "Platform.h"
+#include "Configs/Platform.h"
 
 #ifdef FACE_RECOG_WINDOWS
 #define CONSOLE_COLOR_ENABLED

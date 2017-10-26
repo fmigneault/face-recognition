@@ -1,4 +1,6 @@
-﻿#include "Classifiers/TemplateMatcher.h"
+﻿#ifdef FACE_RECOG_HAS_TM
+
+#include "Classifiers/TemplateMatcher.h"
 #include "FaceRecog.h"
 
 TemplateMatcher::TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, const std::string negativeFileDir,
@@ -124,3 +126,5 @@ double TemplateMatcher::similarityFromEuclideanDistance(const FeatureVector& pro
         dist += (probeSample[f] - templateSample[f]) * (probeSample[f] - templateSample[f]);
     return 1 - std::sqrt(dist) / std::sqrt((double)nFeatures);
 }
+
+#endif/*FACE_RECOG_HAS_TM*/

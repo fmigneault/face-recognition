@@ -39,16 +39,17 @@
 #ifndef FACE_RECOG_TRACK_H
 #define FACE_RECOG_TRACK_H
 
-#include "FaceRecog.h"
-
- /* required includes */
+#include "Utilities/Common.h"
+#include "Configs/ConfigFile.h"
+#include "Tracks/ImageRep.h"
 #include "Tracks/TrackROI.h"
+#include "Trackers/ITracker.h"
 
 class Track
 {
 public:
-    Track(ConfigFile *configFile);
-    Track(ConfigFile *configFile, const cv::Rect& rect, int trackNumber = -1);
+    Track(ConfigFile* configFile);
+    Track(ConfigFile* configFile, const cv::Rect& rect, int trackNumber = -1);
     Track(const Track&);
     Track& operator= (const Track& track);
     ~Track();
@@ -90,7 +91,7 @@ public:
     void configCheckAndSet(ConfigFile* configFile);
 
 private:
-    ConfigFile *_config;
+    ConfigFile* _config;
     void resetTracker();
     int _trackNumber = -1;
     std::string _recognizedPOIName;

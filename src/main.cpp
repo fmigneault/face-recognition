@@ -389,7 +389,7 @@ int main(int argc, char *argv[])
     /* CAPTURE DEVICE (CAMERA/FILES)                                                                                                            */
     /********************************************************************************************************************************************/
     /*Default VideoCapture object used, otherwise try with Point Grey Research FlyCapture2 SDK*/
-    void *videoStream;
+    void* videoStream;
     bool isVideoOpen = false;
 
     FACE_RECOG_DEBUG(
@@ -923,7 +923,7 @@ int main(int argc, char *argv[])
                     // Get the search area, either the full face ROI or localized position if specified
                     cv::Rect searchArea = roi.getRect();
                     if (conf->useEyeLocalizedPosition) {
-                        std::shared_ptr<EyeDetector> eyesDetSpec = std::make_shared<EyeDetector>(eyesDetector);
+                        std::shared_ptr<EyeDetector> eyesDetSpec = std::static_pointer_cast<EyeDetector>(eyesDetector);
                         // Top-Left 1/4 of face ROI (or Right if frame is flipped)
                         if ((iDet == eyesDetSpec->leftEyeIndex && !conf->flipFrames) || (iDet == eyesDetSpec->rightEyeIndex && conf->flipFrames))
                             searchArea = cv::Rect(searchArea.x, searchArea.y, searchArea.width / 2, searchArea.height / 2);

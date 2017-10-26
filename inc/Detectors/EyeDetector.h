@@ -1,7 +1,10 @@
 ﻿#ifndef FACE_RECOG_EYE_DETECTOR_H
 #define FACE_RECOG_EYE_DETECTOR_H
 
-#include "FaceRecog.h"
+#include "Utilities/Common.h"
+#include "Utilities/MatDefines.h"
+#include "Detectors/IDetector.h"
+#include "Tracks/Track.h"
 
 class EyeDetector final : public IDetector
 {
