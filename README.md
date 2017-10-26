@@ -118,6 +118,12 @@ These include multiple option toggles, type indexes, threshold parameters, train
 
 ------------------------------------------------------------------
 
+## Change Log ##
+
+See [CHANGELOG](./CHANGELOG.md)
+
+------------------------------------------------------------------
+
 ## Contributors ##
 
 See [CONTRIBUTORS](./CONTRIBUTORS.md)
