@@ -346,7 +346,7 @@ macro(face_recog_find_packages)
     
     # mvector
     find_package(mvector REQUIRED)
-    set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}   ${mvector_INCLUDE_DIRS})
+    set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}   ${mvector_INCLUDE_DIR})
     
     ####################################################
     # optional (unless enforced by employed module)
