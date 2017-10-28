@@ -79,4 +79,4 @@ cv::Rect TrackerCamshift::rectInsideFrame(const FACE_RECOG_MAT& frame, cv::Rect 
     return bboxInsideFrame;
 }
 
-#endif FACE_RECOG_HAS_CAMSHIFT
+#endif/*FACE_RECOG_HAS_CAMSHIFT*/
