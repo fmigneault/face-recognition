@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
         for (size_t trk = 0; trk < conf->plotMaxTracks; ++trk) {
             for (size_t poi = 0; poi < nPlotPOI; ++poi) {
                 plotData[trk][poi] = cv::Mat(conf->plotAccumulationPoints, 1, CV_64F);
-                plotsPtr[trk][poi] = cv::plot::createPlot2d(plotData[trk][poi]);
+                plotsPtr[trk][poi] = cv::plot::Plot2d::create(plotData[trk][poi]);
                 plotsPtr[trk][poi]->setPlotBackgroundColor(rgbColorCode(BLACK));
                 plotsPtr[trk][poi]->setPlotGridColor(rgbColorCode(DARK_GRAY));
                 plotsPtr[trk][poi]->setMinY(plotMinY);
