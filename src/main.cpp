@@ -209,6 +209,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<IClassifier> classifier;
     CircularBuffer accScores(conf->roiAccumulationSize);
     if (conf->useFaceRecognition) {
+        logOutput << "Training face recognition classifiers..." << std::endl;
         classifier = buildSpecializedClassifier(*conf, POI_ROIs, POI_IDs, NEG_ROIs);
         if (classifier == nullptr) {
             logOutput << "Classifier not properly initialized!" << std::endl;
@@ -217,6 +218,7 @@ int main(int argc, char *argv[])
             logOutput << "    evaluated address: [" << classifier << "]" << std::endl;
             FINALIZE(EXIT_FAILURE);
         }
+        logOutput << "Face recognition classifiers training complete" << std::endl;
     }
     POI_ROIs.clear();
     NEG_ROIs.clear();
@@ -303,11 +305,12 @@ int main(int argc, char *argv[])
     // prepare sequence file names
     if (optArgP)
     {
-        logOutput << "Preparing files. This might take some time..." << std::endl;
+        logOutput << "Preparing sequence test files. This might take some time..." << std::endl;
         testSequenceFileNames.push_back(std::vector<std::string>());
         testSequenceRegexPaths.push_back(framesPath);
         ASSERT_LOG_FINALIZE(util::prepareFrameFileNames(testSequenceFileNames[0], framesPath),
                             "Failed to prepare file names!", logOutput, EXIT_FAILURE);
+        logOutput << "Sequence test files preparation complete" << std::endl;
         FACE_RECOG_DEBUG(
             for (size_t i = 0; i < testSequenceFileNames[0].size(); ++i)
                 logDebug << testSequenceFileNames[0][i] << std::endl;
@@ -341,15 +344,15 @@ int main(int argc, char *argv[])
     Association association(conf);
 
     // main face detector
-    std::shared_ptr<IDetector> faceDetector = buildSpecializedDetector(*conf, opencvSourcesData.string(), DetectorType::FACE_DETECTOR_GLOBAL);
+    std::shared_ptr<IDetector> faceDetector = buildSpecializedDetector(*conf, opencvSourcesData.generic_string(), DetectorType::FACE_DETECTOR_GLOBAL);
     size_t nFaceModels = faceDetector->modelCount();
 
     // localized search face detector
-    std::shared_ptr<IDetector> localFaceDetector = buildSpecializedDetector(*conf, opencvSourcesData.string(), DetectorType::FACE_DETECTOR_GLOBAL);
+    std::shared_ptr<IDetector> localFaceDetector = buildSpecializedDetector(*conf, opencvSourcesData.generic_string(), DetectorType::FACE_DETECTOR_LOCAL);
     size_t nLocalFaceModels = localFaceDetector->modelCount();
 
     // left-right eye detectors
-    std::shared_ptr<IDetector> eyesDetector = buildSpecializedDetector(*conf, opencvSourcesData.string(), DetectorType::EYE_DETECTOR);
+    std::shared_ptr<IDetector> eyesDetector = buildSpecializedDetector(*conf, opencvSourcesData.generic_string(), DetectorType::EYE_DETECTOR);
     size_t nEyeModels = eyesDetector->modelCount();
 
     FACE_RECOG_DEBUG(

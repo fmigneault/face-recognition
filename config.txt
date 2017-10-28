@@ -78,7 +78,7 @@ createTrackConfidenceThreshold = 0.8
 trackerOverlapThreshold = 0.3
 detectionAugmentationOffset = 0
 detectionFrameInterval = 5
-detectionFrameBufferSize = 20                            
+detectionFrameBufferSize = 20
 
 #==============================
 # training (STRUCK)

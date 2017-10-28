@@ -203,7 +203,7 @@ bool ConfigFile::FeatureKernelPair::isValid()
 
 bool ConfigFile::requireAnyCascade() const
 {
-    return HaarCascadeFrontal ^ HaarCascadeProfile ^ LBPCascadeFrontal ^ LBPCascadeProfile ^ LBPCascadeFrontalImproved;
+    return HaarCascadeFrontal | HaarCascadeProfile | LBPCascadeFrontal | LBPCascadeProfile | LBPCascadeFrontalImproved;
 }
 
 ConfigFile::ConfigFile(const std::string& path)
@@ -559,12 +559,12 @@ void ConfigFile::validateValues()
         ASSERT_LOG(plotMaxPOI > 0, "'plotMaxPOI' not greater than 0");
     }
 
-    bool anyCascade = requireAnyCascade();
-    ASSERT_LOG((anyCascade ^ SSD ^ FRCNN ^ YOLO) || !(anyCascade & SSD & FRCNN & YOLO),
+    bool anyCascade = requireAnyCascade();    
+    ASSERT_LOG((anyCascade ^ SSD ^ FRCNN ^ YOLO) ^ (anyCascade & SSD & FRCNN & YOLO),
                "At least one and only one face detector type can be used at the same time!");
-    ASSERT_LOG((STRUCK ^ KCF ^ Camshift ^ Compressive) || !(STRUCK & KCF & Camshift & Compressive),
+    ASSERT_LOG((STRUCK ^ KCF ^ Camshift ^ Compressive) ^ (STRUCK & KCF & Camshift & Compressive),
                "At least one and only one face tracker type can be used at the same time!");
-    ASSERT_LOG((ESVM ^ FaceNet ^ TM) || !(ESVM & FaceNet & TM),
+    ASSERT_LOG((ESVM ^ FaceNet ^ TM) ^ (ESVM & FaceNet & TM),
                "At least one and only one face classifier type can be used at the same time!");
 
     if (STRUCK) {
