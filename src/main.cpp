@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
     if (conf->displayPlots && conf->useFaceRecognition)
     {
         size_t plotDims[2]{ (size_t)conf->plotMaxTracks, nPlotPOI };
-        plotFigure = FACE_RECOG_MAT(cv::Size(conf->plotFigureWidth, conf->plotFigureHeight), CV_8UC3);
+        plotFigure = FACE_RECOG_MAT(cv::Size(conf->plotFigureWidth, conf->plotFigureHeight), CV_8UC3);        
         plotsPtr = xstd::mvector<2, cv::Ptr<cv::plot::Plot2d> >(plotDims);
         plotData = xstd::mvector<2, cv::Mat>(plotDims);
         plotTrackID = std::vector<int>(conf->plotMaxTracks, -1);
@@ -278,7 +278,11 @@ int main(int argc, char *argv[])
         for (size_t trk = 0; trk < conf->plotMaxTracks; ++trk) {
             for (size_t poi = 0; poi < nPlotPOI; ++poi) {
                 plotData[trk][poi] = cv::Mat(conf->plotAccumulationPoints, 1, CV_64F);
+                #if CV_NEW_PLOT2D_CREATE
                 plotsPtr[trk][poi] = cv::plot::Plot2d::create(plotData[trk][poi]);
+                #else
+                plotsPtr[trk][poi] = cv::plot::createPlot2d(plotData[trk][poi]);
+                #endif
                 plotsPtr[trk][poi]->setPlotBackgroundColor(rgbColorCode(BLACK));
                 plotsPtr[trk][poi]->setPlotGridColor(rgbColorCode(DARK_GRAY));
                 plotsPtr[trk][poi]->setMinY(plotMinY);
