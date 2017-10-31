@@ -77,23 +77,23 @@ std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, co
                 error = vj.loadDetector(modelBasePath, NONE);
                 ASSERT_LOG(!error, "Failed loading frontal global face detector file: '" + model + "'");
             }
-            detector = std::make_shared<FaceDetectorVJ>(vj);
+            detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorVJ>(vj));
         }
         else if (config.FRCNN) {
             #ifdef FACE_RECOG_HAS_FRCNN
-            detector = std::make_shared<FaceDetectorFRCNN>();
+            detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorFRCNN>());
             #endif/*FACE_RECOG_HAS_FRCNN*/
         }
         else if (config.SSD) {
             #ifdef FACE_RECOG_HAS_SSD
-            detector = std::make_shared<FaceDetectorSSD>();
+            detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorSSD>());
             #endif/*FACE_RECOG_HAS_SSD*/
         }
         else if (config.YOLO) {
             #ifdef FACE_RECOG_HAS_YOLO
             std::string modelPathProto = (modelBasePath / bfs::path("yolo-face-deploy.prototxt")).generic_string();
             std::string modelPathCaffe = (modelBasePath / bfs::path("yolo-face.caffemodel")).generic_string();
-            detector = std::make_shared<FaceDetectorYOLO>(modelPathProto, modelPathCaffe);
+            detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorYOLO>(modelPathProto, modelPathCaffe));
             #endif/*FACE_RECOG_HAS_YOLO*/
         }
         ASSERT_LOG(detector != nullptr, "Failed to initialize global face detector from specified 'config'");
@@ -115,7 +115,7 @@ std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, co
             error = vj.loadDetector(modelFilePath, HORIZONTAL);
             ASSERT_LOG(!error, "Failed loading right profile local face detector file: '" + modelFilePath + "'");
         }
-        detector = std::make_shared<FaceDetectorVJ>(vj);
+        detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorVJ>(vj));
         ASSERT_LOG(detector != nullptr, "Failed to initialize local face detector from specified 'config'");
         ASSERT_LOG(detector->modelCount() > 0, "Invalid count of local face detector models");
     }
@@ -129,6 +129,7 @@ std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, co
         eyes.loadDetector(modelFilePathRight);
         eyes.leftEyeIndex  = 0;
         eyes.rightEyeIndex = 1;
+        detector = std::static_pointer_cast<IDetector>(std::make_shared<EyeDetector>(eyes));
         ASSERT_LOG(detector != nullptr, "Failed to initialize eye detector from specified 'config'");
         ASSERT_LOG(detector->modelCount() == 2, "Invalid count of eye detector models");
     }

@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     std::string configPath = "./config.txt";
     std::string outDir = "./output";
     std::string imgDir = "./images";
-    std::string resultFilePath = "./result.txt";
+    std::string resultFilePath = "./results.txt";
     std::string framesPath, testFilePath;
     bool optArgI = false, optArgO = false, optArgP = false, optArgR = false, optArgT = false, optArgV = false;
     int argmin = 2, argmax = 12;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     argv[8] = "-t";
     argv[9] = "./sequences-path.txt";
     argv[10] = "-r";
-    argv[11] = "./result.txt";
+    argv[11] = "./results.txt";
     #endif/*FACE_RECOG_SKIP_INPUT_ARGS_CHECK*/
 
     std::string app = argv[0];
@@ -126,8 +126,10 @@ int main(int argc, char *argv[])
             }
         }
     }
-    if (optArgR && !(optArgP || optArgT || optArgV))   // disable '-r' if not in a possible testing case (not live-feed)
-        optArgR = false;
+    if (optArgR && !(optArgP || optArgT || optArgV)) {
+        ASSERT_WARN(false, "Ignoring '-r' option since (-p|-t|-v) option was detected");
+        optArgR = false;                        // disable '-r' if not in a possible testing case (not live-feed)
+    }
 
     // provide here configuration file
     static ConfigFile *conf = new ConfigFile(configPath);
@@ -160,8 +162,9 @@ int main(int argc, char *argv[])
     bfs::remove(logOutputFilePath);
     bfs::remove(logTimingFilePath);
     bfs::remove(logOutBBoxFilePath);
-    bfs::remove(logDebugFilePath);
+    bfs::remove(logDebugFilePath);    
     logstream logOutput(logOutputFilePath, true, true);
+    ASSERT_LOG_FINALIZE(!resultFilePath.empty(), "Option '-r' result file path cannot be empty", logOutput, EXIT_FAILURE);
     logstream logResult(resultFilePath, false, optArgR);
     FACE_RECOG_DEBUG(
         logstream logOutBBox(logOutBBoxFilePath, false, true);
@@ -177,14 +180,15 @@ int main(int argc, char *argv[])
     /********************************************************************************************************************************************/
 
     bfs::path opencvRootPath(opencv_root);
-    bfs::path opencvSourcesData = opencvRootPath / bfs::path("data/");
-    if (!bfs::is_directory(opencvSourcesData))  // if not found under the default 'git source' dir structure, try the 'installed' one
-        opencvSourcesData = opencvRootPath / bfs::path("etc/");
+    bfs::path opencvSourceDataPath = opencvRootPath / bfs::path("data/");
+    if (!bfs::is_directory(opencvSourceDataPath))   // if not found under the default 'git source' dir structure, try the 'installed' one
+        opencvSourceDataPath = opencvRootPath / bfs::path("etc/");
+    std::string opencvSourceDataPathStr = opencvSourceDataPath.generic_string();
     #ifdef FACE_RECOG_HAS_VJ
-    bfs::path lbpCascadesDir = opencvSourcesData / bfs::path("lbpcascades/");
-    bfs::path haarCascadesDir = opencvSourcesData / bfs::path("haarcascades/");
-    ASSERT_LOG_FINALIZE(bfs::is_directory(opencvSourcesData) && bfs::is_directory(lbpCascadesDir) && bfs::is_directory(haarCascadesDir),
-                        "OpenCV source data directory not found to access 'CascadeClassifier' models", logOutput, EXIT_FAILURE);
+    bfs::path lbpCascadesDir = opencvSourceDataPath / bfs::path("lbpcascades/");
+    bfs::path haarCascadesDir = opencvSourceDataPath / bfs::path("haarcascades/");
+    ASSERT_LOG_FINALIZE(bfs::is_directory(opencvSourceDataPath) && bfs::is_directory(lbpCascadesDir) && bfs::is_directory(haarCascadesDir),
+                        "OpenCV source data directory not found to access 'CascadeClassifier' models", logOutput, EXIT_FAILURE);    
     #endif/*FACE_RECOG_HAS_VJ*/
 
     /********************************************************************************************************************************************/
@@ -195,7 +199,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> POI_IDs;
     std::vector<std::vector<FACE_RECOG_MAT> > POI_ROIs, NEG_ROIs;
     if (conf->useFaceRecognition) {
-        ASSERT_LOG_FINALIZE(util::prepareEnrollROIs(*conf, opencvSourcesData, POI_ROIs, POI_IDs, NEG_ROIs, logOutput) == EXIT_SUCCESS,
+        ASSERT_LOG_FINALIZE(util::prepareEnrollROIs(*conf, opencvSourceDataPath, POI_ROIs, POI_IDs, NEG_ROIs, logOutput) == EXIT_SUCCESS,
                             "Error on POI loading", logOutput, EXIT_FAILURE);
         ASSERT_LOG_FINALIZE(POI_ROIs.size() > 0, "Can't execute face recognition without any Person of Interest (POI)", logOutput, EXIT_FAILURE);
     }
@@ -329,7 +333,7 @@ int main(int argc, char *argv[])
         ASSERT_LOG_FINALIZE(util::prepareTestSequences(testSequenceFileNames, testSequenceRegexPaths, testFilePath),
                             "Failed to prepare test sequence file names!", logOutput, EXIT_FAILURE);
         framesPath = testSequenceRegexPaths[0]; // first test sequence for initial VideoCapture open
-        sequenceTrackID = bfs::path(testSequenceRegexPaths[0]).remove_filename().filename().string();
+        sequenceTrackID = bfs::path(testSequenceRegexPaths[0]).remove_filename().filename().string();        
     }
 
     // Header of results file
@@ -348,16 +352,17 @@ int main(int argc, char *argv[])
     Association association(conf);
 
     // main face detector
-    std::shared_ptr<IDetector> faceDetector = buildSpecializedDetector(*conf, opencvSourcesData.generic_string(), DetectorType::FACE_DETECTOR_GLOBAL);
-    size_t nFaceModels = faceDetector->modelCount();
+    std::shared_ptr<IDetector> faceDetector = buildSpecializedDetector(*conf, opencvSourceDataPathStr, DetectorType::FACE_DETECTOR_GLOBAL);
+    ASSERT_LOG_FINALIZE(faceDetector, "Global face detector not properly initialized", logOutput, EXIT_FAILURE);
+    size_t nFaceModels = faceDetector->modelCount();    
 
     // localized search face detector
-    std::shared_ptr<IDetector> localFaceDetector = buildSpecializedDetector(*conf, opencvSourcesData.generic_string(), DetectorType::FACE_DETECTOR_LOCAL);
-    size_t nLocalFaceModels = localFaceDetector->modelCount();
+    std::shared_ptr<IDetector> localFaceDetector = buildSpecializedDetector(*conf, opencvSourceDataPathStr, DetectorType::FACE_DETECTOR_LOCAL);
+    size_t nLocalFaceModels = localFaceDetector ? localFaceDetector->modelCount() : 0;
 
     // left-right eye detectors
-    std::shared_ptr<IDetector> eyesDetector = buildSpecializedDetector(*conf, opencvSourcesData.generic_string(), DetectorType::EYE_DETECTOR);
-    size_t nEyeModels = eyesDetector->modelCount();
+    std::shared_ptr<IDetector> eyesDetector = buildSpecializedDetector(*conf, opencvSourceDataPathStr, DetectorType::EYE_DETECTOR);
+    size_t nEyeModels = eyesDetector ? eyesDetector->modelCount() : 0;
 
     FACE_RECOG_DEBUG(
         for (size_t d = 0; d < nFaceModels; ++d)
