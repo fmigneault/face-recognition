@@ -20,8 +20,11 @@ if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()
     set(CMAKE_CXX_COMPILER g++)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")    
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 endif()
+
+# Optional Visual Studio Code helper for debug generated target
+include(CMakeToolsHelpers OPTIONAL)
 
 # Output setup
 set(CMAKE_DEBUG_POSTFIX "d")
@@ -76,17 +79,17 @@ include(cmake/FaceRecogUtils.cmake)
 # set(FaceRecog_LIBRARY_STATIC    "STATIC")
 # set(FaceRecog_LIBRARY_SHARED    "SHARED")
 # set(FaceRecog_LIBRARY_TYPE ${FaceRecog_LIBRARY_STATIC} CACHE STRING "Library type to generate")
-# set_property(CACHE FaceRecog_LIBRARY_TYPE PROPERTY STRINGS ${FaceRecog_LIBRARY_STATIC} ${FaceRecog_LIBRARY_SHARED}) 
+# set_property(CACHE FaceRecog_LIBRARY_TYPE PROPERTY STRINGS ${FaceRecog_LIBRARY_STATIC} ${FaceRecog_LIBRARY_SHARED})
 # # drop down list of building test mode
 # if(${FaceRecog_BUILD_TESTS})
     # set(FaceRecog_BUILD_LIBRARY "Build from FaceRecog library")
     # set(FaceRecog_BUILD_SOURCES "Build from FaceRecog sources")
     # set(FaceRecog_BUILD_TESTS_MODE ${FaceRecog_BUILD_LIBRARY} CACHE STRING "Build executable mode for tests")
-    # set_property(CACHE FaceRecog_BUILD_TESTS_MODE PROPERTY STRINGS ${FaceRecog_BUILD_LIBRARY} ${FaceRecog_BUILD_SOURCES}) 
+    # set_property(CACHE FaceRecog_BUILD_TESTS_MODE PROPERTY STRINGS ${FaceRecog_BUILD_LIBRARY} ${FaceRecog_BUILD_SOURCES})
 # else()
     # unset(FaceRecog_BUILD_TESTS_MODE CACHE)
 # endif()
-    
+
 # find FaceRecog source files
 face_recog_add_sources()
 

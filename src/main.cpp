@@ -1070,10 +1070,10 @@ int main(int argc, char *argv[])
                     : (eyeOK && currentTracks[i].isConsidered()) ? bboxColorConsidered               // Considered
                     : bboxColorNotMatched;                                                           // NotMatched | no eyes
 
-                // draw old face roi (original detection)
+                // draw old face ROI (original detection)
                 if (showUpdate)
                     cv::rectangle(drawImg, currentTracks[i].getROI().getOriginalRect(), color, conf->roiThicknessOld);
-                // draw updated face roi and text index
+                // draw updated face ROI and text index
                 cv::rectangle(drawImg, currentTracks[i].bbox(), color, conf->roiThickness);
 
                 // display recognition score and target ID
@@ -1134,7 +1134,7 @@ int main(int argc, char *argv[])
                 Point point = Point(currentTracks[i].bbox().x, currentTracks[i].bbox().y - 10);
                 cv::putText(drawImg, strTrackerNumber, point, FONT_HERSHEY_PLAIN, 1.0, color, 2);
 
-                // draw eyes roi
+                // draw eyes ROI
                 if (conf->useEyesDetection) {
                     ROI roi = currentTracks[i].getROI();
                     ColorCode darkColor = color / 2;
@@ -1243,7 +1243,7 @@ int main(int argc, char *argv[])
     #if FACE_RECOG_USE_EXCEPTION_LOGGING
     } // try
     catch (std::exception& ex) {
-        std::cout << "Unhandled exception occured in 'FaceRecog'" << std::endl
+        std::cout << "Unhandled exception occurred in 'FaceRecog'" << std::endl
                   << "  Exception: [" << ex.what() << "]" << std::endl;
         FINALIZE(EXIT_FAILURE);
     }
