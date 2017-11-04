@@ -5,6 +5,7 @@
 #include "Utilities/MatDefines.h"
 #include "Classifiers/IClassifier.h"
 #include "esvmEnsemble.h"
+using namespace esvm;
 
 class ClassifierEnsembleESVM final : public IClassifier
 {
