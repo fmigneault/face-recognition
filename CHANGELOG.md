@@ -1,13 +1,23 @@
 ## Change Log ##
 
-### 2.0 (n/a) ### 
+### [2.0](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=2.0) (WIP) ###
 
-- under development
+- Add SSD face detector
+- Add KCF face tracker
+- Change FastDT for STRUCK
+- Multiple parameter naming, spacing/cleanup adjustments
+- More CMake/defines checks and code inclusion/exclusion
+- Fixes for CMake installs & find libraries
+- Add *this* changelog
 
-### [1.0](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=1.0) (2017-10-05) ### 
+#### Planned/Considered (?) ####
+
+- ThunderSTRUCK
+
+### [1.0](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=1.0) (2017-10-05) ###
 
 - Add localized LBP improved
-- Add FaceNet, YOLO, 
+- Add FaceNet, YOLO, FRCNN
 - Local face search / ROI validation and adjustment
 - FaceDetector, Classifier generic classes
 - Convert outputs to logger class
@@ -26,23 +36,23 @@
 - Reduce repository with extern data files for tests
 - Code standardization (spaces, braces, etc.)
 
-### [0.2](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=0.2) (2017-03-10) ### 
+### [0.2](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=0.2) (2017-03-10) ###
 
 - Fix classifier id initialization
 - Uniform files, class names and configs
-- Circular buffer adjustments (as class)  
+- Circular buffer adjustments (as class)
 - Modify ROI info display
 - Template Matching integration
 - Remove debugs and reapply ESVM
 
-### [0.1](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=0.1) | Tag [FAST-DT_MODIF](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=FAST-DT_MODIF) (2017-03-06) ### 
+### [0.1](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=0.1) | Tag [FAST-DT_MODIF](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=FAST-DT_MODIF) (2017-03-06) ###
 
 - Sub-ROI containers for Eye Detection
 - Small performance fixes and boosts
 - More configuration parameters from file
-- Refactoring of Hungarian Matching and Association functionalities 
+- Refactoring of Hungarian Matching and Association functionalities
 
-### [0.0](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=0.0) | Tag [FAST-DT_BASIC](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=FAST-DT_BASIC) (2016-11-01) ### 
+### [0.0](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=0.0) | Tag [FAST-DT_BASIC](https://bitbucket.org/TeamLIVIA/facerecog/src/?at=FAST-DT_BASIC) (2016-11-01) ###
 
 - Initial version (modification from FAST-DT project)
 - Working ChokePoint dataset test

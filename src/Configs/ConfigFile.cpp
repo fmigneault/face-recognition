@@ -108,6 +108,8 @@ std::string ConfigFile::display() const
         << left << tab << tab << setw(padSize) << setfill(padChar) << "thresholdFaceRecognized"            << sep << thresholdFaceRecognized            << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "roiAccumulationSize"                << sep << roiAccumulationSize                << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "roiAccumulationMode"                << sep << roiAccumulationMode                << endl
+        << left << tab << tab << setw(padSize) << setfill(padChar) << "modelsFileSave"                     << sep << modelsFileSave                     << endl
+        << left << tab << tab << setw(padSize) << setfill(padChar) << "modelsFileDir"                      << sep << modelsFileDir                      << endl
         << left << tab << "detection/tracking parameters" << sep << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "searchRadius"                       << sep << searchRadius                       << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "useHungarianMatching"               << sep << useHungarianMatching               << endl
@@ -297,6 +299,8 @@ ConfigFile::ConfigFile(const std::string& path)
                                 : (mode == CircularBuffer::ScoreMode::AVG)   ? CircularBuffer::ScoreMode::AVG
                                 :                                              CircularBuffer::ScoreMode::RAW;
         }
+        else if (name == "modelsFileSave")                          iss >> modelsFileSave;
+        else if (name == "modelsFileDir")                           iss >> modelsFileDir;
         // detection and tracking parameters
         else if (name == "searchRadius")                            iss >> searchRadius;
         else if (name == "useHungarianMatching")                    iss >> useHungarianMatching;
@@ -418,6 +422,8 @@ void ConfigFile::setDefaults()
     thresholdFaceRecognized     = 0.95;
     roiAccumulationSize         = 30;
     roiAccumulationMode         = CircularBuffer::ScoreMode::RAW;
+    modelsFileSave              = false;
+    modelsFileDir               = "./models/";
 
     searchRadius                            = 30;
     useHungarianMatching                    = false;
@@ -486,80 +492,80 @@ void ConfigFile::setDefaults()
 
 void ConfigFile::validateValues()
 {
-    ASSERT_LOG(svmC > 0, "'svmC' not greater than zero");
-    ASSERT_LOG(svmBudgetSize >= 0, "'svmBudgetSize' not greater or equal to zero");
-    ASSERT_LOG(deviceIndex >= 0, "'deviceIndex' not greater or equal to zero");
+    ASSERT_LOG(svmC > 0, "Config 'svmC' not greater than zero");
+    ASSERT_LOG(svmBudgetSize >= 0, "Config 'svmBudgetSize' not greater or equal to zero");
+    ASSERT_LOG(deviceIndex >= 0, "Config 'deviceIndex' not greater or equal to zero");
 
     if (!useFaceRecognition) {
-        ASSERT_WARN(!useGeometricPositiveStills, "'useGeometricPositiveStills' will be ignored since 'useFaceRecognition' is disabled");
-        ASSERT_WARN(!useSyntheticPositiveStills, "'useSyntheticPositiveStills' will be ignored since 'useFaceRecognition' is disabled");
-        ASSERT_WARN(!useReferenceNegativeStills, "'useReferenceNegativeStills' will be ignored since 'useFaceRecognition' is disabled");
-        ASSERT_WARN(!useGeometricNegativeStills, "'useGeometricNegativeStills' will be ignored since 'useFaceRecognition' is disabled");
+        ASSERT_WARN(!useGeometricPositiveStills, "Config 'useGeometricPositiveStills' will be ignored since 'useFaceRecognition' is disabled");
+        ASSERT_WARN(!useSyntheticPositiveStills, "Config 'useSyntheticPositiveStills' will be ignored since 'useFaceRecognition' is disabled");
+        ASSERT_WARN(!useReferenceNegativeStills, "Config 'useReferenceNegativeStills' will be ignored since 'useFaceRecognition' is disabled");
+        ASSERT_WARN(!useGeometricNegativeStills, "Config 'useGeometricNegativeStills' will be ignored since 'useFaceRecognition' is disabled");
         if (useGeometricPositiveStills || useGeometricNegativeStills) {
-            ASSERT_LOG(geometricTranslatePixels > 0, "'geometricTranslatePixels' not greater than 0");
-            ASSERT_LOG(geometricScalingMinSize > 0, "'geometricScalingMinSize' not greater than 0");
-            ASSERT_LOG(geometricScalingFactor > 0.0 && geometricScalingFactor < 1.0, "'geometricScalingFactor' not in range ]0,1[");
+            ASSERT_LOG(geometricTranslatePixels > 0, "Config 'geometricTranslatePixels' not greater than 0");
+            ASSERT_LOG(geometricScalingMinSize > 0, "Config 'geometricScalingMinSize' not greater than 0");
+            ASSERT_LOG(geometricScalingFactor > 0.0 && geometricScalingFactor < 1.0, "Config 'geometricScalingFactor' not in range ]0,1[");
         }
     }
     else if (!useReferenceNegativeStills)
-        ASSERT_WARN(!useGeometricNegativeStills, "'useGeometricNegativeStills' will be ignored since 'useReferenceNegativeStills' is disabled");
+        ASSERT_WARN(!useGeometricNegativeStills, "Config 'useGeometricNegativeStills' ignored since 'useReferenceNegativeStills' is disabled");
 
     ASSERT_LOG(face.overlapThreshold >= 0.0 && face.overlapThreshold <= 1.0, "'faceOverlapThreshold' not in range [0,1]");
-    ASSERT_LOG(face.scaleFactor > 1.0, "'faceScaleFactor' not greater than 1");
-    ASSERT_LOG(face.nmsThreshold >= 0, "'faceNmsThreshold' not greater or equal to 0");
-    ASSERT_LOG(face.minNeighbours >= 0, "'faceMinNeighbours' not greater or equal to 0");
-    ASSERT_LOG(face.minSize.width > 0 && face.minSize.height > 0, "'faceMinSize' not greater than zero");
-    ASSERT_LOG(face.confidenceSize.width > 0 && face.confidenceSize.height > 0, "'faceConfidenceSize' not greater than zero");
+    ASSERT_LOG(face.scaleFactor > 1.0, "Config 'faceScaleFactor' not greater than 1");
+    ASSERT_LOG(face.nmsThreshold >= 0, "Config 'faceNmsThreshold' not greater or equal to 0");
+    ASSERT_LOG(face.minNeighbours >= 0, "Config 'faceMinNeighbours' not greater or equal to 0");
+    ASSERT_LOG(face.minSize.width > 0 && face.minSize.height > 0, "Config 'faceMinSize' not greater than zero");
+    ASSERT_LOG(face.confidenceSize.width > 0 && face.confidenceSize.height > 0, "Config 'faceConfidenceSize' not greater than zero");
     ASSERT_LOG(face.maxSize.width > face.minSize.width && face.maxSize.height > face.minSize.height,
-               "'faceMaxSize' not greater than 'faceMinSize'");
+               "Config 'faceMaxSize' not greater than 'faceMinSize'");
 
     if (!useEyesDetection)
-        ASSERT_WARN(!useEyeLocalizedPosition, "'useEyeLocalizedPosition' will be ignored since 'useEyesDetection' is disabled");
+        ASSERT_WARN(!useEyeLocalizedPosition, "Config 'useEyeLocalizedPosition' will be ignored since 'useEyesDetection' is disabled");
     else {
-        ASSERT_LOG(eyes.overlapThreshold >= 0.0 && eyes.overlapThreshold <= 1.0, "'eyesOverlapThreshold' not in range [0,1]");
-        ASSERT_LOG(eyes.scaleFactor > 1.0, "'eyesScaleFactor' not greater than 1");
-        ASSERT_LOG(eyes.nmsThreshold >= 0, "'eyesNmsThreshold' not greater or equal to 0");
-        ASSERT_LOG(eyes.minNeighbours >= 0, "'eyesMinNeighbours' not greater or equal to 0");
-        ASSERT_LOG(eyes.minSize.width > 0 && eyes.minSize.height > 0, "'eyesMinSize' not greater than zero");
+        ASSERT_LOG(eyes.overlapThreshold >= 0.0 && eyes.overlapThreshold <= 1.0, "Config 'eyesOverlapThreshold' not in range [0,1]");
+        ASSERT_LOG(eyes.scaleFactor > 1.0, "Config 'eyesScaleFactor' not greater than 1");
+        ASSERT_LOG(eyes.nmsThreshold >= 0, "Config 'eyesNmsThreshold' not greater or equal to 0");
+        ASSERT_LOG(eyes.minNeighbours >= 0, "Config 'eyesMinNeighbours' not greater or equal to 0");
+        ASSERT_LOG(eyes.minSize.width > 0 && eyes.minSize.height > 0, "Config 'eyesMinSize' not greater than zero");
         ASSERT_LOG(eyes.maxSize.width > eyes.minSize.width && eyes.maxSize.height > eyes.minSize.height,
-                   "'eyesMaxSize' not greater than 'eyesMinSize'");
+                   "Config 'eyesMaxSize' not greater than 'eyesMinSize'");
     }
 
-    ASSERT_LOG(displayWindowW > 0, "'displayWindowW' not greater than 0");
-    ASSERT_LOG(displayWindowH > 0, "'displayWindowH' not greater than 0");
+    ASSERT_LOG(displayWindowW > 0, "Config 'displayWindowW' not greater than 0");
+    ASSERT_LOG(displayWindowH > 0, "Config 'displayWindowH' not greater than 0");
 
-    ASSERT_LOG(searchRadius > 0, "'searchRadius' not greater than 0");
-    ASSERT_LOG(searchRadius <= displayWindowW && searchRadius <= displayWindowH, "'search' radius not within display window boundaries");
+    ASSERT_LOG(searchRadius > 0, "Config 'searchRadius' not greater than 0");
+    ASSERT_LOG(searchRadius <= displayWindowW && searchRadius <= displayWindowH, "Config 'search' radius not within display window boundaries");
     if (useHungarianMatching)
-        ASSERT_LOG(associationTrackThreshold >= 0, "'associationTrackThreshold' not greater or equal to 0");
-    ASSERT_LOG(removeTrackCountThresholdInBounds >= 0, "'removeTrackCountThresholdInBounds' not greater or equal to 0");
-    ASSERT_LOG(removeTrackCountThresholdOutBounds >= 0, "'removeTrackCountThresholdOutBounds' not greater or equal to 0");
-    ASSERT_LOG(removeTrackConfidenceInBounds >= 0, "'removeTrackConfidenceInBounds' not greater or equal to 0");
-    ASSERT_LOG(removeTrackConfidenceOutBounds >= 0, "'removeTrackConfidenceOutBounds' not greater or equal to 0");
-    ASSERT_LOG(createTrackCountThreshold >= 0, "'createTrackCountThreshold' not greater or equal to 0");
-    ASSERT_LOG(createTrackConfidenceThreshold >= 0, "'createTrackConfidenceThreshold' not greater or equal to 0");
-    ASSERT_LOG(trackerOverlapThreshold >= 0.0 && trackerOverlapThreshold <= 1.0, "'trackerOverlapThreshold' not in range [0,1]");
-    ASSERT_LOG(detectionFrameInterval > 0, "'detectionFrameInterval' not greater than 0");
+        ASSERT_LOG(associationTrackThreshold >= 0, "Config 'associationTrackThreshold' not greater or equal to 0");
+    ASSERT_LOG(removeTrackCountThresholdInBounds >= 0, "Config 'removeTrackCountThresholdInBounds' not greater or equal to 0");
+    ASSERT_LOG(removeTrackCountThresholdOutBounds >= 0, "Config 'removeTrackCountThresholdOutBounds' not greater or equal to 0");
+    ASSERT_LOG(removeTrackConfidenceInBounds >= 0, "Config 'removeTrackConfidenceInBounds' not greater or equal to 0");
+    ASSERT_LOG(removeTrackConfidenceOutBounds >= 0, "Config 'removeTrackConfidenceOutBounds' not greater or equal to 0");
+    ASSERT_LOG(createTrackCountThreshold >= 0, "Config 'createTrackCountThreshold' not greater or equal to 0");
+    ASSERT_LOG(createTrackConfidenceThreshold >= 0, "Config 'createTrackConfidenceThreshold' not greater or equal to 0");
+    ASSERT_LOG(trackerOverlapThreshold >= 0.0 && trackerOverlapThreshold <= 1.0, "Config 'trackerOverlapThreshold' not in range [0,1]");
+    ASSERT_LOG(detectionFrameInterval > 0, "Config 'detectionFrameInterval' not greater than 0");
     if (useLocalSearchROI)
-        ASSERT_LOG(bboxSizeMultiplyer > 0.0, "'bboxSizeMultiplyer' not greater than 0");
+        ASSERT_LOG(bboxSizeMultiplyer > 0.0, "Config 'bboxSizeMultiplyer' not greater than 0");
 
-    ASSERT_LOG(cameraType.isDefined(), "undefined 'cameraType': [" + cameraType.name() + "]");
-    ASSERT_LOG(cameraIndex >= 0, "'cameraIndex' not greater or equal to 0");
+    ASSERT_LOG(cameraType.isDefined(), "Config 'cameraType' undefined: [" + cameraType.name() + "]");
+    ASSERT_LOG(cameraIndex >= 0, "Config 'cameraIndex' not greater or equal to 0");
 
-    ASSERT_LOG(roiOutputSize > 0, "'roiOutputSize' not greater than 0");
-    ASSERT_LOG(roiThickness > 0, "'roiThickness' not greater than 0");
-    ASSERT_LOG(roiThicknessOld > 0, "'roiThicknessOld' not greater than 0");
+    ASSERT_LOG(roiOutputSize > 0, "Config 'roiOutputSize' not greater than 0");
+    ASSERT_LOG(roiThickness > 0, "Config 'roiThickness' not greater than 0");
+    ASSERT_LOG(roiThicknessOld > 0, "Config 'roiThicknessOld' not greater than 0");
 
     if (displayPlots) {
-        ASSERT_LOG(plotAccumulationPoints > 0, "'plotAccumulationPoints' not greater than 0");
-        ASSERT_LOG(plotFigureWidth > 0, "'plotFigureWidth' not greater than 0");
-        ASSERT_LOG(plotFigureHeight > 0, "'plotFigureHeight' not greater than 0");
-        ASSERT_LOG(plotTrackDirection == 0 || plotTrackDirection == 1, "'plotTrackDirection' unknown value");
-        ASSERT_LOG(plotMaxTracks > 0, "'plotMaxTracks' not greater than 0");
-        ASSERT_LOG(plotMaxPOI > 0, "'plotMaxPOI' not greater than 0");
+        ASSERT_LOG(plotAccumulationPoints > 0, "Config 'plotAccumulationPoints' not greater than 0");
+        ASSERT_LOG(plotFigureWidth > 0, "Config 'plotFigureWidth' not greater than 0");
+        ASSERT_LOG(plotFigureHeight > 0, "Config 'plotFigureHeight' not greater than 0");
+        ASSERT_LOG(plotTrackDirection == 0 || plotTrackDirection == 1, "Config 'plotTrackDirection' unknown value");
+        ASSERT_LOG(plotMaxTracks > 0, "Config 'plotMaxTracks' not greater than 0");
+        ASSERT_LOG(plotMaxPOI > 0, "Config 'plotMaxPOI' not greater than 0");
     }
 
-    bool anyCascade = requireAnyCascade();    
+    bool anyCascade = requireAnyCascade();
     ASSERT_LOG((anyCascade ^ SSD ^ FRCNN ^ YOLO) ^ (anyCascade & SSD & FRCNN & YOLO),
                "At least one and only one face detector type can be used at the same time!");
     ASSERT_LOG((STRUCK ^ KCF ^ Camshift ^ Compressive) ^ (STRUCK & KCF & Camshift & Compressive),
@@ -568,7 +574,7 @@ void ConfigFile::validateValues()
                "At least one and only one face classifier type can be used at the same time!");
 
     if (STRUCK) {
-        ASSERT_LOG(features.size() > 0, "'features' employed with 'STRUCK' face tracker not greater than 0");
+        ASSERT_LOG(features.size() > 0, "Config 'features' employed with 'STRUCK' face tracker not greater than 0");
     }
     if (FRCNN) {
         #ifndef FACE_RECOG_HAS_FRCNN
@@ -581,17 +587,26 @@ void ConfigFile::validateValues()
         #endif/*FACE_RECOG_HAS_YOLO*/
     }
 
-    ASSERT_LOG(bfs::is_directory(NEGDir), "Negative samples file directory not found [" + NEGDir + "]");
-    ASSERT_LOG(bfs::is_directory(POIDir), "Person of Interest ROI directory not found [" + POIDir + "]");
-    ASSERT_LOG(roiAccumulationSize > 0, "ROI and score accumulation size not greater than 0");
-    if (roiAccumulationMode != CircularBuffer::ScoreMode::CUMUL) {
-        ASSERT_LOG(thresholdFaceConsidered >= 0 && thresholdFaceConsidered <= 1, "'thresholdFaceConsidered' not in range [0,1]");
-        ASSERT_LOG(thresholdFaceRecognized >= 0 && thresholdFaceRecognized <= 1, "'thresholdFaceRecognized' not in range [0,1]");
+    ASSERT_LOG(roiAccumulationSize > 0, "Config 'roiAccumulationSize' not greater than 0");
+    ASSERT_WARN(useFaceRecognition, "Config 'useFaceRecognition' detected will disable all face recognition operations and checks");
+    if (useFaceRecognition) {
+        if (roiAccumulationMode != CircularBuffer::ScoreMode::CUMUL) {
+            ASSERT_LOG(thresholdFaceConsidered >= 0 && thresholdFaceConsidered <= 1, "Config 'thresholdFaceConsidered' not in range [0,1]");
+            ASSERT_LOG(thresholdFaceRecognized >= 0 && thresholdFaceRecognized <= 1, "Config 'thresholdFaceRecognized' not in range [0,1]");
+        }
+        else {
+            ASSERT_LOG(thresholdFaceConsidered >= 0 && thresholdFaceConsidered <= roiAccumulationSize,
+                       "Config 'thresholdFaceConsidered' not in range [0,roiAccumulationSize]");
+            ASSERT_LOG(thresholdFaceRecognized >= 0 && thresholdFaceRecognized <= roiAccumulationSize,
+                       "Config 'thresholdFaceRecognized' not in range [0,roiAccumulationSize]");
+        }
+        ASSERT_LOG(thresholdFaceRecognized > thresholdFaceConsidered, "Config 'thresholdFaceRecognized' not greater than 'thresholdFaceConsidered'");
+        ASSERT_LOG(bfs::is_directory(NEGDir), "Config 'NEGDir' for negative samples files directory not found [" + NEGDir + "]");
+        ASSERT_LOG(bfs::is_directory(POIDir), "Config 'POIDir' for Person of Interest ROI directory not found [" + POIDir + "]");
+        ASSERT_LOG(getClassifierType().isDefined(), "Config 'classifierType' undefined: [" + getClassifierType().name() + "]");
+        if (modelsFileSave) {
+            ASSERT_LOG(bfs::is_directory(modelsFileDir),
+                    "Config 'modelsFileDir' saving directory requested by 'modelsFileSave' not found [" + modelsFileDir + "]");
+        }
     }
-    else {
-        ASSERT_LOG(thresholdFaceConsidered >= 0 && thresholdFaceConsidered <= roiAccumulationSize, "'thresholdFaceConsidered' not in range [0,size]");
-        ASSERT_LOG(thresholdFaceRecognized >= 0 && thresholdFaceRecognized <= roiAccumulationSize, "'thresholdFaceRecognized' not in range [0,size]");
-    }
-    ASSERT_LOG(thresholdFaceRecognized > thresholdFaceConsidered, "'thresholdFaceRecognized' not greater than 'thresholdFaceConsidered'");
-    ASSERT_LOG(getClassifierType().isDefined(), "undefined 'classifierType': [" + getClassifierType().name() + "]");
 }

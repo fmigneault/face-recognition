@@ -20,8 +20,9 @@ std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config
     #ifdef FACE_RECOG_HAS_ESVM
     if (classifierType == ClassifierType::ENSEMBLE_ESVM)
     {
+        std::string saveModelsDir = config.modelsFileSave ? config.modelsFileDir : "";
         if (positiveROIs.size() > 0)
-            classifier.reset(new ClassifierEnsembleESVM(positiveROIs, config.NEGDir, positiveIDs, additionalNegativeROIs));
+            classifier.reset(new ClassifierEnsembleESVM(positiveROIs, config.NEGDir, positiveIDs, additionalNegativeROIs, saveModelsDir));
         else
             classifier.reset(new ClassifierEnsembleESVM());
     }

@@ -8,9 +8,11 @@ ClassifierEnsembleESVM::ClassifierEnsembleESVM()
     EoESVM.reset(new esvmEnsemble());
 }
 
-ClassifierEnsembleESVM::ClassifierEnsembleESVM(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, std::string negativeFileDir,
+ClassifierEnsembleESVM::ClassifierEnsembleESVM(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs,
+                                               const std::string& negativeFileDir,
                                                const std::vector<std::string>& positiveIDs,
-                                               const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs)
+                                               const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs,
+                                               const std::string& modelsFileDir)
 {
     size_t nPositives = positiveROIs.size();
     size_t nAdditionalNegatives = additionalNegativeROIs.size();
@@ -32,7 +34,8 @@ ClassifierEnsembleESVM::ClassifierEnsembleESVM(const std::vector<std::vector<FAC
         }
     }
     EoESVM.reset(new esvmEnsemble(posROI, negativeFileDir, positiveIDs, negROI));
-    EoESVM->saveModels(negativeFileDir);
+    if (!modelsFileDir.empty())
+        EoESVM->saveModels(modelsFileDir);
 }
 
 std::vector<double> ClassifierEnsembleESVM::predict(const FACE_RECOG_MAT& roi)

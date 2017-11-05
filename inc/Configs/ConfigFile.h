@@ -103,6 +103,8 @@ public:
     double thresholdFaceRecognized;
     int roiAccumulationSize;
     CircularBuffer::ScoreMode roiAccumulationMode;
+    bool modelsFileSave;
+    std::string modelsFileDir;
 
     // tracker association parameters
     bool useHungarianMatching;

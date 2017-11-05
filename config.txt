@@ -4,7 +4,7 @@
 deviceIndex = 0
 
 #==============================
-# camera 
+# camera
 #==============================
 # Specify which camera live feed must be used
 #   overrides any specified input frame sequence
@@ -42,17 +42,17 @@ TM = 0
 useFaceRecognition = 1
 #   employ positive images from geometric operations on original still
 useGeometricPositiveStills = 0
-#   employ pre-generated positive still synthetic images (3D model) 
+#   employ pre-generated positive still synthetic images (3D model)
 useSyntheticPositiveStills = 0
-#   employ other individual stills as hard counter-examples 
+#   employ other individual stills as hard counter-examples
 useReferenceNegativeStills = 0
-#   employ additional images from geometric operations on negative stills 
-#   requires 'useReferenceNegativeStills' to be employed 
+#   employ additional images from geometric operations on negative stills
+#   requires 'useReferenceNegativeStills' to be employed
 useGeometricNegativeStills = 0
 #   geometric operations parameters
-geometricTranslatePixels = 10 
+geometricTranslatePixels = 10
 geometricScalingMinSize = 24
-geometricScalingFactor = 0.9 
+geometricScalingFactor = 0.9
 #   stills directories
 POIDir = ../data/POI/
 NEGDir = ../data/NEG/
@@ -62,6 +62,9 @@ thresholdFaceConsidered = 8
 thresholdFaceRecognized = 12
 roiAccumulationSize = 20
 roiAccumulationMode = 1
+#   model files options
+modelsFileSave = 0
+modelsFileDir = './models/'
 
 #==============================
 # detection/tracking parameters
@@ -185,9 +188,8 @@ plotFigureHeight = 600
 #   0 = horizontal (POI next to each other for same track on 1 line)
 #   1 = vertical (POI on top/bottom of each other for same track on 1 column)
 plotTrackDirection = 0
-#   maximum number of tracks/POI allowed to be displayed by plots 
+#   maximum number of tracks/POI allowed to be displayed by plots
 plotMaxTracks = 10
 plotMaxPOI = 6
 #   resets plot previously employed for lost track if a new track is started
 plotResetOnTrackLost = 1
-
