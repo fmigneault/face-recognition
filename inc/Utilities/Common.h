@@ -3,7 +3,7 @@
 
 /* Headers of common library dependencies external of FaceRecog */
 
-// Define platform to remove ambiguous `ACCESS_MASK` between Windows and OpenCV 
+// Define platform to remove ambiguous `ACCESS_MASK` between Windows and OpenCV
 // Windows header must be included before OpenCV's headers
 #include "Configs/Platform.h"
 
@@ -27,7 +27,7 @@ using namespace Eigen;
     #include "opencv2/core/cuda.hpp"
 #endif
 // Since 3.3.1 - 'cv::plot::Plot2d::create' instead of 'cv::plot::createPlot2d'
-#if CV_VERSION_MAJOR > 3 && CV_VERSION_MINOR > 3 && CV_VERSION_REVISION > 0
+#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR >= 3 && CV_VERSION_REVISION > 0
     #define CV_NEW_PLOT2D_CREATE
 #endif
 using namespace cv;

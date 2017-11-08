@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     bfs::remove(logOutputFilePath);
     bfs::remove(logTimingFilePath);
     bfs::remove(logOutBBoxFilePath);
-    bfs::remove(logDebugFilePath);    
+    bfs::remove(logDebugFilePath);
     logstream logOutput(logOutputFilePath, true, true);
     ASSERT_LOG_FINALIZE(!resultFilePath.empty(), "Option '-r' result file path cannot be empty", logOutput, EXIT_FAILURE);
     logstream logResult(resultFilePath, false, optArgR);
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
     bfs::path lbpCascadesDir = opencvSourceDataPath / bfs::path("lbpcascades/");
     bfs::path haarCascadesDir = opencvSourceDataPath / bfs::path("haarcascades/");
     ASSERT_LOG_FINALIZE(bfs::is_directory(opencvSourceDataPath) && bfs::is_directory(lbpCascadesDir) && bfs::is_directory(haarCascadesDir),
-                        "OpenCV source data directory not found to access 'CascadeClassifier' models", logOutput, EXIT_FAILURE);    
+                        "OpenCV source data directory not found to access 'CascadeClassifier' models", logOutput, EXIT_FAILURE);
     #endif/*FACE_RECOG_HAS_VJ*/
 
     /********************************************************************************************************************************************/
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
     if (conf->displayPlots && conf->useFaceRecognition)
     {
         size_t plotDims[2]{ (size_t)conf->plotMaxTracks, nPlotPOI };
-        plotFigure = FACE_RECOG_MAT(cv::Size(conf->plotFigureWidth, conf->plotFigureHeight), CV_8UC3);        
+        plotFigure = FACE_RECOG_MAT(cv::Size(conf->plotFigureWidth, conf->plotFigureHeight), CV_8UC3);
         plotsPtr = xstd::mvector<2, cv::Ptr<cv::plot::Plot2d> >(plotDims);
         plotData = xstd::mvector<2, cv::Mat>(plotDims);
         plotTrackID = std::vector<int>(conf->plotMaxTracks, -1);
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
         for (size_t trk = 0; trk < conf->plotMaxTracks; ++trk) {
             for (size_t poi = 0; poi < nPlotPOI; ++poi) {
                 plotData[trk][poi] = cv::Mat(conf->plotAccumulationPoints, 1, CV_64F);
-                #if CV_NEW_PLOT2D_CREATE
+                #ifdef CV_NEW_PLOT2D_CREATE
                 plotsPtr[trk][poi] = cv::plot::Plot2d::create(plotData[trk][poi]);
                 #else
                 plotsPtr[trk][poi] = cv::plot::createPlot2d(plotData[trk][poi]);
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
         ASSERT_LOG_FINALIZE(util::prepareTestSequences(testSequenceFileNames, testSequenceRegexPaths, testFilePath),
                             "Failed to prepare test sequence file names!", logOutput, EXIT_FAILURE);
         framesPath = testSequenceRegexPaths[0]; // first test sequence for initial VideoCapture open
-        sequenceTrackID = bfs::path(testSequenceRegexPaths[0]).remove_filename().filename().string();        
+        sequenceTrackID = bfs::path(testSequenceRegexPaths[0]).remove_filename().filename().string();
     }
 
     // Header of results file
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
     // main face detector
     std::shared_ptr<IDetector> faceDetector = buildSpecializedDetector(*conf, opencvSourceDataPathStr, DetectorType::FACE_DETECTOR_GLOBAL);
     ASSERT_LOG_FINALIZE(faceDetector, "Global face detector not properly initialized", logOutput, EXIT_FAILURE);
-    size_t nFaceModels = faceDetector->modelCount();    
+    size_t nFaceModels = faceDetector->modelCount();
 
     // localized search face detector
     std::shared_ptr<IDetector> localFaceDetector = buildSpecializedDetector(*conf, opencvSourceDataPathStr, DetectorType::FACE_DETECTOR_LOCAL);
