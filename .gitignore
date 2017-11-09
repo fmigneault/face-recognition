@@ -57,6 +57,7 @@ tessdata/
 *.vsp
 
 # Python files
+.idea/
 *.pyc
 *.pyo
 
