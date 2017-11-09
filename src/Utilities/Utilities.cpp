@@ -521,6 +521,7 @@ void setAndDisplayDevices(int deviceIndex, ostream& out)
     const string sep0 = string(right, '*');
     const string sep1 = tab1 + string(right - tab1.length(), '=');
     const string sep2 = tab2 + string(right - tab2.length(), '-');
+    const string sep3 = tab3 + string(right - tab3.length(), '-');
 
     out << sep0 << endl << "Devide Information" << endl << sep1 << endl;
     out << tab1 << "Number of CPU:     " << cv::getNumberOfCPUs() << endl;
@@ -608,6 +609,7 @@ void setAndDisplayDevices(int deviceIndex, ostream& out)
             for (size_t i = 0; i < nPlatforms; ++i)
             {
                 cv::ocl::PlatformInfo plt = platforms[i];
+                out << sep2 << endl;
                 out << tab2 << "Platform " << i << ":" << endl;
                 out << tab3 << "name:    " << plt.name() << endl;
                 out << tab3 << "vendor:  " << plt.vendor() << endl;
@@ -622,6 +624,7 @@ void setAndDisplayDevices(int deviceIndex, ostream& out)
                     {
                         cv::ocl::Device device;
                         plt.getDevice(device, (int)i);
+                        out << sep3 << endl;
                         out << tab3 << "Device " << i << endl;
                         printDeviceInfo(device, tab4, out);
                     }
@@ -638,8 +641,8 @@ void setAndDisplayDevices(int deviceIndex, ostream& out)
     else
     {
         out << tab2 << "Found CUDA enabled device(s): " << cudaNumDevices << endl;
-        out << tab2 << "Current CUDA device: " << cuda::getDevice() << sep2 << endl;
-        out << tab2 << "Printing information of CUDA device(s)..." << endl;
+        out << tab2 << "Current CUDA device: " << cuda::getDevice() << endl;
+        out << tab2 << "Printing information of CUDA device(s)..." << endl << sep2 ;
         for (int i = 0; i < cudaNumDevices; ++i)
         {
             out << tab2 << "Device " << i << endl;

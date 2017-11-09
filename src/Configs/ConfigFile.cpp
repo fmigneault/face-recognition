@@ -150,6 +150,8 @@ std::string ConfigFile::display() const
         << left << tab << tab << setw(padSize) << setfill(padChar) << "use3CascadesLocalSearch"            << sep << use3CascadesLocalSearch            << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "bboxSizeMultiplyer"                 << sep << bboxSizeMultiplyer                 << endl
         << left << tab << "output/debug/display" << sep << endl
+        << left << tab << tab << setw(padSize) << setfill(padChar) << "verboseConfig"                      << sep << verboseConfig                      << endl
+        << left << tab << tab << setw(padSize) << setfill(padChar) << "verboseDevices"                     << sep << verboseDevices                     << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "verboseDebug"                       << sep << verboseDebug                       << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "outputDebug"                        << sep << outputDebug                        << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "outputFrames"                       << sep << outputFrames                       << endl
@@ -344,6 +346,8 @@ ConfigFile::ConfigFile(const std::string& path)
         else if (name == "use3CascadesLocalSearch")                 iss >> use3CascadesLocalSearch;
         else if (name == "bboxSizeMultiplyer")                      iss >> bboxSizeMultiplyer;
         // output/debug/display parameters
+        else if (name == "verboseConfig")                           iss >> verboseConfig;
+        else if (name == "verboseDevices")                          iss >> verboseDevices;
         else if (name == "verboseDebug")                            iss >> verboseDebug;
         else if (name == "outputDebug")                             iss >> outputDebug;
         else if (name == "outputFrames")                            iss >> outputFrames;
@@ -459,6 +463,8 @@ void ConfigFile::setDefaults()
     use3CascadesLocalSearch = false;
     bboxSizeMultiplyer      = 1.5;
 
+    verboseConfig           = true;
+    verboseDevices          = true;
     verboseDebug            = true;
     outputDebug             = true;
     outputFrames            = true;

@@ -173,8 +173,10 @@ int main(int argc, char *argv[])
         logstream logDebug(logDebugFilePath, conf->verboseDebug, conf->outputDebug);
     );
 
-    logOutput << *conf;     // output/display configs read from file
-    logOutput.ofss.flush(); // wait for output completion before moving on (many configs, sometime not enough time to complete before next calls)
+    if (conf->verboseConfig) {
+        logOutput << *conf;     // output/display configs read from file
+        logOutput.ofss.flush(); // wait for output completion before moving on (many configs, sometime not enough time to complete before next calls)
+    }
 
     /********************************************************************************************************************************************/
     /* COMMON PATHS                                                                                                                             */
@@ -234,7 +236,8 @@ int main(int argc, char *argv[])
 
     // Display all available devices, activate OpenCL and set device index to use
     #if CV_VERSION_MAJOR == 3
-    util::setAndDisplayDevices(conf->deviceIndex, logOutput.ofss);
+    if (conf->verboseDevices)
+        util::setAndDisplayDevices(conf->deviceIndex, logOutput.ofss);
     #endif
 
     // Handle for colored console text in Windows

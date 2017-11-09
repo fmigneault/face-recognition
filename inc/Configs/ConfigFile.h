@@ -127,6 +127,8 @@ public:
     double bboxSizeMultiplyer;
 
     // output debug parameters
+    bool verboseConfig;
+    bool verboseDevices;
     bool verboseDebug;
     bool outputDebug;
     bool outputFrames;

@@ -146,8 +146,12 @@ bboxSizeMultiplyer = 1.5
 #==============================
 # output/debug/display
 #==============================
+#   verboseConfig print the detected configuration values from this file
+#   verboseDevices prints OCL/CUDA capable & enabled devices for processing
 #   verboseDebug prints additional messages to the console
 #   outputDebug writes additional information to file
+verboseConfig = 1
+verboseDevices = 1
 verboseDebug = 0
 outputDebug = 0
 #   output/display processed frames with detected/track/recognized ROIs
