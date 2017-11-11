@@ -64,6 +64,7 @@ roiAccumulationSize = 20
 roiAccumulationMode = 1
 #   model files options
 modelsFileSave = 0
+modelsFileLoad = 0
 modelsFileDir = './models/'
 
 #==============================

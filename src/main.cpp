@@ -324,8 +324,9 @@ int main(int argc, char *argv[])
                             "Failed to prepare file names!", logOutput, EXIT_FAILURE);
         logOutput << "Sequence test files preparation complete" << std::endl;
         FACE_RECOG_DEBUG(
+            logDebug << "[optArgP] Test sequence [0] example frame names:" << std::endl;
             for (size_t i = 0; i < testSequenceFileNames[0].size(); ++i)
-                logDebug << testSequenceFileNames[0][i] << std::endl;
+                logDebug << "  " << testSequenceFileNames[0][i] << std::endl;
         );
     }
 
@@ -337,7 +338,19 @@ int main(int argc, char *argv[])
         ASSERT_LOG_FINALIZE(util::prepareTestSequences(testSequenceFileNames, testSequenceRegexPaths, testFilePath),
                             "Failed to prepare test sequence file names!", logOutput, EXIT_FAILURE);
         framesPath = testSequenceRegexPaths[0]; // first test sequence for initial VideoCapture open
-        sequenceTrackID = bfs::path(testSequenceRegexPaths[0]).remove_filename().filename().string();
+        sequenceTrackID = bfs::path(framesPath).remove_filename().filename().string();
+        FACE_RECOG_DEBUG(
+            size_t nTestSequences = testSequenceRegexPaths.size();
+            logDebug << "[optArgT] Test sequences file path: " << testFilePath << std::endl;
+            logDebug << "[optArgT] Test sequences [0] path: " << framesPath << std::endl;
+            logDebug << "[optArgT] Test sequences regex loaded: " << nTestSequences << std::endl;
+            logDebug << "[optArgT] Test sequences paths loaded: " << testSequenceFileNames.size() << std::endl;
+            for (size_t i = 0; i < nTestSequences; ++i)
+                logDebug << "[optArgT] Test sequence frame count [" << i << "]: " << testSequenceFileNames[i].size() << std::endl;
+            logDebug << "[optArgT] Test sequence [0] example frame names:" << std::endl;
+            for (size_t i = 0; i < testSequenceFileNames[0].size(); ++i)
+                logDebug << "  " << testSequenceFileNames[0][i] << std::endl;
+        );
     }
 
     // Header of results file

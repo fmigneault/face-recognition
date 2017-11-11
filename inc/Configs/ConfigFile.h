@@ -104,6 +104,7 @@ public:
     int roiAccumulationSize;
     CircularBuffer::ScoreMode roiAccumulationMode;
     bool modelsFileSave;
+    bool modelsFileLoad;
     std::string modelsFileDir;
 
     // tracker association parameters

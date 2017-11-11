@@ -109,6 +109,7 @@ std::string ConfigFile::display() const
         << left << tab << tab << setw(padSize) << setfill(padChar) << "roiAccumulationSize"                << sep << roiAccumulationSize                << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "roiAccumulationMode"                << sep << roiAccumulationMode                << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "modelsFileSave"                     << sep << modelsFileSave                     << endl
+        << left << tab << tab << setw(padSize) << setfill(padChar) << "modelsFileLoad"                     << sep << modelsFileLoad                     << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "modelsFileDir"                      << sep << modelsFileDir                      << endl
         << left << tab << "detection/tracking parameters" << sep << endl
         << left << tab << tab << setw(padSize) << setfill(padChar) << "searchRadius"                       << sep << searchRadius                       << endl
@@ -302,6 +303,7 @@ ConfigFile::ConfigFile(const std::string& path)
                                 :                                              CircularBuffer::ScoreMode::RAW;
         }
         else if (name == "modelsFileSave")                          iss >> modelsFileSave;
+        else if (name == "modelsFileLoad")                          iss >> modelsFileLoad;
         else if (name == "modelsFileDir")                           iss >> modelsFileDir;
         // detection and tracking parameters
         else if (name == "searchRadius")                            iss >> searchRadius;
@@ -383,15 +385,15 @@ ConfigFile::ConfigFile(const std::string& path)
 
 void ConfigFile::setDefaults()
 {
-    seed                    = 0;
-    svmC                    = 1.0;
-    svmBudgetSize           = 0;
+    seed                        = 0;
+    svmC                        = 1.0;
+    svmBudgetSize               = 0;
 
-    deviceIndex             = 0;
+    deviceIndex                 = 0;
 
-    cameraType              = CameraType::UNDEFINED;
-    cameraIndex             = -1;
-    useCameraTrigger        = false;
+    cameraType                  = CameraType::UNDEFINED;
+    cameraIndex                 = -1;
+    useCameraTrigger            = false;
 
     FRCNN                       = false;
     HaarCascadeFrontal          = true;
@@ -427,6 +429,7 @@ void ConfigFile::setDefaults()
     roiAccumulationSize         = 30;
     roiAccumulationMode         = CircularBuffer::ScoreMode::RAW;
     modelsFileSave              = false;
+    modelsFileLoad              = false;
     modelsFileDir               = "./models/";
 
     searchRadius                            = 30;
