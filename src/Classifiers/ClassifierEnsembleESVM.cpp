@@ -8,18 +8,18 @@ ClassifierEnsembleESVM::ClassifierEnsembleESVM()
     EoESVM.reset(new esvmEnsemble());
 }
 
-ClassifierEnsembleESVM::ClassifierEnsembleESVM(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs,
+ClassifierEnsembleESVM::ClassifierEnsembleESVM(const std::vector<std::vector<FACE_RECOG_MAT>>& positiveROIs,
                                                const std::string& negativeFileDir,
                                                const std::vector<std::string>& positiveIDs,
-                                               const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs,
+                                               const std::vector<std::vector<FACE_RECOG_MAT>>& additionalNegativeROIs,
                                                const std::string& modelsFileDir)
 {
     size_t nPositives = positiveROIs.size();
     size_t nAdditionalNegatives = additionalNegativeROIs.size();
-    std::vector<std::vector<cv::Mat> > posROI(nPositives);
-    std::vector<std::vector<cv::Mat> > negROI;
+    std::vector<std::vector<cv::Mat>> posROI(nPositives);
+    std::vector<std::vector<cv::Mat>> negROI;
     if (nPositives == nAdditionalNegatives)
-        negROI = std::vector<std::vector<cv::Mat> >(nAdditionalNegatives);
+        negROI = std::vector<std::vector<cv::Mat>>(nAdditionalNegatives);
 
     for (size_t pos = 0; pos < nPositives; ++pos) {
         size_t nRepresentations = positiveROIs[pos].size();

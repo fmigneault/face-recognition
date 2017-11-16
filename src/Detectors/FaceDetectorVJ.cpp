@@ -48,56 +48,53 @@ void FaceDetectorVJ::initializeParameters(double scaleFactor, int nmsThreshold, 
     if (overlapThreshold >= 0)  this->overlapThreshold = overlapThreshold;
 }
 
-int FaceDetectorVJ::loadDetector(string modelPath, FlipMode faceFlipMode)
+bool FaceDetectorVJ::loadDetector(string modelPath, FlipMode faceFlipMode)
 {
-    bool success_load_cascade = false;
     #if FACE_RECOG_USE_CUDA
     Ptr<cv::cuda::CascadeClassifier> cascade = cv::cuda::CascadeClassifier::create(modelPath);
-    success_load_cascade = !cascade.empty();
+    bool success_load_cascade = !cascade.empty();
     #else
-    FACE_RECOG_NAMESPACE::CascadeClassifier cascade;
-    success_load_cascade = cascade.load(modelPath);
+    cv::CascadeClassifier cascade;
+    bool success_load_cascade = cascade.load(modelPath);
     #endif
 
-    if (!success_load_cascade)
-    {
-        cerr << "ERROR: Could not load classifier cascade " << modelPath << endl;
-        return -1;
+    if (success_load_cascade) {
+        #if FACE_RECOG_USE_CUDA
+        cascade->setScaleFactor(scaleFactor);
+        cascade->setMinObjectSize(minSize);
+        cascade->setMaxObjectSize(maxSize);
+        cascade->setMinNeighbors(minNeighbours);
+        #endif
+
+        faceFinder.push_back(cascade);
+        stageCount.push_back(1);
+        modelPaths.push_back(modelPath);
+        faceFlipModes.push_back(faceFlipMode);
     }
-
-    #if FACE_RECOG_USE_CUDA
-    cascade->setScaleFactor(scaleFactor);
-    cascade->setMinObjectSize(minSize);
-    cascade->setMaxObjectSize(maxSize);
-    cascade->setMinNeighbors(minNeighbours);
-    #endif
-
-    faceFinder.push_back(cascade);
-    stageCount.push_back(1);
-    modelPaths.push_back(modelPath);
-    faceFlipModes.push_back(faceFlipMode);
-    return 0;
+    return success_load_cascade;
 }
 
 void FaceDetectorVJ::assignImage(const FACE_RECOG_MAT& frame)
 {
-    size_t iFrame = frames.size();
-    FlipMode fm = (iFrame < faceFlipModes.size()) ? faceFlipModes[iFrame] : NONE;
-    frames.push_back(imFlip(frame, fm));
+    cleanImages();
+    size_t nClassifiers = faceFinder.size();
+    for (size_t i = 0; i < nClassifiers; ++i) {
+        FlipMode fm = (i < faceFlipModes.size()) ? faceFlipModes[i] : NONE;
+        frames.push_back(imFlip(frame, fm));
+    }
 }
 
-int FaceDetectorVJ::detect(vector<vector<Rect> >& bboxes)
+bool FaceDetectorVJ::detect(vector<vector<Rect>>& bboxes)
 {
     size_t nClassifiers = faceFinder.size();
     size_t nImages = frames.size();
-    if (nImages != nClassifiers)
-    {
-        cerr << "ERROR in findFaces, different number of images and classifiers" << endl;
-        return -1;
-    }
+    ASSERT_LOG(nImages == nClassifiers, "Different number of images and classifiers in `FaceRecogVJ::detect`");
+
+    if (bboxes.size() != nClassifiers)
+        bboxes = std::vector<std::vector<Rect>>(nClassifiers);
 
     #pragma omp parallel for
-    for (long c = 0; c < nClassifiers; ++c)
+    for (omp_size_t c = 0; c < nClassifiers; ++c)
     {
         #if FACE_RECOG_USE_CUDA
         auto cascade_gpu = faceFinder[c];
@@ -107,17 +104,34 @@ int FaceDetectorVJ::detect(vector<vector<Rect> >& bboxes)
         faceFinder[c].detectMultiScale(frames[c], bboxes[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
         #endif
     }
-    return 0;
+    return true;
+}
+
+void FaceDetectorVJ::flipDetections(size_t index, vector<vector<Rect>>& bboxes)
+{
+    for (size_t i = 0; i < bboxes[index].size(); ++i)
+    {
+        Rect bbox = bboxes[index][i];
+        bboxes[index][i].x = frames[index].cols - bbox.x - bbox.width;
+    }
+}
+
+vector<Rect> FaceDetectorVJ::mergeDetections(vector<vector<Rect>>& bboxes)
+{
+    size_t nBBox = bboxes.size();
+    bool frontalOnly = nBBox == 1;
+    if (!frontalOnly)
+        for (size_t b = 0; b < nBBox; ++b)
+            if (faceFlipModes[b] == HORIZONTAL)
+                flipDetections(b, bboxes);
+    return util::mergeDetections(bboxes, overlapThreshold, frontalOnly);
 }
 
 double FaceDetectorVJ::evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image)
 {
     /*EVALUATE CONFIDENCE FOR UNMATCHED TARGETS*/
     size_t nFaces = faceFinder.size();
-    if (nFaces != stageCount.size()) {
-        cerr << "ERROR in evaluateConfidence, different number of classifiers and stage count" << endl;
-        return -1;
-    }
+    ASSERT_LOG(nFaces == stageCount.size(), "Different number of classifiers and stage count in `FaceDetectorVJ::evaluateConfidence`");
 
     vector<double> confidences(nFaces);
     vector<Rect> trackersROI;
@@ -128,7 +142,7 @@ double FaceDetectorVJ::evaluateConfidence(const Track& track, const FACE_RECOG_M
 
     double score = 0;
     #pragma omp parallel for
-    for (long f = 0; f < nFaces; ++f) {
+    for (omp_size_t f = 0; f < nFaces; ++f) {
         croppedFaces[f] = imResize(imFlip(image(face).clone(), faceFlipModes[f]), evalSize);
         double tempWeights = 0;
         confidences[f] = faceFinder[f].classify(croppedFaces[f], tempWeights);
@@ -144,26 +158,6 @@ double FaceDetectorVJ::evaluateConfidence(const Track& track, const FACE_RECOG_M
     //#else
     //faceFinder[i].detectMultiScale(croppedTarget, trackersROI, scaleFactor, minNeighbours, CV_HAAR_SCALE_IMAGE);
     //#endif
-}
-
-void FaceDetectorVJ::flipDetections(size_t index, vector<vector<Rect> >& bboxes)
-{
-    for (size_t i = 0; i < bboxes[index].size(); ++i)
-    {
-        Rect bbox = bboxes[index][i];
-        bboxes[index][i].x = frames[index].cols - bbox.x - bbox.width;
-    }
-}
-
-vector<Rect> FaceDetectorVJ::mergeDetections(vector<vector<Rect> >& bboxes)
-{
-    size_t nBBox = bboxes.size();
-    bool frontalOnly = nBBox == 1;
-    if (!frontalOnly)
-        for (size_t b = 0; b < nBBox; ++b)
-            if (faceFlipModes[b] == HORIZONTAL)
-                flipDetections(b, bboxes);
-    return util::mergeDetections(bboxes, overlapThreshold, frontalOnly);
 }
 
 #endif/*FACE_RECOG_HAS_VJ*/

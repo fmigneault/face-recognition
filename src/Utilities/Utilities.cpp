@@ -26,7 +26,7 @@ bool prepareFrameFileNames(vector<string>& fileNames, const string& framesRegexP
         return false;
     else {
         for (auto &entry : boost::make_iterator_range(bfs::directory_iterator(p), {}))
-            fileNames.push_back(entry.path().stem().string());
+            fileNames.push_back(boost::trim_copy(entry.path().stem().string()));
         sort(fileNames.begin(), fileNames.end());
     }
     return !fileNames.empty();
@@ -46,6 +46,7 @@ bool prepareTestSequences(vector<vector<string> >& sequenceFileNames, vector<str
             size_t iTest = sequenceFileNames.size() - 1;
             if (!util::prepareFrameFileNames(sequenceFileNames[iTest], testFileSequenceRegexPath))
                 return false;
+            boost::trim(testFileSequenceRegexPath);
             sequenceRegexPaths.push_back(testFileSequenceRegexPath);
         }
     }
@@ -127,6 +128,7 @@ int loadDirectoryROIs(const ConfigFile& config, bfs::path opencvSourcesDataPath,
         alternativeROIPath = config.POIDir;
     if (!bfs::is_directory(alternativeROIPath))
         return EXIT_FAILURE;
+    boost::trim(alternativeROIPath);
 
     // special image names (for auto-generation if missing)
     std::string roiSuffix = "_roi";

@@ -12,12 +12,12 @@ public:
     EyeDetector();
     EyeDetector(double scale, int nms, cv::Size minSize, cv::Size maxSize);
     void initializeParameters(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize);
-    int loadDetector(std::string name);
+    bool loadDetector(std::string name);
     // specialized overrides
     void assignImage(const FACE_RECOG_MAT& frame) override;
     double evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image) override;
-    void flipDetections(size_t index, vector<vector<Rect> >& faces) override;
-    int detect(vector<vector<Rect> >& bboxes) override;
+    void flipDetections(size_t index, vector<vector<Rect>>& faces) override;
+    bool detect(vector<vector<Rect>>& bboxes) override;
     // utility members
     std::vector<cv::Rect> getFoundEyes(std::vector<cv::Rect> relRect);
     size_t rightEyeIndex;
@@ -25,7 +25,7 @@ public:
 
 private:
     #if FACE_RECOG_USE_CUDA
-    std::vector<Ptr<cv::cuda::CascadeClassifier> > _eyeCascades;
+    std::vector<Ptr<cv::cuda::CascadeClassifier>> _eyeCascades;
     #else
     std::vector<FACE_RECOG_NAMESPACE::CascadeClassifier> _eyeCascades;
     #endif

@@ -2,9 +2,9 @@
 #include "FaceRecog.h"
 
 std::shared_ptr<IClassifier> buildSpecializedClassifier(const ConfigFile& config,
-                                                        const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs,
+                                                        const std::vector<std::vector<FACE_RECOG_MAT>>& positiveROIs,
                                                         const std::vector<std::string>& positiveIDs,
-                                                        const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs)
+                                                        const std::vector<std::vector<FACE_RECOG_MAT>>& additionalNegativeROIs)
 {
     std::shared_ptr<IClassifier> classifier = nullptr;
     ClassifierType classifierType = config.getClassifierType();

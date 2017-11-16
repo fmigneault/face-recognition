@@ -50,6 +50,10 @@ std::string ConfigFile::display() const
     size_t padSize = 40;
     size_t padLine = 60;
 
+    // save flags before altering them to restore after
+    std::ios coutInitState(nullptr);
+    coutInitState.copyfmt(std::cout);
+
     ostringstream featParams;
     for (size_t f = 0; f < features.size(); ++f) {
         featParams << left << tab << tab << setw(padSize) << setfill(padChar) << "feature" << sep << f << endl
@@ -184,7 +188,9 @@ std::string ConfigFile::display() const
         << left << tab << tab << setw(padSize) << setfill(padChar) << "plotResetOnTrackLost"               << sep << plotResetOnTrackLost               << endl
         << string(padLine, '=') << endl;
 
-    return out.str();
+    std::string out_str(out.str());
+    std::cout.copyfmt(coutInitState);   // restore output initial state
+    return out_str;
 }
 
 ostream& operator<< (ostream& out, const ConfigFile& conf)

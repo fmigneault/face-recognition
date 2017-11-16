@@ -28,7 +28,7 @@ void FaceDetectorFRCNN::pyObjList2VecRect(PyObject* list)
     }
 }
 
-int FaceDetectorFRCNN::detect(std::vector<std::vector<cv::Rect> >& bboxes)
+bool FaceDetectorFRCNN::detect(std::vector<std::vector<cv::Rect>>& bboxes)
 {
    //setenv("PYTHONPATH", folderPath.c_str(), 1);
     auto lastFrame = frames.back();
@@ -41,14 +41,14 @@ int FaceDetectorFRCNN::detect(std::vector<std::vector<cv::Rect> >& bboxes)
     args.emplace_back(ndmat);
     bp::object res = callPyFuncFromFile(pyFunc, filePath, args);
     if (res.is_none())
-        return 0;
+        return false;
     pyObjList2VecRect(res.ptr());
 
     /*
     std::cout << "1" << std::endl;
     PyObject* res = callPyUsingModule(pyFunc, filePath, ndata);
     Py_CLEAR(ndata);*/
-    return 1;
+    return true;
 }
 
 void FaceDetectorFRCNN::assignImage(FACE_RECOG_MAT frame)

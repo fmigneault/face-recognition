@@ -33,7 +33,7 @@ void FaceDetectorSSD::initializeParameters(double scaleFactor, int nmsThreshold,
     if (overlapThreshold >= 0)  this->overlapThreshold = overlapThreshold;
 }
 
-int FaceDetectorSSD::loadDetector(string name, FlipMode faceFlipMode)
+bool FaceDetectorSSD::loadDetector(string name, FlipMode faceFlipMode)
 {
     bool success_load_cascade = false;
     #if FACE_RECOG_USE_CUDA
@@ -47,7 +47,7 @@ int FaceDetectorSSD::loadDetector(string name, FlipMode faceFlipMode)
     if (!success_load_cascade)
     {
         cerr << "ERROR: Could not load classifier cascade " << name << endl;
-        return -1;
+        return false;
     }
 
     #if FACE_RECOG_USE_CUDA
@@ -60,7 +60,7 @@ int FaceDetectorSSD::loadDetector(string name, FlipMode faceFlipMode)
     faceFinder.push_back(cascade);
     stageCount.push_back(1);
     faceFlipModes.push_back(faceFlipMode);
-    return 0;
+    return true;
 }
 
 void FaceDetectorSSD::assignImage(const FACE_RECOG_MAT& frame)
@@ -70,14 +70,14 @@ void FaceDetectorSSD::assignImage(const FACE_RECOG_MAT& frame)
     frames.push_back(imFlip(frame, fm));
 }
 
-int FaceDetectorSSD::detect(vector<vector<Rect> >& bboxes)
+bool FaceDetectorSSD::detect(vector<vector<Rect>>& bboxes)
 {
     size_t nClassifiers = faceFinder.size();
     size_t nImages = frames.size();
     if (nImages != nClassifiers)
     {
         cerr << "ERROR in findFaces, different number of images and classifiers" << endl;
-        return -1;
+        return false;
     }
 
     #pragma omp parallel for
@@ -91,7 +91,7 @@ int FaceDetectorSSD::detect(vector<vector<Rect> >& bboxes)
         faceFinder[c].detectMultiScale(frames[c], bboxes[c], scaleFactor, nmsThreshold, CASCADE_SCALE_IMAGE, minSize, maxSize);
         #endif
     }
-    return 0;
+    return true;
 }
 
 double FaceDetectorSSD::evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image)
@@ -130,7 +130,7 @@ double FaceDetectorSSD::evaluateConfidence(const Track& track, const FACE_RECOG_
     //#endif
 }
 
-void FaceDetectorSSD::flipDetections(size_t index, vector<vector<Rect> >& faces)
+void FaceDetectorSSD::flipDetections(size_t index, vector<vector<Rect>>& faces)
 {
     for (size_t i = 0; i < faces[index].size(); ++i)
     {
@@ -139,7 +139,7 @@ void FaceDetectorSSD::flipDetections(size_t index, vector<vector<Rect> >& faces)
     }
 }
 
-vector<Rect> FaceDetectorSSD::mergeDetections(vector<vector<Rect> >& faces)
+vector<Rect> FaceDetectorSSD::mergeDetections(vector<vector<Rect>>& faces)
 {
     size_t nFaces = faces.size();
     bool frontalOnly = nFaces == 1;
@@ -183,7 +183,7 @@ SSD_Detector::SSD_Detector(const string& model_file,
     SetMean(mean_file, mean_value);
 }
 
-std::vector<vector<float> > SSD_Detector::Detect(const cv::Mat& img) {
+std::vector<vector<float>> SSD_Detector::Detect(const cv::Mat& img) {
     Blob<float>* input_layer = net_->input_blobs()[0];
     input_layer->Reshape(1, num_channels_,
                          input_geometry_.height, input_geometry_.width);
@@ -201,7 +201,7 @@ std::vector<vector<float> > SSD_Detector::Detect(const cv::Mat& img) {
     Blob<float>* result_blob = net_->output_blobs()[0];
     const float* result = result_blob->cpu_data();
     const int num_det = result_blob->height();
-    vector<vector<float> > detections;
+    vector<vector<float>> detections;
     for (int k = 0; k < num_det; ++k) {
         if (result[0] == -1) {
           // Skip invalid detection.

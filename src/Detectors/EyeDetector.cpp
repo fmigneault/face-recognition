@@ -19,34 +19,27 @@ void EyeDetector::initializeParameters(double scaleFactor, int nmsThreshold, cv:
     _maxSize = maxSize;
 }
 
-int EyeDetector::loadDetector(std::string name)
+bool EyeDetector::loadDetector(std::string name)
 {
-    bool success_load_cascade = false;
     #if FACE_RECOG_USE_CUDA
     Ptr<cv::cuda::CascadeClassifier> _cascade = cv::cuda::CascadeClassifier::create(name);
-    success_load_cascade = !_cascade.empty();
+    bool success_load_cascade = !_cascade.empty();
     #else
     FACE_RECOG_NAMESPACE::CascadeClassifier _cascade;
-    success_load_cascade = _cascade.load(name);
+    bool success_load_cascade = _cascade.load(name);
     #endif
 
-    if (!success_load_cascade)
-    {
-        std::cerr << "ERROR: Could not load classifier cascade" << name << std::endl;
-        return -1;
+    if (success_load_cascade) {
+        #if FACE_RECOG_USE_CUDA
+        cascade->setScaleFactor(_scaleFactor);
+        cascade->setMinObjectSize(_minSize);
+        cascade->setMaxObjectSize(_maxSize);
+        cascade->setMinNeighbors(_nmsThreshold);
+        #endif
+
+        _eyeCascades.push_back(_cascade);
     }
-    else
-        std::cout << "Cascade " << name << " successfully loaded" << std::endl;
-
-    #if FACE_RECOG_USE_CUDA
-    cascade->setScaleFactor(_scaleFactor);
-    cascade->setMinObjectSize(_minSize);
-    cascade->setMaxObjectSize(_maxSize);
-    cascade->setMinNeighbors(_nmsThreshold);
-    #endif
-
-    _eyeCascades.push_back(_cascade);
-    return 0;
+    return success_load_cascade;
 }
 
 void EyeDetector::assignImage(const FACE_RECOG_MAT& frame)
@@ -59,13 +52,13 @@ double EyeDetector::evaluateConfidence(const Track& track, const FACE_RECOG_MAT&
     return (track.getROI().getSubRect().area()) ? 1.0 : 0.0;
 }
 
-void EyeDetector::flipDetections(size_t index, vector<vector<Rect> >& faces) {}
+void EyeDetector::flipDetections(size_t index, vector<vector<Rect>>& faces) {}
 
 // Return detections from the specified ROI
-int EyeDetector::detect(vector<vector<Rect> >& bboxes)
+bool EyeDetector::detect(vector<vector<Rect>>& bboxes)
 {
     #pragma omp parallel for
-    for (long c = 0; c < _eyeCascades.size(); ++c)
+    for (omp_size_t c = 0; c < _eyeCascades.size(); ++c)
     {
         std::vector<cv::Rect> _foundEyes;
 
@@ -79,6 +72,7 @@ int EyeDetector::detect(vector<vector<Rect> >& bboxes)
 
         bboxes[c] = getFoundEyes(_foundEyes);
     }
+    return true;
 };
 
 // Return the absolute position of the ROIs of found eyes within the image specified using found relative positions

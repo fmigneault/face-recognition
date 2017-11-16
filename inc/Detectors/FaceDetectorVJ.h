@@ -33,10 +33,10 @@ public:
     FaceDetectorVJ(double scaleFactor, int nmsThreshold, cv::Size minSize, cv::Size maxSize,
                    cv::Size evalSize, int minNeighbours, double overlapThreshold);
     void setDefaults();
-    int loadDetector(std::string modelPath, FlipMode faceFlipMode = NONE);
+    bool loadDetector(std::string modelPath, FlipMode faceFlipMode = NONE);
     // specialized overrides
     void assignImage(const FACE_RECOG_MAT& frame) override;
-    int detect(std::vector<std::vector<cv::Rect> >& bboxes) override;
+    bool detect(std::vector<std::vector<cv::Rect> >& bboxes) override;
     double evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image) override;
     void flipDetections(size_t index, vector<vector<Rect> >& bboxes) override;
     vector<Rect> mergeDetections(vector<vector<Rect> >& bboxes) override;

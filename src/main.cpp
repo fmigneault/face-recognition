@@ -206,10 +206,11 @@ int main(int argc, char *argv[])
                             "Error on POI loading", logOutput, EXIT_FAILURE);
         ASSERT_LOG_FINALIZE(POI_ROIs.size() > 0, "Can't execute face recognition without any Person of Interest (POI)", logOutput, EXIT_FAILURE);
     }
+    const size_t targetCount = POI_IDs.size();
 
     FACE_RECOG_DEBUG(
-        std::vector<double> minScores(POI_ROIs.size(), DBL_MAX);
-        std::vector<double> maxScores(POI_ROIs.size(), -DBL_MAX);
+        std::vector<double> minScores(targetCount,  DBL_MAX);
+        std::vector<double> maxScores(targetCount, -DBL_MAX);
     );
 
     // apply classifier according to config
@@ -272,7 +273,7 @@ int main(int argc, char *argv[])
     xstd::mvector<2, cv::Ptr<cv::plot::Plot2d> > plotsPtr;      // [track][poi] display plots
     FACE_RECOG_MAT plotFigure, subPlot;                         // render all 'subplots' display in a common 'figure' window
     std::vector<int> plotTrackID;                               // memory of currently displayed track id, employed for resets
-    size_t nPlotPOI = MIN(POI_IDs.size(), conf->plotMaxPOI);
+    size_t nPlotPOI = MIN(targetCount, conf->plotMaxPOI);
     if (conf->displayPlots && conf->useFaceRecognition)
     {
         size_t plotDims[2]{ (size_t)conf->plotMaxTracks, nPlotPOI };
@@ -354,10 +355,9 @@ int main(int argc, char *argv[])
     }
 
     // Header of results file
-    logResult
-        << "SEQUENCE_TRACK_ID,SEQUENCE_NUMBER,FRAME_NUMBER,TRACK_COUNT,TARGET_COUNT,"
-        << "TRACK_NUMBER,BEST_LABEL,BEST_SCORE_RAW,BEST_SCORE_ACC,ROI_TL_X,ROI_TL_Y,ROI_BR_X,ROI_BR_Y";
-    for (size_t poi = 0; poi < POI_IDs.size(); ++poi) {
+    logResult << "SEQUENCE_TRACK_ID,SEQUENCE_NUMBER,FRAME_NUMBER,TRACK_COUNT,TARGET_COUNT,TRACK_NUMBER,"
+              << "BEST_LABEL,BEST_SCORE_RAW,BEST_SCORE_ACC,ROI_TL_X,ROI_TL_Y,ROI_BR_X,ROI_BR_Y";
+    for (size_t poi = 0; poi < targetCount; ++poi) {
         std::string spoi = std::to_string(poi);
         logResult << ",TARGET_LABEL_" + spoi + ",TARGET_SCORE_RAW_" + spoi + ",TARGET_SCORE_ACC_" + spoi;
     }
@@ -383,11 +383,11 @@ int main(int argc, char *argv[])
 
     FACE_RECOG_DEBUG(
         for (size_t d = 0; d < nFaceModels; ++d)
-            logOutput << "Loaded global face detector model " << d << ": '" << bfs::path(faceDetector->getModelPath(d)).stem().string() << "'" << std::endl;
+            logOutput << "Loaded global face detector model " << d << ": '" << faceDetector->getModelName(d) << "'" << std::endl;
         for (size_t d = 0; d < nLocalFaceModels; ++d)
-            logOutput << "Loaded local face detector model " << d << ": '" << bfs::path(localFaceDetector->getModelPath(d)).stem().string() << "'" << std::endl;
+            logOutput << "Loaded local face detector model " << d << ": '" << localFaceDetector->getModelName(d) << "'" << std::endl;
         for (size_t d = 0; d < nEyeModels; ++d)
-            logOutput << "Loaded eye detector model " << d << ": '" << bfs::path(eyesDetector->getModelPath(d)).stem().string() << "'" << std::endl;
+            logOutput << "Loaded eye detector model " << d << ": '" << eyesDetector->getModelName(d) << "'" << std::endl;
     );
 
     /*TRAKING VECTORS*/
@@ -396,7 +396,6 @@ int main(int argc, char *argv[])
     currentTracks.reserve(25);
     /*DETECTION VECTORS*/
     vector<cv::Rect> mergedDet, NotMatchedDets, newROIs;
-    vector<vector<cv::Rect> > combo(nFaceModels);
     vector<size_t> usedDetectorIndexes;
 
     /********************************************************************************************************************************************/
@@ -420,11 +419,7 @@ int main(int argc, char *argv[])
     /*Default VideoCapture object used, otherwise try with Point Grey Research FlyCapture2 SDK*/
     void* videoStream;
     bool isVideoOpen = false;
-
-    FACE_RECOG_DEBUG(
-        logDebug << "CAMERA TYPE: " << conf->cameraType << std::endl;
-        logDebug << "CAMERA TYPE: " << conf->cameraType.name() << std::endl;
-    );
+    FACE_RECOG_DEBUG(logDebug << "Camera Type: " << conf->cameraType << std::endl);
 
     /* Index of the camera to use, otherwise the frame sequence is used */
     if (conf->cameraType == CameraType::FILE_STREAM || conf->cameraIndex < 0)               // image files sequence or video file
@@ -537,10 +532,6 @@ int main(int argc, char *argv[])
         // grayscale
         FACE_RECOG_NAMESPACE::cvtColor(frame, frameGray, CV_BGR2GRAY);
 
-        // clean previously detected faces
-        for (int c = 0; c < nFaceModels; ++c)
-            combo[c].clear();
-
         bool isNewDetection = frameCounter == 0 || frameCounter % conf->detectionFrameInterval == 0;
 
         //========================================================================================================================================
@@ -550,10 +541,8 @@ int main(int argc, char *argv[])
         {
             FACE_RECOG_DEBUG(frameTime = getTimeNowPrecise());
 
-            faceDetector->cleanImages();
-            for (int i = 0; i < nFaceModels; ++i)
-                faceDetector->assignImage(frameGray);
-            faceDetector->detect(combo);
+            faceDetector->assignImage(frameGray);
+            faceDetector->detectMerge(mergedDet);
 
             FACE_RECOG_DEBUG(
                 deltaTime = getDeltaTimePrecise(frameTime, MILLISECONDS);
@@ -561,8 +550,6 @@ int main(int argc, char *argv[])
                 logDebug << setprecision(3) << "detection time: " << deltaTime << " ms" << std::endl;
             );
 
-            // merge 3 views detections
-            mergedDet = faceDetector->mergeDetections(combo);
             // reinit candidates
             for (size_t i = 0; i < initCandidates.size(); ++i)
                 initCandidates[i].markNotMatched();
@@ -841,9 +828,7 @@ int main(int argc, char *argv[])
 
                 // execute localize search to find faces ROI
                 std::vector<std::vector<cv::Rect> > localComboFaces(nLocalFaceModels);
-                localFaceDetector->cleanImages();
-                for (size_t c = 0; c < nLocalFaceModels; ++c)
-                    localFaceDetector->assignImage(frameROI);
+                localFaceDetector->assignImage(frameROI);
                 localFaceDetector->detect(localComboFaces);
                 newROIs = localFaceDetector->mergeDetections(localComboFaces);
 
@@ -1062,13 +1047,7 @@ int main(int argc, char *argv[])
         // output recognition results 'start of line' to CSV file (generic information)
         //      SEQUENCE_TRACK_ID,SEQUENCE_NUMBER,FRAME_NUMBER,TRACK_COUNT,TARGET_COUNT
         size_t trackCount = currentTracks.size();
-        if (optArgR) {
-            size_t trackCount = currentTracks.size();
-            size_t targetCount = POI_IDs.size();
-            logResult << sequenceTrackID << "," << sequenceCounter << "," << currentFrameLabel << "," << trackCount << "," << targetCount;
-            if (trackCount == 0)
-                logResult << std::endl; // move to next line immediately if there are no results to output
-        }
+        logResult << sequenceTrackID << "," << sequenceCounter << "," << currentFrameLabel << "," << trackCount << "," << targetCount;
 
         for (size_t i = 0; i < trackCount; ++i)
         {
@@ -1083,9 +1062,9 @@ int main(int argc, char *argv[])
                 // display original ROI before update if available and requested
                 bool showUpdate = conf->useLocalSearchROI && conf->displayOldROI && currentTracks[i].getROI().isUpdatedROI();
 
-                ColorCode color = (eyeOK && currentTracks[i].isRecognized()) ? bboxColorRecognized   // Recognized
-                    : (eyeOK && currentTracks[i].isConsidered()) ? bboxColorConsidered               // Considered
-                    : bboxColorNotMatched;                                                           // NotMatched | no eyes
+                ColorCode color = (eyeOK && currentTracks[i].isRecognized()) ? bboxColorRecognized  // Recognized
+                                : (eyeOK && currentTracks[i].isConsidered()) ? bboxColorConsidered  // Considered
+                                : bboxColorNotMatched;                                              // NotMatched | no eyes
 
                 // draw old face ROI (original detection)
                 if (showUpdate)
@@ -1094,12 +1073,14 @@ int main(int argc, char *argv[])
                 cv::rectangle(drawImg, currentTracks[i].bbox(), color, conf->roiThickness);
 
                 // display recognition score and target ID
-                int bestPosIndex; double bestPosScore;
-                accScores.getMaxPositiveInfo(conf->roiAccumulationMode, currentTracks[i].getTrackNumber(), bestPosIndex, bestPosScore);
-                if (currentTracks[i].isRecognized() || currentTracks[i].isConsidered()) {
-                    std::string strTargetTagAndScore = POI_IDs[bestPosIndex] + " | " + std::to_string(bestPosScore);
-                    Point point = Point(currentTracks[i].bbox().x, currentTracks[i].bbox().y + currentTracks[i].bbox().height + 15);
-                    cv::putText(drawImg, strTargetTagAndScore, point, FONT_HERSHEY_PLAIN, 1.0, color, 2);
+                int bestPosIndex = -1; double bestPosScore = 0;
+                if (conf->useFaceRecognition) {
+                    accScores.getMaxPositiveInfo(conf->roiAccumulationMode, currentTracks[i].getTrackNumber(), bestPosIndex, bestPosScore);
+                    if ((currentTracks[i].isRecognized() || currentTracks[i].isConsidered()) && bestPosIndex >= 0) {
+                        std::string strTargetTagAndScore = POI_IDs[bestPosIndex] + " | " + std::to_string(bestPosScore);
+                        Point point = Point(currentTracks[i].bbox().x, currentTracks[i].bbox().y + currentTracks[i].bbox().height + 15);
+                        cv::putText(drawImg, strTargetTagAndScore, point, FONT_HERSHEY_PLAIN, 1.0, color, 2);
+                    }
                 }
 
                 /*  output rest of recognition results as CSV:
@@ -1115,14 +1096,18 @@ int main(int argc, char *argv[])
                     cv::Point br = currentTracks[i].bbox().br();
                     size_t trackNumer = currentTracks[i].getTrackNumber();
                     std::string targetsLabelScores;
-                    for (size_t j = 0; j < POI_IDs.size(); ++j)
-                        targetsLabelScores += ("," + POI_IDs[j] + "," + std::to_string(accScores.getRawScore(trackNumer, j)) +
-                                               "," + std::to_string(accScores.getScore(conf->roiAccumulationMode, trackNumer, j)));
-                    double bestRawScore = accScores.getRawScore(trackNumer, bestPosIndex);
-                    logResult << "," << trackNumer << "," << POI_IDs[bestPosIndex] << "," << bestRawScore << "," << bestPosScore;
+                    std::string bestPosID;
+                    double bestRawScore = -1;
+                    if (conf->useFaceRecognition) {
+                        bestPosID = POI_IDs[bestPosIndex];
+                        bestRawScore = accScores.getRawScore(trackNumer, bestPosIndex);
+                        for (size_t j = 0; j < targetCount; ++j) {
+                            targetsLabelScores += ("," + POI_IDs[j] + "," + std::to_string(accScores.getRawScore(trackNumer, j)) +
+                                                   "," + std::to_string(accScores.getScore(conf->roiAccumulationMode, trackNumer, j)));
+                        }
+                    }
+                    logResult << "," << trackNumer << "," << bestPosID << "," << bestRawScore << "," << bestPosScore;
                     logResult << "," << tl.x << "," << tl.y << "," << br.x << "," << br.y << targetsLabelScores;
-                    if (trackCount - 1 == i)
-                        logResult << std::endl;
                 }
 
                 // display sequence track ID, frame number and FPS where applicable and as requested
@@ -1179,6 +1164,7 @@ int main(int argc, char *argv[])
                     logOutBBox << currentFrameLabel << " " << util::rectPointCoordinates(currentTracks[i].bbox(), " ") << std::endl;
             );
         }
+        logResult << std::endl; // move to next line for future results to output (next frame)
 
         //----------------------------------------------------------------------------------------------------------------------------------------
         // PLOT DISPLAY

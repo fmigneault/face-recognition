@@ -12,17 +12,19 @@ class IDetector
 public:
     IDetector() {}
     virtual ~IDetector() {}
-    virtual int loadDetector(std::string name);
-    virtual std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect> >& bboxes);
-    virtual void flipDetections(size_t index, std::vector<std::vector<cv::Rect> >& bboxes);
+    virtual bool loadDetector(std::string name);
+    virtual int detectMerge(std::vector<cv::Rect>& bboxes);
+    virtual std::vector<cv::Rect> mergeDetections(std::vector<std::vector<cv::Rect>> &bboxes);
+    virtual void flipDetections(size_t index, std::vector<std::vector<cv::Rect>>& bboxes);
     virtual void cleanImages() { frames.clear(); }
     // pure virtual methods (mandatory overrides by derived classes)
     virtual void assignImage(const FACE_RECOG_MAT& frame) = 0;
-    virtual int detect(std::vector<std::vector<cv::Rect> >& bboxes) = 0;
+    virtual bool detect(std::vector<std::vector<cv::Rect>>& bboxes) = 0;
     virtual double evaluateConfidence(const Track& track, const FACE_RECOG_MAT& image) = 0;
     // utility methods
     size_t modelCount();
-    std::string getModelPath(size_t modelIndex);
+    std::string getModelPath(size_t modelIndex = 0);
+    std::string getModelName(size_t modelIndex = 0);
 protected:
     std::vector<std::string> modelPaths;
     std::vector<FACE_RECOG_MAT> frames;

@@ -1,9 +1,9 @@
 ﻿#include "Detectors/IDetector.h"
 #include "FaceRecog.h"
 
-int IDetector::loadDetector(string name)
+bool IDetector::loadDetector(string name)
 {
-    return -1;
+    return false;
 }
 
 void IDetector::assignImage(const FACE_RECOG_MAT& frame)
@@ -13,7 +13,12 @@ void IDetector::assignImage(const FACE_RECOG_MAT& frame)
 
 std::string IDetector::getModelPath(size_t modelIndex)
 {
-    return modelPaths[modelIndex];
+    return modelIndex < modelPaths.size() ? modelPaths[modelIndex] : "";
+}
+
+std::string IDetector::getModelName(size_t modelIndex)
+{
+    return modelIndex < modelPaths.size() ? bfs::path(getModelPath(modelIndex)).stem().string() : "";
 }
 
 size_t IDetector::modelCount()
@@ -21,7 +26,7 @@ size_t IDetector::modelCount()
     return modelPaths.size();
 }
 
-void IDetector::flipDetections(size_t index, vector<vector<Rect> >& bboxes)
+void IDetector::flipDetections(size_t index, vector<vector<Rect>>& bboxes)
 {
     for (size_t i = 0; i < bboxes[index].size(); ++i)
     {
@@ -30,18 +35,25 @@ void IDetector::flipDetections(size_t index, vector<vector<Rect> >& bboxes)
     }
 }
 
-vector<Rect> IDetector::mergeDetections(vector<vector<Rect> >& bboxes)
+vector<Rect> IDetector::mergeDetections(vector<vector<Rect>>& bboxes)
 {
     bool frontalOnly = bboxes.size() == 1;
     return util::mergeDetections(bboxes, overlapThreshold, frontalOnly);
 }
 
+int IDetector::detectMerge(std::vector<cv::Rect>& bboxes)
+{
+    vector<vector<Rect>> multiBBoxes;
+    if (!detect(multiBBoxes))
+        return -1;
+    bboxes = mergeDetections(multiBBoxes);
+    return (int)(bboxes.size());
+}
+
 std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, const std::string modelBasePath, DetectorType detectorType)
 {
     ASSERT_LOG(bfs::is_directory(modelBasePath), "Model base path not found [" + modelBasePath + "]");
-
     std::shared_ptr<IDetector> detector = nullptr;
-    int error = 0;
 
     // global face detector settings
     if (detectorType == DetectorType::FACE_DETECTOR_GLOBAL) {
@@ -50,32 +62,25 @@ std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, co
                               config.face.confidenceSize, config.face.minNeighbours, config.face.overlapThreshold);
             if (config.HaarCascadeFrontal) {
                 std::string modelFilePath = (modelBasePath / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).generic_string();
-                error = vj.loadDetector(modelFilePath, NONE);
-                ASSERT_LOG(!error, "Failed loading frontal global face detector file: '" + modelFilePath + "'");
+                ASSERT_LOG(vj.loadDetector(modelFilePath, NONE), "Load frontal global face detector model [" + modelFilePath + "] failed");
             }
             if (config.HaarCascadeProfile) {
                 std::string modelFilePath = (modelBasePath / bfs::path("haarcascades/haarcascade_profileface.xml")).generic_string();
-                error = vj.loadDetector(modelFilePath, NONE);
-                ASSERT_LOG(!error, "Failed loading left profile global face detector file: '" + modelFilePath + "'");
-                error = vj.loadDetector(modelFilePath, HORIZONTAL);
-                ASSERT_LOG(!error, "Failed loading right profile global face detector file: '" + modelFilePath + "'");
+                ASSERT_LOG(vj.loadDetector(modelFilePath, NONE),       "Load profile(L) global face detector model [" + modelFilePath + "] failed");
+                ASSERT_LOG(vj.loadDetector(modelFilePath, HORIZONTAL), "Load profile(R) global face detector model [" + modelFilePath + "] failed");
             }
             if (config.LBPCascadeFrontal) {
                 std::string modelFilePath = (modelBasePath / bfs::path("lbpcascades/lbpcascade_frontalface.xml")).generic_string();
-                error = vj.loadDetector(modelFilePath, NONE);
-                ASSERT_LOG(!error, "Failed loading frontal global face detector file: '" + modelFilePath + "'");
+                ASSERT_LOG(vj.loadDetector(modelFilePath, NONE), "Load frontal global face detector model [" + modelFilePath + "] failed");
             }
             if (config.LBPCascadeProfile) {
                 std::string modelFilePath = (modelBasePath / bfs::path("lbpcascades/lbpcascade_profileface.xml")).generic_string();
-                error = vj.loadDetector(modelFilePath, NONE);
-                ASSERT_LOG(!error, "Failed loading left profile global face detector file: '" + modelFilePath + "'");
-                error = vj.loadDetector(modelFilePath, HORIZONTAL);
-                ASSERT_LOG(!error, "Failed loading right profile global face detector file: '" + modelFilePath + "'");
+                ASSERT_LOG(vj.loadDetector(modelFilePath, NONE),       "Load profile(L) global face detector model [" + modelFilePath + "] failed");
+                ASSERT_LOG(vj.loadDetector(modelFilePath, HORIZONTAL), "Load profile(R) global face detector model [" + modelFilePath + "] failed");
             }
             if (config.LBPCascadeFrontalImproved) {
-                std::string model = (modelBasePath / bfs::path("lbpcascades/lbpcascade_frontalface_improved.xml")).generic_string();
-                error = vj.loadDetector(modelBasePath, NONE);
-                ASSERT_LOG(!error, "Failed loading frontal global face detector file: '" + model + "'");
+                std::string modelFilePath = (modelBasePath / bfs::path("lbpcascades/lbpcascade_frontalface_improved.xml")).generic_string();
+                ASSERT_LOG(vj.loadDetector(modelBasePath, NONE), "Load frontal global face detector model [" + modelFilePath + "] failed");
             }
             detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorVJ>(vj));
         }
@@ -96,7 +101,7 @@ std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, co
             detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorYOLO>(modelPathProto, modelPathCaffe));
             #endif/*FACE_RECOG_HAS_YOLO*/
         }
-        ASSERT_LOG(detector != nullptr, "Failed to initialize global face detector from specified 'config'");
+        ASSERT_LOG(detector != nullptr, "Initialize global face detector from specified 'config' failed");
         ASSERT_LOG(detector->modelCount() > 0, "Invalid count of global face detector models");
     }
     // local face detector settings
@@ -105,32 +110,29 @@ std::shared_ptr<IDetector> buildSpecializedDetector(const ConfigFile& config, co
                           config.face.confidenceSize, config.face.minNeighbours, config.face.overlapThreshold);
         // frontal model
         std::string modelFilePath = (modelBasePath / bfs::path("haarcascades/haarcascade_frontalface_alt.xml")).generic_string();
-        error = vj.loadDetector(modelFilePath, NONE);
-        ASSERT_LOG(!error, "Failed loading frontal local face detector file: '" + modelFilePath + "'");
+        ASSERT_LOG(vj.loadDetector(modelFilePath, NONE), "Load frontal local face detector model [" + modelFilePath + "] failed");
         // profile models
         if (config.use3CascadesLocalSearch) {
             std::string modelFilePath = (modelBasePath / bfs::path("haarcascades/haarcascade_profileface.xml")).generic_string();
-            error = vj.loadDetector(modelFilePath, NONE);
-            ASSERT_LOG(!error, "Failed loading left profile local face detector file: '" + modelFilePath + "'");
-            error = vj.loadDetector(modelFilePath, HORIZONTAL);
-            ASSERT_LOG(!error, "Failed loading right profile local face detector file: '" + modelFilePath + "'");
+            ASSERT_LOG(vj.loadDetector(modelFilePath, NONE),       "Load profile(L) local face detector model [" + modelFilePath + "] failed");
+            ASSERT_LOG(vj.loadDetector(modelFilePath, HORIZONTAL), "Load profile(R) local face detector model [" + modelFilePath + "] failed");
         }
         detector = std::static_pointer_cast<IDetector>(std::make_shared<FaceDetectorVJ>(vj));
-        ASSERT_LOG(detector != nullptr, "Failed to initialize local face detector from specified 'config'");
+        ASSERT_LOG(detector != nullptr, "Initialize local face detector from specified 'config' failed");
         ASSERT_LOG(detector->modelCount() > 0, "Invalid count of local face detector models");
     }
     // eye detector settings
     else if (detectorType == DetectorType::EYE_DETECTOR && config.useEyesDetection) {
         EyeDetector eyes(config.eyes.scaleFactor, config.eyes.nmsThreshold, config.eyes.minSize, config.eyes.maxSize);
         // left/right eyes
-        std::string modelFilePathLeft  = (modelBasePath / bfs::path("haarcascades/haarcascade_lefteye_2splits.xml")).generic_string();
-        std::string modelFilePathRight = (modelBasePath / bfs::path("haarcascades/haarcascade_righteye_2splits.xml")).generic_string();
-        eyes.loadDetector(modelFilePathLeft);
-        eyes.loadDetector(modelFilePathRight);
+        std::string modelFilePathL = (modelBasePath / bfs::path("haarcascades/haarcascade_lefteye_2splits.xml")).generic_string();
+        std::string modelFilePathR = (modelBasePath / bfs::path("haarcascades/haarcascade_righteye_2splits.xml")).generic_string();
+        ASSERT_LOG(eyes.loadDetector(modelFilePathL), "Load eye(L) detector model [" + modelFilePathL + "] failed");
+        ASSERT_LOG(eyes.loadDetector(modelFilePathR), "Load eye(R) detector model [" + modelFilePathR + "] failed");
         eyes.leftEyeIndex  = 0;
         eyes.rightEyeIndex = 1;
         detector = std::static_pointer_cast<IDetector>(std::make_shared<EyeDetector>(eyes));
-        ASSERT_LOG(detector != nullptr, "Failed to initialize eye detector from specified 'config'");
+        ASSERT_LOG(detector != nullptr, "Initialize eye detector from specified 'config' failed");
         ASSERT_LOG(detector->modelCount() == 2, "Invalid count of eye detector models");
     }
 

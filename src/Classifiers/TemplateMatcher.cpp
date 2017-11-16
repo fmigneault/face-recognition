@@ -3,9 +3,9 @@
 #include "Classifiers/TemplateMatcher.h"
 #include "FaceRecog.h"
 
-TemplateMatcher::TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT> >& positiveROIs, const std::string negativeFileDir,
+TemplateMatcher::TemplateMatcher(const std::vector<std::vector<FACE_RECOG_MAT>>& positiveROIs, const std::string negativeFileDir,
                                  const std::vector<std::string>& positiveIDs,
-                                 const std::vector<std::vector<FACE_RECOG_MAT> >& additionalNegativeROIs)
+                                 const std::vector<std::vector<FACE_RECOG_MAT>>& additionalNegativeROIs)
 {
     setConstants();
 

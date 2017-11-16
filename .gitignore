@@ -51,6 +51,8 @@ tessdata/
 
 # Visual Studio Code
 .vscode/
+Cache/
+Local Storage/
 
 # Profiler files
 *.psess

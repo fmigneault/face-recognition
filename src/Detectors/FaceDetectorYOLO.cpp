@@ -39,7 +39,7 @@ FaceDetectorYOLO::FaceDetectorYOLO(std::string modelPathProto, std::string model
     net->CopyTrainedLayersFromBinaryProto(modelPathCaffe);
 }
 
-int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
+bool FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect>>& bboxes)
 {
     m_faces.clear();
     loadData(frames[0]);
@@ -48,7 +48,7 @@ int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
     const float* begin = output_layer->cpu_data();
     const float* end = begin + output_layer->channels();
     std::vector<float> result(begin, end);
-    std::vector<std::vector<int> > bboxs;
+    std::vector<std::vector<int>> bboxs;
     float threashold = 0.3;
     float pro_obj[121][2];
     int idx_class[121];
@@ -59,8 +59,8 @@ int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
 
     std::vector<bool> mark(bboxs.size(), true);
 
-    for (int i = 0; i < bboxs.size(); ++i) {
-        for (int j = i + 1; j < bboxs.size(); ++j) {
+    for (size_t i = 0; i < bboxs.size(); ++i) {
+        for (size_t j = i + 1; j < bboxs.size(); ++j) {
             int overlap_x = lap(bboxs[i][0], bboxs[i][2], bboxs[j][0], bboxs[j][2]);
             int overlap_y = lap(bboxs[i][1], bboxs[i][3], bboxs[j][1], bboxs[j][3]);
             overlap = (overlap_x*overlap_y)*1.0 / ((bboxs[i][0] - bboxs[i][2])*(bboxs[i][1] - bboxs[i][3]) + (bboxs[j][0] - bboxs[j][2])*(bboxs[j][1] - bboxs[j][3]) - (overlap_x*overlap_y));
@@ -72,7 +72,7 @@ int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
             }
         }
     }
-    for (int i = 0; i < bboxs.size(); ++i) {
+    for (size_t i = 0; i < bboxs.size(); ++i) {
         if (mark[i]) {
             cv::Point point1(bboxs[i][1], bboxs[i][2]);
             cv::Point point2(bboxs[i][3], bboxs[i][4]);
@@ -85,7 +85,7 @@ int FaceDetectorYOLO::detect(std::vector<std::vector<cv::Rect> >& bboxes)
         }
     }
     faces[0] = m_faces;
-    return 1;
+    return true;
 }
 
 double FaceDetectorYOLO::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
@@ -99,7 +99,7 @@ double FaceDetectorYOLO::evaluateConfidence(Track& track, FACE_RECOG_MAT& image)
     const float* begin = output_layer->cpu_data();
     const float* end = begin + output_layer->channels();
     std::vector<float> result(begin, end);
-    std::vector<std::vector<int> > bboxes;
+    std::vector<std::vector<int>> bboxes;
     float pro_obj[121][2];
     int idx_class[121];
     float threashold = 0.1;
@@ -139,7 +139,7 @@ void FaceDetectorYOLO::loadData(cv::Mat& image)
     }
 }
 
-void FaceDetectorYOLO::getBox(std::vector<float> result, float* pro_obj, int* idx_class, std::vector<std::vector<int> >& bboxs, float thresh, cv::Mat image)
+void FaceDetectorYOLO::getBox(std::vector<float> result, float* pro_obj, int* idx_class, std::vector<std::vector<int>>& bboxs, float thresh, cv::Mat image)
 {
     float pro_class[121];
     int idx;

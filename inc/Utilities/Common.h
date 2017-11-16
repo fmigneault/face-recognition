@@ -45,6 +45,7 @@ using namespace cv;
 #endif/*FACE_RECOG_HAS_PYTHON*/
 
 // Boost
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/circular_buffer.hpp>
