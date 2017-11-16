@@ -82,10 +82,14 @@ This option allows processing older results files that did not combine both tran
 When backward compatibility is employed, trajectory-level evaluation is mandatory (only this one is possible).
 """
 
-import os, csv, sys
+from __future__ import print_function
+import os
+import csv
+import sys
 
-TYPE_RES =  "RESULTS"
-TYPE_SEQ =  "SEQUENCES"
+
+TYPE_RES = "RESULTS"
+TYPE_SEQ = "SEQUENCES"
 
 FILTER_FLAG = "FILTER"
 
@@ -318,13 +322,13 @@ def readSequenceFileInput(csvSequencesFilePath, csvResultsFilePath, noHeaderSequ
     """
     assert(os.path.isfile(csvResultsFilePath))
     assert(os.path.isfile(csvSequencesFilePath))
-    with open(csvResultsFilePath, newline='') as csvFileIn:
+    with open(csvResultsFilePath, 'r') as csvFileIn:
         csvReader = csv.reader(csvFileIn)
         allLinesRes = [line for line in csvReader]
         assert(len(allLinesRes) > 1)
         if not noHeaderResults:
             del allLinesRes[0] # remove header
-    with open(csvSequencesFilePath, newline='') as csvFileIn:
+    with open(csvSequencesFilePath, 'r') as csvFileIn:
         csvReader = csv.reader(csvFileIn)
         allLinesSeq = [line for line in csvReader]
         assert(len(allLinesSeq) > 1)
@@ -340,7 +344,7 @@ def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False):
     Writes the merged file combining 'SEQUENCES' and 'RESULTS' fields, removing duplicate data and invalid tracks.
     Information must have been preprocessed, this function only handles writing operations, not the actual processing.
     """
-    with open(mergedFilePath, 'w', newline='') as csvFileOut:
+    with open(mergedFilePath, 'wb') as csvFileOut:
         csvWriter = csv.writer(csvFileOut)
         if backComp:
             bestHeader = ["BEST_LABEL","BEST_SCORE"]
@@ -829,7 +833,7 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='\r')
     # Print New Line on Complete
     if iteration == total: print()
 

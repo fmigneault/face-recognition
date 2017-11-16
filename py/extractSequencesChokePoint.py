@@ -3,7 +3,9 @@
 Operations applied specifically to sequences specified as 'frontal' views in ChokePoint dataset.
 """
 
-import os, csv
+import os
+import csv
+
 
 FRONTAL_SEQUENCES = [
     "P1E_S1_C1",
@@ -33,12 +35,12 @@ def extractFrontalChokePoint(resultsFile, noHeaderResults=False):
     outFile, extFile = os.path.splitext(resultsFile)
     frontalFile = outFile + "-frontal" + extFile
 
-    with open(resultsFile, 'r', newline='') as csvFile:
+    with open(resultsFile, 'rb') as csvFile:
         csvReader = csv.reader(csvFile)
         resultsLines = [line for line in csvReader]
         assert(len(resultsLines) > 1)
 
-    with open(frontalFile, 'w', newline='') as csvFile:
+    with open(frontalFile, 'wb') as csvFile:
         csvWriter = csv.writer(csvFile)
         startIndex = 0
         if not noHeaderResults:
@@ -58,12 +60,12 @@ def extractSessionsChokePoint(resultsFile, noHeaderResults=False):
     outFile, extFile = os.path.splitext(resultsFile)
     sessionFiles = [outFile + "-S" + str(s+1) + extFile for s in range(4)]
 
-    with open(resultsFile, 'r', newline='') as csvFile:
+    with open(resultsFile, 'rb') as csvFile:
         csvReader = csv.reader(csvFile)
         resultsLines = [line for line in csvReader]
         assert(len(resultsLines) > 1)
 
-    files = [open(f, 'w', newline='') for f in sessionFiles]
+    files = [open(f, 'wb') for f in sessionFiles]
     csvWriters = [csv.writer(f) for f in files]
     startIndex = 0
     if not noHeaderResults:
@@ -75,6 +77,7 @@ def extractSessionsChokePoint(resultsFile, noHeaderResults=False):
         csvWriters[session].writerow(r)
 
     [f.close() for f in files]
+
 
 if __name__ == "__main__":
     extractFrontalChokePoint('')
