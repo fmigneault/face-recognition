@@ -188,6 +188,13 @@ endif()
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 configure_file(cmake/${FaceRecog_CONFIG_FILE}.in ${FaceRecog_CONFIG_PATH})
 
+# update rpath for dynamic library install
+set({INSTALL_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIBRARY_DIR})
+set(CMAKE_SKIP_BUILD_RPATH              FALSE)  # use RPATH for building the build tree
+set(CMAKE_BUILD_WITH_INSTALL_RPATH      FALSE)  # build with local paths, then use installed path when installing library
+set(CMAKE_INSTALL_RPATH ${INSTALL_LIBRARY_PATH})
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH   TRUE)   # add parts outside of build tree inside RPATH for install
+
 # install
 install(TARGETS ${FaceRecog_EXE_NAME}
         RUNTIME DESTINATION ${INSTALL_BINARY_DIR}

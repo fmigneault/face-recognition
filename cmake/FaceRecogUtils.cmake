@@ -23,9 +23,9 @@ macro(face_recog_add_sources)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/ClassifierFaceNet.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/ClassifierType.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/IClassifier.h)
-    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/TemplateMatcher.h)    
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Classifiers/TemplateMatcher.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ConfigFile.h)
-    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ConsoleOptions.h)        
+    set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/ConsoleOptions.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/Platform.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Configs/Version.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Detectors/DetectorType.h)
@@ -61,7 +61,7 @@ macro(face_recog_add_sources)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Utilities/MatDefines.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Utilities/MultiColorType.h)
     set(FaceRecog_HEADER_FILES ${FaceRecog_HEADER_FILES} ${FaceRecog_HEADERS_DIRS}/Utilities/Utilities.h)
-    
+
     # source files
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/main.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Camera/CameraType.cpp)
@@ -71,7 +71,7 @@ macro(face_recog_add_sources)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Classifiers/ClassifierFaceNet.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Classifiers/ClassifierType.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Classifiers/IClassifier.cpp)
-    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Classifiers/TemplateMatcher.cpp)   
+    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Classifiers/TemplateMatcher.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Configs/ConfigFile.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Detectors/DetectorType.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Detectors/EyeDetector.cpp)
@@ -84,7 +84,7 @@ macro(face_recog_add_sources)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Python/PythonInterop.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Python/PythonModule.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerCamshift.cpp)
-    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerCompressive.cpp)    
+    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerCompressive.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerKCF.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Trackers/TrackerSTRUCK.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Tracks/Association.cpp)
@@ -98,7 +98,7 @@ macro(face_recog_add_sources)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Tracks/Track.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Tracks/TrackROI.cpp)
     set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Utilities/MultiColorType.cpp)
-    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Utilities/Utilities.cpp)    
+    set(FaceRecog_SOURCE_FILES ${FaceRecog_SOURCE_FILES} ${FaceRecog_SOURCES_DIRS}/Utilities/Utilities.cpp)
 endmacro()
 
 #--------------------------------------------------------------------------------------------------
@@ -165,7 +165,7 @@ macro(face_recog_update_modules)
     else()
         remove_definitions(-DFACE_RECOG_HAS_CAMSHIFT)
     endif()
-    
+
     # Compressive Tracker
     if(${FaceRecog_ENABLE_Compressive}}})
         add_definitions(-DFACE_RECOG_HAS_COMPRESSIVE)
@@ -221,7 +221,7 @@ macro(face_recog_update_modules)
     else()
         remove_definitions(-DFACE_RECOG_HAS_SSD)
     endif()
-    
+
     # STRUCK
     if(${FaceRecog_ENABLE_STRUCK})
         add_definitions(-DFACE_RECOG_HAS_STRUCK)
@@ -252,17 +252,17 @@ macro(face_recog_update_modules)
         set(ESVM_ROOT_DIR "ESVM_ROOT_DIR-NOTFOUND")
     endif()
     if(${FaceRecog_ENABLE_ESVM})
-        if(${BUILD_ESVM})            
+        if(${BUILD_ESVM})
             add_subdirectory(${ESVM_ROOT_DIR})
         else()
             find_package(ESVM  CONFIG REQUIRED
                          NAMES "ESVM" "ExemplarSVM" "ExemplarSVM-LIBSVM" "ExemplarSVM-LIBLINEAR"
                          PATHS ${ESVM_ROOT_DIR} ${ESVM_ROOT_DIR}/cmake ${ESVM_DIR} ${ESVM_DIR}/cmake)
-        endif()            
+        endif()
         set(FaceRecog_INCLUDE_DIRS        ${FaceRecog_INCLUDE_DIRS}     ${ESVM_INCLUDE_DIRS})
         if(${ESVM_BUILD_LIBSVM})
-            set(FaceRecog_SOURCE_FILES    ${FaceRecog_SOURCE_FILES}     ${ESVM_SOURCE_FILES}) 
-        else()            
+            set(FaceRecog_SOURCE_FILES    ${FaceRecog_SOURCE_FILES}     ${ESVM_SOURCE_FILES})
+        else()
             set(FaceRecog_LIBRARY_DIRS      ${FaceRecog_LIBRARY_DIRS}       ${ESVM_LIBRARY_DIRS})
             set(FaceRecog_LIBRARIES_DEBUG   ${FaceRecog_LIBRARIES_DEBUG}    ${ESVM_LIBRARY_DEBUG})
             set(FaceRecog_LIBRARIES_RELEASE ${FaceRecog_LIBRARIES_RELEASE}  ${ESVM_LIBRARY_RELEASE})
@@ -271,7 +271,7 @@ macro(face_recog_update_modules)
     else()
         remove_definitions(-DFACE_RECOG_HAS_ESVM)
     endif()
-    
+
     # FaceNet
     if(${FaceRecog_ENABLE_FaceNet})
         if(NOT (${WITH_Python} AND ${WITH_TensorFlow}))
@@ -283,14 +283,14 @@ macro(face_recog_update_modules)
     else()
         remove_definitions(-DFACE_RECOG_HAS_FACE_NET)
     endif()
-    
+
     # Template Matching
     if(${FaceRecog_ENABLE_TM})
         add_definitions(-DFACE_RECOG_HAS_TM)
     else()
         remove_definitions(-DFACE_RECOG_HAS_TM)
     endif()
-       
+
 endmacro()
 
 #--------------------------------------------------------------------------------------------------
@@ -301,41 +301,42 @@ endmacro()
 #   sets defines with corresponding packages as required in code
 #--------------------------------------------------------------------------------------------------
 macro(face_recog_find_packages)
-    
+
     ####################################################
     # required (no matter which module is employed)
     ####################################################
-    
+
     # Common(C++)
     find_package(CommonCpp REQUIRED CONFIG
                  NAMES "CommonCpp" "Common-Cpp" "Common_Cpp" "CommonC++" "Common-C++" "Common_C++"
                  PATHS ${COMMON_CPP_ROOT_DIR} ${COMMON_CPP_ROOT_DIR}/cmake ${CommonCpp_DIR} ${CommonCpp_DIR}/cmake)
-    if(${CommonCpp_FOUND})    
-        set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}       ${CommonCpp_INCLUDE_DIRS})        
+    if(${CommonCpp_FOUND})
+        set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}       ${CommonCpp_INCLUDE_DIRS})
         set(FaceRecog_LIBRARY_DIRS      ${FaceRecog_LIBRARY_DIRS}       ${CommonCpp_LIBRARY_DIRS})
         set(FaceRecog_LIBRARIES_DEBUG   ${FaceRecog_LIBRARIES_DEBUG}    ${CommonCpp_LIBRARY_DEBUG})
         set(FaceRecog_LIBRARIES_RELEASE ${FaceRecog_LIBRARIES_RELEASE}  ${CommonCpp_LIBRARY_RELEASE})
+        add_definitions(${CommonCpp_DEFINITIONS})
     endif()
 
     # Boost
     option(Boost_USE_STATIC_LIBS    OFF)
     option(Boost_USE_MULTITHREADED  ON)
-    option(Boost_USE_STATIC_RUNTIME OFF)    
+    option(Boost_USE_STATIC_RUNTIME OFF)
     if(${WITH_Python})
         find_package(Boost REQUIRED COMPONENTS filesystem system python)
     else()
         find_package(Boost REQUIRED COMPONENTS filesystem system)
     endif()
-    if(${Boost_FOUND})    
+    if(${Boost_FOUND})
         set(FaceRecog_INCLUDE_DIRS  ${FaceRecog_INCLUDE_DIRS}   ${Boost_INCLUDE_DIRS})
         set(FaceRecog_LIBRARIES     ${FaceRecog_LIBRARIES}      ${Boost_LIBRARIES})
-        set(FaceRecog_LIBRARY_DIRS  ${FaceRecog_LIBRARY_DIRS}   ${Boost_LIBRARY_DIRS}) 
-    endif()    
+        set(FaceRecog_LIBRARY_DIRS  ${FaceRecog_LIBRARY_DIRS}   ${Boost_LIBRARY_DIRS})
+    endif()
 
     # Eigen
     find_package(Eigen3 3.3 REQUIRED)
     set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}   ${EIGEN3_INCLUDE_DIR})
-        
+
     # OpenCV
     find_package(OpenCV 3.2 REQUIRED)
     set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}   ${OpenCV_INCLUDE_DIRS})
@@ -343,20 +344,20 @@ macro(face_recog_find_packages)
     if(${OpenCV_FOUND} AND ${CommonCpp_FOUND})
         add_definitions(-DCOMMON_CPP_HAS_OPENCV)
     endif()
-    
+
     # mvector
     find_package(mvector REQUIRED)
     set(FaceRecog_INCLUDE_DIRS      ${FaceRecog_INCLUDE_DIRS}   ${mvector_INCLUDE_DIR})
-    
+
     ####################################################
     # optional (unless enforced by employed module)
     ####################################################
-    
+
     # CUDA
     if(${WITH_CUDA})
         find_package(CUDA REQUIRED)
         set(FaceRecog_INCLUDE_DIRS  ${FaceRecog_INCLUDE_DIRS}   ${CUDA_INCLUDE_DIRS})
-    endif()    
+    endif()
 
     # OpenMP
     if(${WITH_OpenMP})
@@ -365,8 +366,8 @@ macro(face_recog_find_packages)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
         endif()
     endif()
-    
-    # Caffe     
+
+    # Caffe
     if(${WITH_Caffe})
         find_package(Caffe REQUIRED)
         if(Caffe_FOUND)
@@ -376,14 +377,14 @@ macro(face_recog_find_packages)
             set(WITH_Protobuf ON CACHE BOOL "Include Protobuf library support" FORCE)
         endif()
     endif()
-    
+
     # Protobuf
     if(${WITH_Protobuf})
         find_package(Protobuf 3.2 REQUIRED)
         set(FaceRecog_INCLUDE_DIRS  ${FaceRecog_INCLUDE_DIRS}   ${Protobuf_INCLUDE_DIRS})
         set(FaceRecog_LIBRARIES     ${FaceRecog_LIBRARIES}      ${Protobuf_LIBRARIES})
     endif()
-    
+
     # TensorFlow
     if(${WITH_TensorFlow})
         find_package(tensorflow 1.0 REQUIRED)
@@ -393,7 +394,7 @@ macro(face_recog_find_packages)
             remove_definitions(-DFACE_RECOG_HAS_TENSORFLOW)
         endif()
     endif()
-    
+
     # Python
     if(${WITH_Python})
         find_package(PythonLibs 2.7 REQUIRED)
@@ -405,7 +406,7 @@ macro(face_recog_find_packages)
             remove_definitions(-DFACE_RECOG_HAS_PYTHON)
         endif()
     endif()
-    
+
     # FlyCapture2
     if(${WITH_FlyCapture2})
         find_package(FlyCapture2 REQUIRED)
@@ -418,7 +419,7 @@ macro(face_recog_find_packages)
     else()
         add_definitions(-DFACE_RECOG_HAS_FLYCAPTURE2=0)
     endif()
-    
+
 endmacro()
 
 #--------------------------------------------------------------------------------------------------
@@ -426,7 +427,7 @@ endmacro()
 #
 #   obtains version of FaceRecog
 #--------------------------------------------------------------------------------------------------
-macro(face_recog_find_version)    
+macro(face_recog_find_version)
 
     set(FaceRecog_VERSION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inc/Configs/Version.h")
     file(STRINGS "${FaceRecog_VERSION_FILE}" FaceRecog_VERSION_PARTS REGEX "#define FACE_RECOG_VERSION_[A-Z]+[ ]+" )
@@ -455,14 +456,14 @@ macro(face_recog_display_versions)
     foreach(lib IN ITEMS ${ARGN})
         # try to find the library as is, otherwise try in all CAPS
         set(lib_version "${lib}_VERSION")
-        if("${${lib_version}}" STREQUAL "")            
+        if("${${lib_version}}" STREQUAL "")
             string(TOUPPER "${lib}_VERSION" lib_version)
         endif()
-        set(padlib "${lib}:")      
+        set(padlib "${lib}:")
         padstr(padlib ${padlib} 20 " ")
         set(lib_with "WITH_${lib}")
 
-        # check if library is found, and consider missing "WITH_<lib>" as REQUIRED library 
+        # check if library is found, and consider missing "WITH_<lib>" as REQUIRED library
         if((NOT "${${lib_version}}" STREQUAL "") AND (("${${lib_with}}" STREQUAL "") OR ("${${lib_with}}" STREQUAL "ON")))
             status("    ${padlib}${${lib_version}}")
         elseif("${${lib_with}}" STREQUAL "OFF")
@@ -506,10 +507,10 @@ macro(face_recog_display_summary)
     status("--------------------------------------------------------------------------------")
     status("Libraries Version:")
     face_recog_display_versions(Boost Caffe CUDA Eigen3 FlyCapture2 OpenCV OpenMP Protobuf Python TensorFlow)
-    status("--------------------------------------------------------------------------------")    
+    status("--------------------------------------------------------------------------------")
     status("FaceRecog Build:")
     status("    Build Directory:    ${CMAKE_CURRENT_BINARY_DIR}")
-    status("--------------------------------------------------------------------------------")    
+    status("--------------------------------------------------------------------------------")
     status("FaceRecog Install:")
     status("    Prefix:             ${CMAKE_INSTALL_PREFIX}")
     status("    Binary:             ${INSTALL_BINARY_DIR}")
@@ -549,7 +550,7 @@ endmacro()
 #--------------------------------------------------------------------------------------------------
 # padstr
 #
-#   returns the <padded> string by padding <str> with specified number <n> of character <char> 
+#   returns the <padded> string by padding <str> with specified number <n> of character <char>
 #--------------------------------------------------------------------------------------------------
 macro(padstr padded str n char)
 
