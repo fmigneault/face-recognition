@@ -468,14 +468,21 @@ int main(int argc, char *argv[])
         if (optArgT && frameCounter >= testSequenceFileNames[sequenceCounter].size()) {
             ++sequenceCounter;
             frameCounter = 0;
-            if (sequenceCounter >= testSequenceFileNames.size()) break; // end of all test sequences
+            // end of all test sequences
+            if (sequenceCounter >= testSequenceFileNames.size()) {
+                logOutput << "All test sequences processed."
+                break;
+            }
             sequenceTrackID = bfs::path(testSequenceRegexPaths[sequenceCounter]).remove_filename().filename().string();
             ((VideoCapture*)videoStream)->open(testSequenceRegexPaths[sequenceCounter]);
             currentTracks.clear();  // reset tracks for starting new sequence
         }
 
         // update frame label or end loop when end reached with input files
-        if (optArgP && frameCounter >= testSequenceFileNames[sequenceCounter].size()) break;
+        if (optArgP && frameCounter >= testSequenceFileNames[sequenceCounter].size()) {
+            logOutput << "All input frames processed from path."
+            break;
+        }
         currentFrameLabel = (optArgP || optArgT) ? testSequenceFileNames[sequenceCounter][frameCounter] : std::to_string(frameCounter);
 
         FACE_RECOG_DEBUG(logDebug << "Delta: " << getDeltaTimePrecise(frameTimePrev, MILLISECONDS) << "ms" << std::endl);
