@@ -55,7 +55,7 @@ It is expected by the script that the lines correspond to the same entries (inpu
 
 Counter-validation heuristic is applied with ground truth eye positions against found track ROI points TL,BR to
 identify the expected tracks to evaluate in case that more than one ROI was registered on any given frame.
-The maximal number of matching eye positions with ROIs along a corresponding track (eyes within ROI) indicates the
+The maximum number of matching eye positions with ROIs along a corresponding track (eyes within ROI) indicates the
 retained track if more than one was available within a corresponding frame sequence.
 The script supposes that only one track per sequence is expected, others are ignored and removed for merged output.
 
@@ -265,7 +265,7 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
 
             progress += 1
             printProgressBar(progress, total, prefix=title, length=30)
-    print('', flush=True)
+    sys.stdout.flush()
 
     # evaluate performance summary
     print("Running summary evaluations...")
@@ -383,7 +383,7 @@ def writeResultPerfFile(perfFilePath, summaryHeader, summaryValues, perfHeader, 
     Writes the summary and detailed (per-threshold) results of the specified containers.
     Information must have been preprocessed, this function only handles writing operations, not the actual processing.
     """
-    with open(perfFilePath, 'w', newline='') as csvFileOut:
+    with open(perfFilePath, 'wb') as csvFileOut:
         csvWriter = csv.writer(csvFileOut)
         csvWriter.writerow(summaryHeader)
         csvWriter.writerow(summaryValues)
@@ -619,7 +619,7 @@ def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backC
       Where CM(i) are computed with the transaction-level threshold and CM(j) with the trajectory-level threshold.
       ConfusionMatrix are ordered for all targets transaction-level threshold, then followed by all trajectory-level.
 
-    If using backward compatibility, only trajectory-level matrixes are computed and are also appended to the line end.
+    If using backward compatibility, only trajectory-level matrices are computed and are also appended to the line end.
     If 'FILTER_FLAG' was set, an empty ConfusionMatrix object is appended instead of original results.
     """
     groundTruth = frameLine[TYPE_SEQ][getFieldIndex("GT_LABEL", TYPE_SEQ, backComp)]
@@ -798,7 +798,7 @@ def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0):
     for ts, gt in zip(targetScores, labelsGT):
         # sort scores in descending order, and check for top k scores if target was properly identified
         topLabels = sorted(ts, key=lambda label: ts[label], reverse=True)
-        topScores = [ ts[label] for label in topLabels ]
+        topScores = [ts[label] for label in topLabels]
         for k in rank:
             if ts[gt] in topScores[0:k]: rank_k[k] += 1
     total = float(len(targetScores))
@@ -817,7 +817,7 @@ def generateThresholds(start, end, incr):
     return thresholds
 
 
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '■'):
+def printProgressBar (iteration, total, prefix='', suffix='', decimals=1, length=100, fill='■'):
     """
     Print iterations progress.
     Call in a loop to create terminal progress bar
