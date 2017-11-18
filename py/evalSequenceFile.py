@@ -700,22 +700,26 @@ def calcAUC(dictCM, pFPR=1.0):
     Requires a dict of ConfusionMatrix with corresponding thresholds as keys.
     Partial area under the ROC curve for FPR=[0,pFPR] points can be calculated if pFPR is specified.
     """
-    if pFPR <= 0 or pFPR > 1: return -1
-    # get (FPR,TPR) points from confusion matrices
-    ROC = [(dictCM[t].FPR(),dictCM[t].TPR()) for t in dictCM]
-    # filter invalid points and sort ascending points (sorting keys employ FPR located first in tuple, then TPR)
-    ROC = sorted([p for p in ROC if p[0] != -1 and p[1] != -1])
-    if len(ROC) < 2: return 0
-    # filter up to pFPR for pAUC, interpolate last point for requested pFPR if required
-    pROC = [p for p in ROC if p[0] <= pFPR]
-    if pROC[-1][0] != pFPR and len(ROC) > len(pROC):
-        iROC = len(pROC)
-        pTPR = pROC[-1][1] + (pFPR - pROC[-1][0]) * (ROC[iROC][1] - pROC[-1][1]) / (ROC[iROC][0] - pROC[-1][0])
-        pROC += [(pFPR, pTPR)]
-    # trapezoidal rule of partial areas
-    auc = sum([(pROC[i][1] + pROC[i-1][1]) * (pROC[i][0] - pROC[i-1][0]) / 2 for i in range(1,len(pROC))])
-    # divide by pFPR requested to obtain result in range [0,1]
-    return auc / pFPR
+    try:
+        if pFPR <= 0 or pFPR > 1: return -1
+        # get (FPR,TPR) points from confusion matrices
+        ROC = [(dictCM[t].FPR(), dictCM[t].TPR()) for t in dictCM]
+        # filter invalid points and sort ascending points (sorting keys employ FPR located first in tuple, then TPR)
+        ROC = sorted([p for p in ROC if p[0] != -1 and p[1] != -1])
+        if len(ROC) < 2: return 0
+        # filter up to pFPR for pAUC, interpolate last point for requested pFPR if required
+        pROC = [p for p in ROC if p[0] <= pFPR]
+        if pROC[-1][0] != pFPR and len(ROC) > len(pROC):
+            iROC = len(pROC)
+            pTPR = pROC[-1][1] + (pFPR - pROC[-1][0]) * (ROC[iROC][1] - pROC[-1][1]) / (ROC[iROC][0] - pROC[-1][0])
+            pROC += [(pFPR, pTPR)]
+        # trapezoidal rule of partial areas
+        auc = sum([(pROC[i][1] + pROC[i-1][1]) * (pROC[i][0] - pROC[i-1][0]) / 2 for i in range(1, len(pROC))])
+        # divide by pFPR requested to obtain result in range [0,1]
+        return auc / pFPR
+    except Exception as e:
+        print("Exception occurred: [" + repr(e) + "]")
+        return -1
 
 
 def calcAUPR(dictCM):
@@ -723,29 +727,33 @@ def calcAUPR(dictCM):
     Calculate area under the Precision-Recall curve.
     Requires a dictionary of ConfusionMatrix objects with corresponding thresholds as keys.
     """
-    # reverse sort thresholds for (PPV,TPR) points in ascending order
-    PR = [(dictCM[t].PPV(),dictCM[t].TPR()) for t in sorted(dictCM, reverse=True)]
-    # filter invalid points
-    PR = [p for p in PR if p[0] != -1 and p[1] != -1]
-    if len(PR) < 2: return 0
-    # get min(PPV) and corresponding TPR to handle missing points in top of PR (when PPV doesn't start at 0)
-    # get min(TPR) to handle missing invalid points (div by 0,-1) at bottom of PR (when TPR doesn't reach 0)
-    PPV_minPPV = 1
-    TPR_minPPV = 1
-    PPV_minTPR = 0
-    TPR_minTPR = 1
-    for ppv,tpr in PR:
-        if ppv < PPV_minPPV:
-            PPV_minPPV = ppv
-            TPR_minPPV = tpr
-        if tpr < TPR_minTPR:
-            TPR_minTPR = tpr
-            PPV_minTPR = ppv
-    # add point (0, TPR_minPPV) to get horizontal line from PPV=0 to first available PPV_minPPV point on plot
-    # add point (PPV_minTPR, 0) to get vertical line from last available TPR_minTPR point down to TPR = 0
-    PR = [(PPV_minTPR, 0)] + PR + [(0, TPR_minPPV)]
-    # trapezoidal rule of partial area
-    return sum([(PR[i-1][1] + PR[i][1]) * (PR[i-1][0] - PR[i][0]) / 2 for i in range(1,len(PR))])
+    try:
+        # reverse sort thresholds for (PPV,TPR) points in ascending order
+        PR = [(dictCM[t].PPV(),dictCM[t].TPR()) for t in sorted(dictCM, reverse=True)]
+        # filter invalid points
+        PR = [p for p in PR if p[0] != -1 and p[1] != -1]
+        if len(PR) < 2: return 0
+        # get min(PPV) and corresponding TPR to handle missing points in top of PR (when PPV doesn't start at 0)
+        # get min(TPR) to handle missing invalid points (div by 0,-1) at bottom of PR (when TPR doesn't reach 0)
+        PPV_minPPV = 1
+        TPR_minPPV = 1
+        PPV_minTPR = 0
+        TPR_minTPR = 1
+        for ppv,tpr in PR:
+            if ppv < PPV_minPPV:
+                PPV_minPPV = ppv
+                TPR_minPPV = tpr
+            if tpr < TPR_minTPR:
+                TPR_minTPR = tpr
+                PPV_minTPR = ppv
+        # add point (0, TPR_minPPV) to get horizontal line from PPV=0 to first available PPV_minPPV point on plot
+        # add point (PPV_minTPR, 0) to get vertical line from last available TPR_minTPR point down to TPR = 0
+        PR = [(PPV_minTPR, 0)] + PR + [(0, TPR_minPPV)]
+        # trapezoidal rule of partial area
+        return sum([(PR[i-1][1] + PR[i][1]) * (PR[i-1][0] - PR[i][0]) / 2 for i in range(1, len(PR))])
+    except Exception as e:
+        print("Exception occurred: [" + repr(e) + "]")
+        return -1
 
 
 def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0):
@@ -764,54 +772,59 @@ def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0):
 
     Returns a dictionary of rank-k values for requested rank(s).
     """
-    # k value(s) validation, number of targets is always available even in 'empty' results lines
-    if type(rank) is int:
-        rank = [rank]
-    rank = sorted(rank)
-    nTargets, targetLabels = getTargetInfo(sequenceGroupedLines, backComp)
-    for k in rank: assert(k >= 1 and k <= nTargets)
+    try:
+        # k value(s) validation, number of targets is always available even in 'empty' results lines
+        if type(rank) is int:
+            rank = [rank]
+        rank = sorted(rank)
+        nTargets, targetLabels = getTargetInfo(sequenceGroupedLines, backComp)
+        for k in rank: assert(k >= 1 and k <= nTargets)
 
-    # create a list of {label: score} for every frame/track according to transaction/trajectory modes
-    targetScores = []
-    labelsGT = []
-    for seq in sequenceGroupedLines:
-        track = sequenceGroupedLines[seq]
-        labelGT = track[0][TYPE_SEQ][getFieldIndex("GT_LABEL", TYPE_SEQ, backComp)]
-        if labelGT not in targetLabels: continue  # skip cases where individual on track is not any of the tragets
+        # create a list of {label: score} for every frame/track according to transaction/trajectory modes
+        targetScores = []
+        labelsGT = []
+        for seq in sequenceGroupedLines:
+            track = sequenceGroupedLines[seq]
+            labelGT = track[0][TYPE_SEQ][getFieldIndex("GT_LABEL", TYPE_SEQ, backComp)]
+            if labelGT not in targetLabels: continue  # skip cases where individual on track is not any of the tragets
 
-        # trajectory evaluation using RAW/ACC scores
-        if mode == 0 or mode == 1:
-            labelsGT.append(labelGT)
-            targetScores.append({})
-            for t, label in zip(range(nTargets), targetLabels):
-                if   mode == 0: scoreField = "TARGET_SCORE_ACC"
-                elif mode == 1: scoreField = "TARGET_SCORE_RAW"
-                iTargetScore = getFieldIndex(scoreField, TYPE_RES, backComp, 0, t, nTargets)
-                # find max score along track for each corresponding target individual
-                for frame in track:
-                    targetScores[-1][label] = max(targetScores[-1].get(label, 0), float(frame[TYPE_RES][iTargetScore]))
-
-        # transaction evaluation using RAW scores
-        elif mode == 2:
-            for frame in track:
+            # trajectory evaluation using RAW/ACC scores
+            if mode == 0 or mode == 1:
                 labelsGT.append(labelGT)
                 targetScores.append({})
                 for t, label in zip(range(nTargets), targetLabels):
-                    iTargetScore = getFieldIndex("TARGET_SCORE_RAW", TYPE_RES, backComp, 0, t, nTargets)
-                    targetScores[-1][label] = float(frame[TYPE_RES][iTargetScore])
+                    if   mode == 0: scoreField = "TARGET_SCORE_ACC"
+                    elif mode == 1: scoreField = "TARGET_SCORE_RAW"
+                    iTargetScore = getFieldIndex(scoreField, TYPE_RES, backComp, 0, t, nTargets)
+                    # find max score along track for each corresponding target individual
+                    for frame in track:
+                        targetScores[-1][label] = max(targetScores[-1].get(label, 0),
+                                                      float(frame[TYPE_RES][iTargetScore]))
 
-    # evaluate ranks percentage of correctly identified targets
-    rank_k = dict([k,0] for k in rank)
-    for ts, gt in zip(targetScores, labelsGT):
-        # sort scores in descending order, and check for top k scores if target was properly identified
-        topLabels = sorted(ts, key=lambda label: ts[label], reverse=True)
-        topScores = [ts[label] for label in topLabels]
-        for k in rank:
-            if ts[gt] in topScores[0:k]: rank_k[k] += 1
-    total = float(len(targetScores))
-    for k in rank_k:
-        rank_k[k] = float(rank_k[k]) / total
-    return rank_k
+            # transaction evaluation using RAW scores
+            elif mode == 2:
+                for frame in track:
+                    labelsGT.append(labelGT)
+                    targetScores.append({})
+                    for t, label in zip(range(nTargets), targetLabels):
+                        iTargetScore = getFieldIndex("TARGET_SCORE_RAW", TYPE_RES, backComp, 0, t, nTargets)
+                        targetScores[-1][label] = float(frame[TYPE_RES][iTargetScore])
+
+        # evaluate ranks percentage of correctly identified targets
+        rank_k = dict([k,0] for k in rank)
+        for ts, gt in zip(targetScores, labelsGT):
+            # sort scores in descending order, and check for top k scores if target was properly identified
+            topLabels = sorted(ts, key=lambda label: ts[label], reverse=True)
+            topScores = [ts[label] for label in topLabels]
+            for k in rank:
+                if ts[gt] in topScores[0:k]: rank_k[k] += 1
+        total = float(len(targetScores))
+        for k in rank_k:
+            rank_k[k] = float(rank_k[k]) / total
+        return rank_k
+    except Exception as e:
+        print("Exception occurred: [" + repr(e) + "]")
+        return -1
 
 
 def generateThresholds(start, end, incr):
