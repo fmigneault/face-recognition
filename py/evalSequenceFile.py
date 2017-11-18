@@ -181,7 +181,7 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
     # parse lines (group by corresponding sequences)
     print("Grouping lines per corresponding sequences...")
     sequenceGroupedLines = dict()
-    for lineSeq,lineRes in allLines:
+    for lineSeq, lineRes in allLines:
         seqKey = lineRes[getFieldIndex("SEQUENCE_TRACK_ID", TYPE_RES, evalBackwardCompatibility)] # unique
         sequenceGroupedLines.setdefault(seqKey, list()).append({TYPE_SEQ: lineSeq, TYPE_RES: lineRes})
 
@@ -219,13 +219,13 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
                 frameLine[TYPE_RES].extend(emptyTrack)
 
     if evalTransactionLevel and not evalTrajectoryLevel:
-        print("Running evaluations for thresholds: (transaction) 0 to " + str(THRESHOLD_SCORE_RAW_MAX) + "...")
+        print("Running evaluations for thresholds: (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "]:")
     elif not evalTransactionLevel and evalTrajectoryLevel:
-        print("Running evaluations for thresholds: (trajectory)  0 to " + str(THRESHOLD_SCORE_ACC_MAX) + "...")
+        print("Running evaluations for thresholds: (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
     else:
         print("Running evaluations for thresholds:" + \
-              " (transaction) 0 to " + str(THRESHOLD_SCORE_RAW_MAX) + " |" + \
-              " (trajectory)  0 to " + str(THRESHOLD_SCORE_ACC_MAX) + "...")
+              " (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "] |" + \
+              " (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
     transacDigits = len(str(int(1/THRESHOLD_SCORE_RAW_INCR)))
     transacFormat = "." + str(transacDigits) + "f"
     for threshTransac, threshTraject in zip(thresholdsTransac, thresholdsTraject):
@@ -250,21 +250,22 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
                 # append ConfusionMatrix with current threshold, for every best/target-label/score combination
                 evalLineConfusionMatrix(frameLine, threshTransac, threshTraject, evalBackwardCompatibility)
 
-                # cumulate transaction-level evaluation results along each frame, per threshold
+                # cummulate transaction-level evaluation results along each frame, per threshold
                 if evalTransactionLevel:
                     for e in range(nEvaluations):
-                        # cumulate corresponding (TP,FP,TN,FN) across frames
+                        # cummulate corresponding (TP,FP,TN,FN) across frames
                         threshTransacPerf[e][threshTransac] += frameLine[TYPE_RES][maxLength + e]
 
-            # cumulate trajectory-level evaluation results along each track, per threshold
+            # cummulate trajectory-level evaluation results along each track, per threshold
             if evalTrajectoryLevel:
                 evalResults = evalTrackConfusionMatrix(sequenceGroupedLines[tr], evalBackwardCompatibility)
                 for e in range(nEvaluations):
-                    # cumulate corresponding (TP,FP,TN,FN) across tracks
+                    # cummulate corresponding (TP,FP,TN,FN) across tracks
                     threshTrajectPerf[e][threshTraject] += evalResults[e]
 
             progress += 1
             printProgressBar(progress, total, prefix=title, length=30)
+    print('')
     sys.stdout.flush()
 
     # evaluate performance summary
@@ -372,10 +373,10 @@ def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False):
                 mergedLine = []
                 mergedLine.extend(line[TYPE_SEQ])
                 mergedLine.extend([line[FILTER_FLAG]])
-                mergedLine.extend(line[TYPE_RES][:iTrackCount]) # add up to original 'TRACK_COUNT'
-                mergedLine.extend([1])                          # add 'TRACK_COUNT_FILTERED' = 1
-                mergedLine.extend(line[TYPE_RES][iTrackCount:]) # rest of results line
-                csvWriter.writerow(mergedLine[:maxLength])      # don't output ConfusionMatrix objects
+                mergedLine.extend(line[TYPE_RES][:iTrackCount])  # add up to original 'TRACK_COUNT'
+                mergedLine.extend([1])                           # add 'TRACK_COUNT_FILTERED' = 1
+                mergedLine.extend(line[TYPE_RES][iTrackCount:])  # rest of results line
+                csvWriter.writerow(mergedLine[:maxLength])       # don't output ConfusionMatrix objects
 
 
 def writeResultPerfFile(perfFilePath, summaryHeader, summaryValues, perfHeader, perfThresholds, perfResults, perfCount):
@@ -395,7 +396,7 @@ def writeResultPerfFile(perfFilePath, summaryHeader, summaryValues, perfHeader, 
             csvWriter.writerow(row)
 
 
-def getFieldIndex(field, fileType, backwardCompatibility=False, trackIndex=0, targetIndex=0, targetCount=0):
+def getFieldIndex(field, fileType, backComp=False, trackIndex=0, targetIndex=0, targetCount=0):
     """
     Returns the index of the requested <HEADER> field for the corresponding <fileType>={RESULTS,SEQUENCES}
     For track results, zero based indexes can be specified to obtain index of i-th track, and j-th target score.
@@ -403,8 +404,8 @@ def getFieldIndex(field, fileType, backwardCompatibility=False, trackIndex=0, ta
     If the field cannot be found, returns None.
     """
     if fileType == TYPE_RES:
-        header = HEADER_INDEX_RESULTS[int(backwardCompatibility)]
-        if backwardCompatibility:
+        header = HEADER_INDEX_RESULTS[int(backComp)]
+        if backComp:
             if field in ["BEST_SCORE_RAW","BEST_SCORE_ACC"]:
                 field = "BEST_SCORE"
             elif field in ["TARGET_SCORE_RAW","TARGET_SCORE_ACC"]:
@@ -430,7 +431,6 @@ def getFieldInfo(infoContainer, mapping, fieldParams):
     contained in this container, the method returns the field information specified with field parameters corresponding
     exactly to ordered input parameters of 'getFieldIndex' function.
 
-
     Usage:
     ------
 
@@ -451,7 +451,7 @@ def getFieldInfo(infoContainer, mapping, fieldParams):
     return mapping(infoContainer)[getFieldIndex(*fieldParams)]
 
 
-def getTargetInfo(sequenceFrameLines, backComp):
+def getTargetInfo(sequenceFrameLines, backComp=False):
     """
     Returns the number of targets and a list of their corresponding labels as tuple.
 
@@ -484,7 +484,7 @@ def isEyesInROI(roi, eyes):
     return eyeBetween[0] >= roi[0] and eyeBetween[0] <= roi[2] and eyeBetween[1] >= roi[1] and eyeBetween[1] <= roi[3]
 
 
-def filterBestTrack(sequenceFrameLines, backComp):
+def filterBestTrack(sequenceFrameLines, backComp=False):
     """
     Filters the tracks keeping only the most probable one given GT eye positions and tracked ROIs.
     Function requires input <sequenceFrameLines> as a list of {TYPE_SEQ: line, TYPE_RES: line} for every frame-line.
@@ -547,7 +547,7 @@ def filterBestTrack(sequenceFrameLines, backComp):
                 sequenceFrameLines[fl][TYPE_RES] = line[:baseTrackEnd]
 
 
-def filterFileTrack(sequenceLines, filterSequences, backComp):
+def filterFileTrack(sequenceLines, filterSequences, backComp=False):
     """
     Adds 'FILTER_FLAG' value to each line of the track sequence according to specified list of filter sequences.
     """
@@ -557,7 +557,7 @@ def filterFileTrack(sequenceLines, filterSequences, backComp):
         line[FILTER_FLAG] = flag
 
 
-def generateEmptyTrack(targetCount, backwardCompatibility):
+def generateEmptyTrack(targetCount, backComp=False):
     """
     Returns the default (invalid) values to pad a 'RESULTS' line that did not contain any track scores.
     Expects empty track lines format as:
@@ -566,7 +566,7 @@ def generateEmptyTrack(targetCount, backwardCompatibility):
 
     Adds the missing resutls such that all labels are '', all scores are 0.0, and all ROI positions are -1.
     """
-    if backwardCompatibility:
+    if backComp:
         return [-1, '', 0.0, -1, -1, -1, -1] + ['', 0.0] * targetCount              # only trajectory-level scores
     else:
         return [-1, '', 0.0, 0.0, -1, -1, -1, -1] + ['', 0.0, 0.0] * targetCount    # transaction+trajectory scores
@@ -578,37 +578,44 @@ class ConfusionMatrix:
     """
     def __init__(self, cmAsList=None):
         if cmAsList is None:
-            self.fromList([0,0,0,0])
+            self.fromList([0, 0, 0, 0])
         else:
             self.fromList(cmAsList)
+
     def __iadd__(self, other):
         self.TP += other.TP
         self.FP += other.FP
         self.TN += other.TN
         self.FN += other.FN
         return self
+
     @staticmethod
     def fields():
-        return ["TP","FP","TN","FN","FPR","TPR","PPV"]
+        return ['TP', 'FP', 'TN' ,'FN', 'FPR', 'TPR', 'PPV']
+
     def fromList(self, cmAsList):
         self.TP = cmAsList[0]
         self.FP = cmAsList[1]
         self.TN = cmAsList[2]
         self.FN = cmAsList[3]
+
     def asList(self):
         return [self.TP, self.FP, self.TN, self.FN, self.FPR(), self.TPR(), self.PPV()]
+
     def FPR(self):
         if self.FP + self.TN == 0: return -1
-        return self.FP / (self.FP + self.TN)
+        return self.FP / float(self.FP + self.TN)
+
     def TPR(self):
         if self.TP + self.FN == 0: return -1
-        return self.TP / (self.TP + self.FN)
+        return self.TP / float(self.TP + self.FN)
+
     def PPV(self):
         if self.TP + self.FP == 0: return -1
-        return self.TP / (self.TP + self.FP)
+        return self.TP / float(self.TP + self.FP)
 
 
-def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backComp):
+def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backComp=False):
     """
     Appends ConfusionMatrix results to line using specified scores, label and GT.
     Appended results are in the following order:
@@ -646,7 +653,7 @@ def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backC
                 frameLine[TYPE_RES][-1].FN = (groundTruth == label and score <  threshold)   # FN
 
 
-def evalTrackConfusionMatrix(trackFrameLines, backComp):
+def evalTrackConfusionMatrix(trackFrameLines, backComp=False):
     """
     Evaluates the TP,FP,TN,FN along a complete track given its pre-evaluated (with 'evalLineConfusionMatrix')
     and corresponding list of line-frames (each appended with ConfusionMatrix frame-line transaction recognitions).
@@ -817,25 +824,37 @@ def generateThresholds(start, end, incr):
     return thresholds
 
 
-def printProgressBar (iteration, total, prefix='', suffix='', decimals=1, length=100, fill='■'):
+def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100,
+                     fill='█', empty=' ', begin='▕', end='▏', done=' [DONE] '):
     """
     Print iterations progress.
     Call in a loop to create terminal progress bar
     @params:
-        iteration   - Required  : current iteration (int)
-        total       - Required  : total iterations (int)
-        prefix      - Optional  : prefix string (str)
-        suffix      - Optional  : suffix string (str)
-        decimals    - Optional  : positive number of decimals in percent complete (int)
-        length      - Optional  : character length of bar (int)
-        fill        - Optional  : bar fill character (str)
+        iteration   - Required : current iteration                      [int]
+        total       - Required : total iterations                       [int]
+        prefix      - Optional : prefix string                          [str]
+        suffix      - Optional : suffix string                          [str]
+        decimals    - Optional : positive number of decimals in percent [int]
+        length      - Optional : character length of bar                [int]
+        fill        - Optional : bar fill character                     [str] (ex: '■', '█', '#')
+        empty       - Optional : not filled bar character               [str] (ex: '-', ' ', '•')
+        begin       - Optional : starting bar character                 [str] (ex: '|', '▕', '[')
+        end         - Optional : ending bar character                   [str] (ex: '|', '▏', ']')
+        done        - Optional : display message when 100% is reached   [str]
     """
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='\r')
-    # Print New Line on Complete
-    if iteration == total: print()
+    bar = fill * filledLength + empty * (length - filledLength)
+    display = '\r{prefix} {begin}{bar}{end} {percent}% {suffix}' \
+              .format(prefix=prefix, begin=begin, bar=bar, end=end, percent=percent, suffix=suffix)
+    print(display, end='\r'),   # comma after print() required for python 2
+    if iteration == total:      # print with newline on complete, also add spaces to 'erase' previous progress bar
+        finish = '\r{prefix} {done}'.format(prefix=prefix, done=done)
+        if hasattr(str, 'decode'):   # handle python 2 non-unicode strings for proper length measure
+            finish = finish.decode('utf-8')
+            display = display.decode('utf-8')
+        clear = ' ' * max(len(display) - len(finish), 0)
+        print(finish + clear)
 
 
 if __name__ == "__main__":

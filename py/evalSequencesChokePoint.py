@@ -44,7 +44,7 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     assert(p.isfile(resultsFileBase + resultsFileExt))
 
     if overwriteEvaluationFiles:
-        print("Cleaning up old evaluation files (-eval and -perf)")
+        print("Cleaning up old evaluation files (-eval and -perf)...")
         for var in resultsVariations:
             # clean previous results files if overwrite requested and matching backward compatibility
             resultsVarEvalFilePath = resultsFileBase + var + resultsEval + resultsFileExt
@@ -60,7 +60,7 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
             if p.isfile(resultsVarPerfTrajectFilePath) and not evalBackwardCompatibility:
                 rm(resultsVarPerfTrajectFilePath)
 
-    print("Extracting sessions and frontal sequences from complete results file")
+    print("Extracting sessions and frontal sequences from complete results file...")
     for var in resultsVariations:
         # generate results file variations if missing or overwrite requested
         resultsVarFilePath = resultsFileBase + var + resultsFileExt
