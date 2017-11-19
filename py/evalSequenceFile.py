@@ -86,10 +86,14 @@ from __future__ import print_function
 import os
 import csv
 import sys
+import copy
 
 
 TYPE_RES = "RESULTS"
 TYPE_SEQ = "SEQUENCES"
+TYPE_NORM = "NORMALIZED"
+
+NORM_TRACK_LENGTH = 20  # circular-buffer track accumulation size to employ for normalization (default: [W=20])
 
 FILTER_FLAG = "FILTER"
 
@@ -151,7 +155,7 @@ THRESHOLD_SCORE_RAW_INCR = THRESHOLD_SCORE_RAW_MAX / (THRESHOLD_SCORE_ACC_MAX / 
 
 
 def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequencesFilePath="",
-                         noHeaderSequences=False, noHeaderResults=False,
+                         noHeaderSequences=False, noHeaderResults=False, evalNormalizedScores=True,
                          evalTransactionLevel=True, evalTrajectoryLevel=True,
                          outputMergedEvalFile=True, evalBackwardCompatibility=False):
     """
@@ -162,7 +166,12 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
     assert((not evalBackwardCompatibility and (evalTransactionLevel or evalTrajectoryLevel)) or
            (evalBackwardCompatibility and evalTrajectoryLevel))
     if evalBackwardCompatibility:
-        evalTransactionLevel = False
+        if evalTransactionLevel:
+            print("WARNING: 'evalTransactionLevel' turned off for 'evalBackwardCompatibility' mode")
+            evalTransactionLevel = False
+        if evalNormalizedScores:
+            print("WARNING: 'evalNormalizedScores' turned off for 'evalBackwardCompatibility' mode")
+            evalNormalizedScores = False
 
     # read files lines and get basic information
     allLines = readSequenceFileInput(csvSequencesFilePath, csvResultsFilePath, noHeaderSequences, noHeaderResults)
@@ -182,7 +191,7 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
     print("Grouping lines per corresponding sequences...")
     sequenceGroupedLines = dict()
     for lineSeq, lineRes in allLines:
-        seqKey = lineRes[getFieldIndex("SEQUENCE_TRACK_ID", TYPE_RES, evalBackwardCompatibility)] # unique
+        seqKey = lineRes[getFieldIndex("SEQUENCE_TRACK_ID", TYPE_RES, evalBackwardCompatibility)]  # unique
         sequenceGroupedLines.setdefault(seqKey, list()).append({TYPE_SEQ: lineSeq, TYPE_RES: lineRes})
 
     # filter invalid tracks from sequences
@@ -194,126 +203,156 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
         filterBestTrack(seqLines, evalBackwardCompatibility)
         filterFileTrack(seqLines, filterSequences, evalBackwardCompatibility)
 
+    # apply normalization if requested
+    evalTypes = [TYPE_RES]
+    if evalNormalizedScores:
+        print("Applying score normalization to sequences...")
+        addNormalizedScoreResults(sequenceGroupedLines)
+        evalTypes.append(TYPE_NORM)
+
     # generate for multiple thresholds and prepare containers, default values, etc.
     thresholdsTransac = generateThresholds(0, THRESHOLD_SCORE_RAW_MAX, THRESHOLD_SCORE_RAW_INCR)
     thresholdsTraject = generateThresholds(0, THRESHOLD_SCORE_ACC_MAX, THRESHOLD_SCORE_ACC_INCR)
     threshTransacPerf = dict()
     threshTrajectPerf = dict()
-    emptyTrack = generateEmptyTrack(nTargets, evalBackwardCompatibility)
+    emptyTrackResults = generateEmptyResultLine(nTargets, evalBackwardCompatibility)
+    trackCountIndex = getFieldIndex("TRACK_COUNT", TYPE_RES, evalBackwardCompatibility)
     maxLength = getFieldIndex("TARGET_SCORE_ACC", TYPE_RES, evalBackwardCompatibility, 0, nTargets - 1, nTargets) + 1
     nEvaluations = nTargets + 1   # +1 for 'best'
-    if evalTransactionLevel:
-        for e in range(nEvaluations):
-            threshTransacPerf[e] = dict()
-            for t in thresholdsTransac:
-                threshTransacPerf[e][t] = ConfusionMatrix()
-    if evalTrajectoryLevel:
-        for e in range(nEvaluations):
-            threshTrajectPerf[e] = dict()
-            for t in thresholdsTraject:
-                threshTrajectPerf[e][t] = ConfusionMatrix()
-    for tr in sequenceGroupedLines:
-        for frameLine in sequenceGroupedLines[tr]:
-            # add default empty track values if no results are available for a given frame along tracks
-            if int(frameLine[TYPE_RES][getFieldIndex("TRACK_COUNT", TYPE_RES, evalBackwardCompatibility)]) < 1:
-                frameLine[TYPE_RES].extend(emptyTrack)
+    for et in evalTypes:
+        threshTransacPerf[et] = dict()
+        threshTrajectPerf[et] = dict()
+        if evalTransactionLevel:
+            for e in range(nEvaluations):
+                threshTransacPerf[et][e] = dict()
+                for t in thresholdsTransac:
+                    threshTransacPerf[et][e][t] = ConfusionMatrix()
+        if evalTrajectoryLevel:
+            for e in range(nEvaluations):
+                threshTrajectPerf[et][e] = dict()
+                for t in thresholdsTraject:
+                    threshTrajectPerf[et][e][t] = ConfusionMatrix()
+        if et == TYPE_RES:
+            for tr in sequenceGroupedLines:
+                for frameLine in sequenceGroupedLines[tr]:
+                    # add default empty track values if no results are available for a given frame along tracks
+                    if int(frameLine[TYPE_RES][trackCountIndex]) < 1:
+                        frameLine[TYPE_RES].extend(emptyTrackResults)
 
-    if evalTransactionLevel and not evalTrajectoryLevel:
-        print("Running evaluations for thresholds: (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "]:")
-    elif not evalTransactionLevel and evalTrajectoryLevel:
-        print("Running evaluations for thresholds: (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
-    else:
-        print("Running evaluations for thresholds:" + \
-              " (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "] |" + \
-              " (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
-    transacDigits = len(str(int(1/THRESHOLD_SCORE_RAW_INCR)))
-    transacFormat = "." + str(transacDigits) + "f"
-    for threshTransac, threshTraject in zip(thresholdsTransac, thresholdsTraject):
+    try:
+        hide_cursor()   # avoid cursor blinking across progress bar
         if evalTransactionLevel and not evalTrajectoryLevel:
-            title = "  Processing transaction-level threshold T=" + format(threshTransac, transacFormat).ljust(6)
+            print("Running evaluations for thresholds: (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "]:")
         elif not evalTransactionLevel and evalTrajectoryLevel:
-            title = "  Processing trajectory-level threshold T=" + str(threshTraject).ljust(6)
+            print("Running evaluations for thresholds: (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
         else:
-            title = "  Processing transaction|trajectory-level thresholds T=" + \
-                    format(threshTransac, transacFormat) + "|" + str(threshTraject).ljust(6)
-        progress = 0
-        total = len(sequenceGroupedLines)
-        printProgressBar(progress, total, prefix=title, length=30)
-
-        # evaluate performance of each track-based lines per threshold
-        for tr in sequenceGroupedLines:
-            for frameLine in sequenceGroupedLines[tr]:
-                # remove any result ConfusionMatrix from previous iteration
-                if len(frameLine[TYPE_RES]) > maxLength:
-                    del frameLine[TYPE_RES][maxLength:]
-                # transaction evaluation of each frame-line
-                # append ConfusionMatrix with current threshold, for every best/target-label/score combination
-                evalLineConfusionMatrix(frameLine, threshTransac, threshTraject, evalBackwardCompatibility)
-
-                # cummulate transaction-level evaluation results along each frame, per threshold
-                if evalTransactionLevel:
-                    for e in range(nEvaluations):
-                        # cummulate corresponding (TP,FP,TN,FN) across frames
-                        threshTransacPerf[e][threshTransac] += frameLine[TYPE_RES][maxLength + e]
-
-            # cummulate trajectory-level evaluation results along each track, per threshold
-            if evalTrajectoryLevel:
-                evalResults = evalTrackConfusionMatrix(sequenceGroupedLines[tr], evalBackwardCompatibility)
-                for e in range(nEvaluations):
-                    # cummulate corresponding (TP,FP,TN,FN) across tracks
-                    threshTrajectPerf[e][threshTraject] += evalResults[e]
-
-            progress += 1
+            print("Running evaluations for thresholds:" + \
+                  " (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "] |" + \
+                  " (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
+        transacDigits = len(str(int(1/THRESHOLD_SCORE_RAW_INCR)))
+        transacFormat = "." + str(transacDigits) + "f"
+        for threshTransac, threshTraject in zip(thresholdsTransac, thresholdsTraject):
+            if evalTransactionLevel and not evalTrajectoryLevel:
+                title = "  Processing transaction-level threshold T=" + format(threshTransac, transacFormat).ljust(6)
+            elif not evalTransactionLevel and evalTrajectoryLevel:
+                title = "  Processing trajectory-level threshold T=" + str(threshTraject).ljust(6)
+            else:
+                title = "  Processing transaction|trajectory-level thresholds T=" + \
+                        format(threshTransac, transacFormat) + "|" + str(threshTraject).ljust(6)
+            progress = 0
+            total = len(sequenceGroupedLines)
             printProgressBar(progress, total, prefix=title, length=30)
-    print('')
-    sys.stdout.flush()
 
-    # evaluate performance summary
+            # evaluate performance of each track-based lines per threshold, for every evaluation type
+            for tr in sequenceGroupedLines:
+                for et in evalTypes:
+                    for frameLine in sequenceGroupedLines[tr]:
+                        # remove any result ConfusionMatrix from previous iteration
+                        if len(frameLine[et]) > maxLength:
+                            del frameLine[et][maxLength:]
+                        # transaction evaluation of each frame-line
+                        # append ConfusionMatrix with current threshold, for every best/target-label/score combination
+                        evalLineConfusionMatrix(frameLine, threshTransac, threshTraject, evalBackwardCompatibility, et)
+
+                        # accumulate transaction-level evaluation results along each frame, per threshold
+                        if evalTransactionLevel:
+                            for e in range(nEvaluations):
+                                # accumulate corresponding (TP,FP,TN,FN) across frames
+                                threshTransacPerf[et][e][threshTransac] += frameLine[et][maxLength + e]
+
+                    # accumulate trajectory-level evaluation results along each track, per threshold
+                    if evalTrajectoryLevel:
+                        evalResults = evalTrackConfusionMatrix(sequenceGroupedLines[tr], evalBackwardCompatibility, et)
+                        for e in range(nEvaluations):
+                            # accumulate corresponding (TP,FP,TN,FN) across tracks
+                            threshTrajectPerf[et][e][threshTraject] += evalResults[e]
+
+                progress += 1
+                printProgressBar(progress, total, prefix=title, length=30)
+        print_flush()
+    except Exception:
+        raise   # rethrow
+    finally:    # reset cursor visibility
+        show_cursor()
+
+    # prepare performance summary constants
     print("Running summary evaluations...")
-    summaryValuesTransac = []
-    summaryValuesTraject = []
+    summaryValuesTransac = dict()
+    summaryValuesTraject = dict()
     summaryHeader = []
     summaryLabels = ["_BEST"] + ["_TARGET_" + str(t) for t in range(nTargets)]
     for label in summaryLabels:
         summaryHeader += ["pAUC(5%)" + label, "pAUC(10%)" + label, "pAUC(20%)" + label, "AUC" + label, "AUPR" + label]
     summaryRanks = list(range(1, nTargets + 1))
     summaryHeader += ["RANK_" + str(k) for k in summaryRanks]
-    for e in range(nEvaluations):
-        if evalTransactionLevel:
-            summaryValuesTransac += [calcAUC(threshTransacPerf[e], pFPR=0.05), calcAUC(threshTransacPerf[e], pFPR=0.10),
-                                     calcAUC(threshTransacPerf[e], pFPR=0.20), calcAUC(threshTransacPerf[e]),
-                                     calcAUPR(threshTransacPerf[e])]
-        if evalTrajectoryLevel:
-            summaryValuesTraject += [calcAUC(threshTrajectPerf[e], pFPR=0.05), calcAUC(threshTrajectPerf[e], pFPR=0.10),
-                                     calcAUC(threshTrajectPerf[e], pFPR=0.20), calcAUC(threshTrajectPerf[e]),
-                                     calcAUPR(threshTrajectPerf[e])]
-    if evalTransactionLevel:
-        summaryValuesTransac += list(calcRank(sequenceGroupedLines, rank=summaryRanks, mode=2).values())
-    if evalTrajectoryLevel:
-        summaryValuesTraject += list(calcRank(sequenceGroupedLines, rank=summaryRanks, mode=0).values())
-
     perfHeader = ["T"] + ConfusionMatrix.fields() * nEvaluations
     filePathExt = os.path.splitext(csvResultsFilePath)
 
-    # output transaction-level evaluation performances
-    if evalTransactionLevel:
-        print("Writing transaction-level evaluation results to file...")
-        outputFile = filePathExt[0] + "-perf-transaction" + filePathExt[1]
-        writeResultPerfFile(outputFile, summaryHeader, summaryValuesTransac,
-                            perfHeader, thresholdsTransac, threshTransacPerf, nEvaluations)
+    # evaluate performance summary for each evaluation type, target and transaction/trajectory-level
+    for et in evalTypes:
+        summaryValuesTransac[et] = list()
+        summaryValuesTraject[et] = list()
+        for e in range(nEvaluations):
+            if evalTransactionLevel:
+                summaryValuesTransac[et] += [calcAUC(threshTransacPerf[et][e], pFPR=0.05),
+                                             calcAUC(threshTransacPerf[et][e], pFPR=0.10),
+                                             calcAUC(threshTransacPerf[et][e], pFPR=0.20),
+                                             calcAUC(threshTransacPerf[et][e]),
+                                             calcAUPR(threshTransacPerf[et][e])]
+            if evalTrajectoryLevel:
+                summaryValuesTraject[et] += [calcAUC(threshTrajectPerf[et][e], pFPR=0.05),
+                                             calcAUC(threshTrajectPerf[et][e], pFPR=0.10),
+                                             calcAUC(threshTrajectPerf[et][e], pFPR=0.20),
+                                             calcAUC(threshTrajectPerf[et][e]),
+                                             calcAUPR(threshTrajectPerf[et][e])]
+        if evalTransactionLevel:
+            rankings = calcRank(sequenceGroupedLines, rank=summaryRanks, mode=2, evalType=et)
+            summaryValuesTransac[et] += list(rankings.values())
+        if evalTrajectoryLevel:
+            rankings = calcRank(sequenceGroupedLines, rank=summaryRanks, mode=0, evalType=et)
+            summaryValuesTraject[et] += list(rankings.values())
 
-    # output trajectory-level evaluation performances
-    if evalTrajectoryLevel:
-        print("Writing trajectory-level evaluation results to file...")
-        outputFile = filePathExt[0] + "-perf-trajectory" + filePathExt[1]
-        writeResultPerfFile(outputFile, summaryHeader, summaryValuesTraject,
-                            perfHeader, thresholdsTraject, threshTrajectPerf, nEvaluations)
+        fileEvalType = "-norm" if et == TYPE_NORM else ""
 
-    # write file by adding merged sequences and results information
-    if outputMergedEvalFile:
-        print("Writing merged sequences and results to file...")
-        outputFile = filePathExt[0] + "-eval" + filePathExt[1]
-        writeMergedEvalFile(outputFile, sequenceGroupedLines, evalBackwardCompatibility)
+        # output transaction-level evaluation performances
+        if evalTransactionLevel:
+            print("Writing transaction-level evaluation results to file...")
+            outputFile = filePathExt[0] + "-perf-transaction" + fileEvalType + filePathExt[1]
+            writeResultPerfFile(outputFile, summaryHeader, summaryValuesTransac[et],
+                                perfHeader, thresholdsTransac, threshTransacPerf[et], nEvaluations)
+
+        # output trajectory-level evaluation performances
+        if evalTrajectoryLevel:
+            print("Writing trajectory-level evaluation results to file...")
+            outputFile = filePathExt[0] + "-perf-trajectory" + fileEvalType + filePathExt[1]
+            writeResultPerfFile(outputFile, summaryHeader, summaryValuesTraject[et],
+                                perfHeader, thresholdsTraject, threshTrajectPerf[et], nEvaluations)
+
+        # write file by adding merged sequences and results information
+        if outputMergedEvalFile:
+            print("Writing merged sequences and results to file...")
+            outputFile = filePathExt[0] + "-eval" + fileEvalType + filePathExt[1]
+            writeMergedEvalFile(outputFile, sequenceGroupedLines, evalBackwardCompatibility, et)
 
 
 def readSequenceFileInput(csvSequencesFilePath, csvResultsFilePath, noHeaderSequences=False, noHeaderResults=False):
@@ -340,7 +379,7 @@ def readSequenceFileInput(csvSequencesFilePath, csvResultsFilePath, noHeaderSequ
     return [list(i) for i in zip(allLinesSeq,allLinesRes)]
 
 
-def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False):
+def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False, evalType=TYPE_RES):
     """
     Writes the merged file combining 'SEQUENCES' and 'RESULTS' fields, removing duplicate data and invalid tracks.
     Information must have been preprocessed, this function only handles writing operations, not the actual processing.
@@ -358,7 +397,7 @@ def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False):
                         "TARGET_COUNT","TRACK_NUMBER"] \
                      + bestHeader \
                      + ["ROI_TL_X","ROI_TL_Y","ROI_BR_X","ROI_BR_Y"]
-        iTrackCount = getFieldIndex("TRACK_COUNT", TYPE_RES, backComp)
+        iTrackCount = getFieldIndex("TRACK_COUNT", evalType, backComp)
         targetCount = getTargetInfo(sequenceGroupedLines, backComp)[0]
         for t in range(targetCount):
             mergedHeader += ["TARGET_LABEL_" + str(t)]
@@ -373,9 +412,9 @@ def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False):
                 mergedLine = []
                 mergedLine.extend(line[TYPE_SEQ])
                 mergedLine.extend([line[FILTER_FLAG]])
-                mergedLine.extend(line[TYPE_RES][:iTrackCount])  # add up to original 'TRACK_COUNT'
+                mergedLine.extend(line[evalType][:iTrackCount])  # add up to original 'TRACK_COUNT'
                 mergedLine.extend([1])                           # add 'TRACK_COUNT_FILTERED' = 1
-                mergedLine.extend(line[TYPE_RES][iTrackCount:])  # rest of results line
+                mergedLine.extend(line[evalType][iTrackCount:])  # rest of results line
                 csvWriter.writerow(mergedLine[:maxLength])       # don't output ConfusionMatrix objects
 
 
@@ -403,7 +442,7 @@ def getFieldIndex(field, fileType, backComp=False, trackIndex=0, targetIndex=0, 
     In the case of track or target indexes, the target count must also be specified for proper indexing.
     If the field cannot be found, returns None.
     """
-    if fileType == TYPE_RES:
+    if fileType == TYPE_RES or fileType == TYPE_NORM:
         header = HEADER_INDEX_RESULTS[int(backComp)]
         if backComp:
             if field in ["BEST_SCORE_RAW","BEST_SCORE_ACC"]:
@@ -451,6 +490,20 @@ def getFieldInfo(infoContainer, mapping, fieldParams):
     return mapping(infoContainer)[getFieldIndex(*fieldParams)]
 
 
+def getFrameLineInfo(frameLine, field, fileType, fieldParams):
+    """
+    Shortcut method to extract information from higher level 'frameLine' container.
+    (ie: dictionary of corresponding {TYPE_RES: [<res_list_info>], TYPE_SEQ: [<seq_list_info>]} lines)
+
+        info = frameLine[TYPE_RES][getFieldIndex(field, TYPE_RES, backComp, trackIndex, targetIndex, targetCount)]
+
+    Becomes:
+
+        info = getFrameLineInfo(frameLine, field, TYPE_RES, backComp, trackIndex, targetIndex, targetCount)
+    """
+    return frameLine[fileType][getFieldIndex(field, fileType, *fieldParams)]
+
+
 def getTargetInfo(sequenceFrameLines, backComp=False):
     """
     Returns the number of targets and a list of their corresponding labels as tuple.
@@ -477,7 +530,7 @@ def getTargetInfo(sequenceFrameLines, backComp=False):
 
 def isEyesInROI(roi, eyes):
     """
-    Evaluates the correspondance between the specified ROI and the GT eye positions
+    Evaluates the correspondence between the specified ROI and the GT eye positions
     Expects ROI as tuple (tl_x,tl_y,br_x,br_y) as eye position as tuple (left_eye_x,left_eye_y,right_eye_x,right_eye_y)
     """
     eyeBetween = ((eyes[0] + eyes[2]) / 2, (eyes[1] + eyes[3]) / 2)
@@ -557,19 +610,92 @@ def filterFileTrack(sequenceLines, filterSequences, backComp=False):
         line[FILTER_FLAG] = flag
 
 
-def generateEmptyTrack(targetCount, backComp=False):
+def generateEmptyResultLine(targetCount, backComp=False):
     """
     Returns the default (invalid) values to pad a 'RESULTS' line that did not contain any track scores.
     Expects empty track lines format as:
 
         SEQUENCE_TRACK_ID,SEQUENCE_NUMBER,FRAME_NUMBER,TRACK_COUNT,TARGET_COUNT   (no results here)
 
-    Adds the missing resutls such that all labels are '', all scores are 0.0, and all ROI positions are -1.
+    Adds the missing results such that all labels are '', all scores are 0.0, and all ROI positions are -1.
     """
     if backComp:
         return [-1, '', 0.0, -1, -1, -1, -1] + ['', 0.0] * targetCount              # only trajectory-level scores
     else:
         return [-1, '', 0.0, 0.0, -1, -1, -1, -1] + ['', 0.0, 0.0] * targetCount    # transaction+trajectory scores
+
+
+def addNormalizedScoreResults(sequenceGroupedLines):
+    """
+    Adds a 'NORMALIZED' section to 'sequenceGroupedLines' to contain normalized scores from the 'RESULTS' section.
+    Scores are normalized across all 'frameLines' of the whole 'RESULTS' for transaction-level using MIN-MAX rule,
+    then trajectory-level scores are re-evaluated and normalized using these found scores.
+    """
+    minScore = +float('inf')
+    maxScore = -float('inf')
+    backComp = False
+    targetCount, targetLabels = getTargetInfo(sequenceGroupedLines, backComp)
+    bestLabelIndex = getFieldIndex("BEST_LABEL", TYPE_RES, backComp)
+    bestScoreIndex = getFieldIndex("BEST_SCORE_RAW", TYPE_RES, backComp)
+    bestCumulIndex = getFieldIndex("BEST_SCORE_ACC", TYPE_RES, backComp)
+    trackCountIndex = getFieldIndex("TRACK_COUNT", TYPE_RES, backComp)
+    trackIdIndex = getFieldIndex("TRACK_NUMBER", TYPE_RES, backComp)
+    emptyFrameLineResults = generateEmptyResultLine(targetCount, backComp)
+
+    # find min/max
+    for seqKey in sequenceGroupedLines:
+        for frameLine in sequenceGroupedLines[seqKey]:
+            # skip lines without any track score results
+            if int(frameLine[TYPE_RES][trackCountIndex]) < 1:
+                continue
+            for iTarget in range(targetCount):
+                iScoreIndex = getFieldIndex("TARGET_SCORE_RAW", TYPE_RES, backComp, 0, iTarget, targetCount)
+                iScoreValue = float(frameLine[TYPE_RES][iScoreIndex])
+                minScore = min(minScore, iScoreValue)
+                maxScore = max(maxScore, iScoreValue)
+    rangeScore = float(maxScore - minScore)
+
+    # apply min/max
+    for seqKey in sequenceGroupedLines:
+        for iFrame, frameLine in enumerate(sequenceGroupedLines[seqKey]):
+            frameLine[TYPE_NORM] = copy.deepcopy(frameLine[TYPE_RES])
+            # add default empty track values if no results are available for a given frame along tracks
+            if int(frameLine[TYPE_NORM][trackCountIndex]) < 1:
+                frameLine[TYPE_NORM].extend(emptyFrameLineResults)
+                continue
+            for iTarget in range(targetCount):
+                # normalize min/max raw score (transaction-level)
+                iScoreIndex = getFieldIndex("TARGET_SCORE_RAW", TYPE_RES, backComp, 0, iTarget, targetCount)
+                iScoreValue = float(frameLine[TYPE_RES][iScoreIndex])
+                frameLine[TYPE_NORM][iScoreIndex] = (iScoreValue - minScore) / rangeScore
+                # update trajectory-level score with normalized transaction-level score (using default Circular-Buffer)
+                iCumulIndex = getFieldIndex("TARGET_SCORE_ACC", TYPE_NORM, backComp, 0, iTarget, targetCount)
+                frameLine[TYPE_NORM][iCumulIndex] = frameLine[TYPE_NORM][iScoreIndex]
+                # add accumulated scores up to previous track-frame to the current frame score when available
+                if iFrame > 0:
+                    prevFrame = sequenceGroupedLines[seqKey][iFrame-1]
+                    cumulPrevFrame = prevFrame[TYPE_NORM][iCumulIndex]
+                    frameLine[TYPE_NORM][iCumulIndex] += cumulPrevFrame
+                # gradually remove accumulated scores out of the same continuous track-frame accumulation window
+                if iFrame >= NORM_TRACK_LENGTH:  # ensure that at least enough frames are passed to do following checks
+                    initFrame = sequenceGroupedLines[seqKey][iFrame-NORM_TRACK_LENGTH]
+                    frameTrackID = frameLine[TYPE_NORM][trackIdIndex]
+                    startTrackID = initFrame[TYPE_NORM][trackIdIndex]
+                    if startTrackID == frameTrackID:  # ensure that we are within the same track (maybe track was lost)
+                        cumulInitFrame = initFrame[TYPE_NORM][iScoreIndex]
+                        frameLine[TYPE_NORM][iCumulIndex] -= cumulInitFrame
+                # update current line 'BEST' transaction/trajectory-level scores and label across targets
+                if iTarget == 0:
+                    frameLine[TYPE_NORM][bestScoreIndex] = frameLine[TYPE_NORM][iScoreIndex]
+                    frameLine[TYPE_NORM][bestCumulIndex] = frameLine[TYPE_NORM][iCumulIndex]
+                    frameLine[TYPE_NORM][bestLabelIndex] = targetLabels[iTarget]
+                else:
+                    if frameLine[TYPE_NORM][iScoreIndex] > frameLine[TYPE_NORM][bestScoreIndex]:
+                        frameLine[TYPE_NORM][bestScoreIndex] = frameLine[TYPE_NORM][iScoreIndex]
+                    if frameLine[TYPE_NORM][iCumulIndex] > frameLine[TYPE_NORM][bestCumulIndex]:
+                        frameLine[TYPE_NORM][bestCumulIndex] = frameLine[TYPE_NORM][iCumulIndex]
+                        frameLine[TYPE_NORM][bestLabelIndex] = targetLabels[iTarget]
+                frameLine[TYPE_NORM][bestCumulIndex] = max(0, frameLine[TYPE_NORM][bestCumulIndex])
 
 
 class ConfusionMatrix:
@@ -615,7 +741,7 @@ class ConfusionMatrix:
         return self.TP / float(self.TP + self.FP)
 
 
-def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backComp=False):
+def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backComp=False, evalType=TYPE_RES):
     """
     Appends ConfusionMatrix results to line using specified scores, label and GT.
     Appended results are in the following order:
@@ -630,7 +756,7 @@ def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backC
     If 'FILTER_FLAG' was set, an empty ConfusionMatrix object is appended instead of original results.
     """
     groundTruth = frameLine[TYPE_SEQ][getFieldIndex("GT_LABEL", TYPE_SEQ, backComp)]
-    targetCount = int(getFieldInfo(frameLine, lambda x: x[TYPE_RES], ["TARGET_COUNT", TYPE_RES, backComp]))
+    targetCount = int(getFieldInfo(frameLine, lambda x: x[evalType], ["TARGET_COUNT", evalType, backComp]))
     labelFields = ["BEST_LABEL"] + ["TARGET_LABEL"] * targetCount
     if backComp:
         scoreFields = [["BEST_SCORE"] + ["TARGET_SCORE"] * targetCount]
@@ -643,17 +769,17 @@ def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backC
     for threshold, fields in zip(thresholds, scoreFields):
         for i in range(len(labelFields)):
             # use i=-1 for 'BEST_TARGET' so that following targets get the proper zero-based indexes, 'BEST' ignores i
-            label = frameLine[TYPE_RES][getFieldIndex(labelFields[i],  TYPE_RES, backComp, 0, i-1, targetCount)]
-            score = float(frameLine[TYPE_RES][getFieldIndex(fields[i], TYPE_RES, backComp, 0, i-1, targetCount)])
-            frameLine[TYPE_RES].append(ConfusionMatrix())
+            label = frameLine[evalType][getFieldIndex(labelFields[i],  evalType, backComp, 0, i-1, targetCount)]
+            score = float(frameLine[evalType][getFieldIndex(fields[i], evalType, backComp, 0, i-1, targetCount)])
+            frameLine[evalType].append(ConfusionMatrix())
             if not frameLine[FILTER_FLAG]:
-                frameLine[TYPE_RES][-1].TP = (groundTruth == label and score >= threshold)   # TP
-                frameLine[TYPE_RES][-1].FP = (groundTruth != label and score >= threshold)   # FP
-                frameLine[TYPE_RES][-1].TN = (groundTruth != label and score <  threshold)   # TN
-                frameLine[TYPE_RES][-1].FN = (groundTruth == label and score <  threshold)   # FN
+                frameLine[evalType][-1].TP = (groundTruth == label and score >= threshold)   # TP
+                frameLine[evalType][-1].FP = (groundTruth != label and score >= threshold)   # FP
+                frameLine[evalType][-1].TN = (groundTruth != label and score <  threshold)   # TN
+                frameLine[evalType][-1].FN = (groundTruth == label and score <  threshold)   # FN
 
 
-def evalTrackConfusionMatrix(trackFrameLines, backComp=False):
+def evalTrackConfusionMatrix(trackFrameLines, backComp=False, evalType=TYPE_RES):
     """
     Evaluates the TP,FP,TN,FN along a complete track given its pre-evaluated (with 'evalLineConfusionMatrix')
     and corresponding list of line-frames (each appended with ConfusionMatrix frame-line transaction recognitions).
@@ -664,9 +790,9 @@ def evalTrackConfusionMatrix(trackFrameLines, backComp=False):
 
     If 'FILTER_FLAG' was set, empty ConfusionMatrix objects are appended instead of original results.
     """
-    targetCount = int(getFieldInfo(trackFrameLines, lambda x: x[0][TYPE_RES], ["TARGET_COUNT", TYPE_RES, backComp]))
+    targetCount = int(getFieldInfo(trackFrameLines, lambda x: x[0][evalType], ["TARGET_COUNT", evalType, backComp]))
     filterFlag = trackFrameLines[0][FILTER_FLAG]
-    evalSize = len(trackFrameLines[0][TYPE_RES])
+    evalSize = len(trackFrameLines[0][evalType])
     evalCount = targetCount + 1     # +1 for 'best'
     evalStart = evalSize - evalCount
     evalCM = list()
@@ -675,7 +801,7 @@ def evalTrackConfusionMatrix(trackFrameLines, backComp=False):
         if not filterFlag:
             fn = True
             for frameLine in trackFrameLines:
-                cm = frameLine[TYPE_RES][evalStart + i]
+                cm = frameLine[evalType][evalStart + i]
                 # return result on first positive match found along track
                 # (accumulation threshold was reached)
                 if cm.TP:
@@ -756,7 +882,7 @@ def calcAUPR(dictCM):
         return -1
 
 
-def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0):
+def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0, evalType=TYPE_RES):
     """
     Calculates rank-k values based on target recognition scores contained in sequences-grouped lines (per-track).
     Calculates by default only rank-1. Other rank value(s) can be specified using individual integer or iterable.
@@ -795,11 +921,11 @@ def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0):
                 for t, label in zip(range(nTargets), targetLabels):
                     if   mode == 0: scoreField = "TARGET_SCORE_ACC"
                     elif mode == 1: scoreField = "TARGET_SCORE_RAW"
-                    iTargetScore = getFieldIndex(scoreField, TYPE_RES, backComp, 0, t, nTargets)
+                    iTargetScore = getFieldIndex(scoreField, evalType, backComp, 0, t, nTargets)
                     # find max score along track for each corresponding target individual
                     for frame in track:
                         targetScores[-1][label] = max(targetScores[-1].get(label, 0),
-                                                      float(frame[TYPE_RES][iTargetScore]))
+                                                      float(frame[evalType][iTargetScore]))
 
             # transaction evaluation using RAW scores
             elif mode == 2:
@@ -807,8 +933,8 @@ def calcRank(sequenceGroupedLines, rank=1, backComp=False, mode=0):
                     labelsGT.append(labelGT)
                     targetScores.append({})
                     for t, label in zip(range(nTargets), targetLabels):
-                        iTargetScore = getFieldIndex("TARGET_SCORE_RAW", TYPE_RES, backComp, 0, t, nTargets)
-                        targetScores[-1][label] = float(frame[TYPE_RES][iTargetScore])
+                        iTargetScore = getFieldIndex("TARGET_SCORE_RAW", evalType, backComp, 0, t, nTargets)
+                        targetScores[-1][label] = float(frame[evalType][iTargetScore])
 
         # evaluate ranks percentage of correctly identified targets
         rank_k = dict([k,0] for k in rank)

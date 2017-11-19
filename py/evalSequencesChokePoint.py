@@ -11,7 +11,7 @@ import argparse
 
 
 def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesFilePath="",
-                            evalTransactionLevel=True, evalTrajectoryLevel=True,
+                            evalTransactionLevel=True, evalTrajectoryLevel=True, evalNormalizedScores=True,
                             overwriteResultsFiles=False, overwriteEvaluationFiles=False,
                             evalBackwardCompatibility=False):
     """
@@ -95,7 +95,8 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
         # produce evaluation files
         evalSequenceFile.evalSequenceFilePerf(sequencesFileBase + var + sequencesFileExt,
                                               resultsFileBase + var + resultsFileExt,
-                                              filterSequencesFilePath,
+                                              filterSequencesFilePath=filterSequencesFilePath,
+                                              evalNormalizedScores=evalNormalizedScores,
                                               evalTransactionLevel=tmpEvalTransac,
                                               evalTrajectoryLevel=tmpEvalTraject,
                                               evalBackwardCompatibility=evalBackwardCompatibility)
