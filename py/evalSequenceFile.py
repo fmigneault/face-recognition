@@ -82,7 +82,7 @@ This option allows processing older results files that did not combine both tran
 When backward compatibility is employed, trajectory-level evaluation is mandatory (only this one is possible).
 """
 
-from __future__ import print_function
+from printUtils import *
 import os
 import csv
 import sys
@@ -961,39 +961,6 @@ def generateThresholds(start, end, incr):
     for i,t in enumerate(thresholds):
         thresholds[i] = round(t * incr, 6)
     return thresholds
-
-
-def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100,
-                     fill='█', empty=' ', begin='▕', end='▏', done=' [DONE] '):
-    """
-    Print iterations progress.
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required : current iteration                      [int]
-        total       - Required : total iterations                       [int]
-        prefix      - Optional : prefix string                          [str]
-        suffix      - Optional : suffix string                          [str]
-        decimals    - Optional : positive number of decimals in percent [int]
-        length      - Optional : character length of bar                [int]
-        fill        - Optional : bar fill character                     [str] (ex: '■', '█', '#')
-        empty       - Optional : not filled bar character               [str] (ex: '-', ' ', '•')
-        begin       - Optional : starting bar character                 [str] (ex: '|', '▕', '[')
-        end         - Optional : ending bar character                   [str] (ex: '|', '▏', ']')
-        done        - Optional : display message when 100% is reached   [str]
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + empty * (length - filledLength)
-    display = '\r{prefix} {begin}{bar}{end} {percent}% {suffix}' \
-              .format(prefix=prefix, begin=begin, bar=bar, end=end, percent=percent, suffix=suffix)
-    print(display, end='\r'),   # comma after print() required for python 2
-    if iteration == total:      # print with newline on complete, also add spaces to 'erase' previous progress bar
-        finish = '\r{prefix} {done}'.format(prefix=prefix, done=done)
-        if hasattr(str, 'decode'):   # handle python 2 non-unicode strings for proper length measure
-            finish = finish.decode('utf-8')
-            display = display.decode('utf-8')
-        clear = ' ' * max(len(display) - len(finish), 0)
-        print(finish + clear)
 
 
 if __name__ == "__main__":

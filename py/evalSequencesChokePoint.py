@@ -13,7 +13,7 @@ import argparse
 def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesFilePath="",
                             evalTransactionLevel=True, evalTrajectoryLevel=True, evalNormalizedScores=True,
                             overwriteResultsFiles=False, overwriteEvaluationFiles=False,
-                            evalBackwardCompatibility=False):
+                            overwritePerformanceFiles=False, evalBackwardCompatibility=False):
     """
     Evaluates expected ChokePoint 'RESULTS' file, and all other variations generated from it with corresponding
     'SEQUENCES' files. If complete 'results' file is found and others are not, they get generated before evaluation.
@@ -44,15 +44,20 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     assert(p.isfile(resultsFileBase + resultsFileExt))
 
     if overwriteEvaluationFiles:
-        print("Cleaning up old evaluation files (-eval and -perf)...")
+        print("Cleaning up old evaluation files (-eval)...")
+        for var in resultsVariations:
+            # clean previous results files if overwrite requested
+            resultsVarEvalFilePath = resultsFileBase + var + resultsEval + resultsFileExt
+            if p.isfile(resultsVarEvalFilePath):
+                rm(resultsVarEvalFilePath)
+
+    if overwritePerformanceFiles:
+        print("Cleaning up old performance files (-perf)...")
         for var in resultsVariations:
             # clean previous results files if overwrite requested and matching backward compatibility
-            resultsVarEvalFilePath = resultsFileBase + var + resultsEval + resultsFileExt
             resultsVarPerfFilePath = resultsFileBase + var + resultsPerf + resultsFileExt
             resultsVarPerfTransacFilePath = resultsFileBase + var + resultsPerfTransac + resultsFileExt
             resultsVarPerfTrajectFilePath = resultsFileBase + var + resultsPerfTraject + resultsFileExt
-            if p.isfile(resultsVarEvalFilePath):
-                rm(resultsVarEvalFilePath)
             if p.isfile(resultsVarPerfFilePath) and evalBackwardCompatibility:
                 rm(resultsVarPerfFilePath)
             if p.isfile(resultsVarPerfTransacFilePath) and not evalBackwardCompatibility:
@@ -76,10 +81,11 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
         tmpEvalTransac = evalTransactionLevel
         tmpEvalTraject = evalTrajectoryLevel
         resultsVarName = resultsFileName + var
+        resultsVarEvalFilePath = resultsFileBase + var + resultsEval + resultsFileExt
         resultsVarPerfFilePath = resultsFileBase + var + resultsPerf + resultsFileExt
         resultsVarPerfTransacFilePath = resultsFileBase + var + resultsPerfTransac + resultsFileExt
         resultsVarPerfTrajectFilePath = resultsFileBase + var + resultsPerfTraject + resultsFileExt
-        if not overwriteEvaluationFiles:
+        if not overwritePerformanceFiles:
             if evalBackwardCompatibility and p.isfile(resultsVarPerfFilePath):
                 print("Skipping generation of '" + resultsVarName + resultsPerf + "' (already exists)")
                 continue
@@ -91,6 +97,10 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
                 tmpEvalTraject = False
             if not tmpEvalTransac and not tmpEvalTraject:
                 continue
+        tmpMergeEval = True
+        if not overwriteEvaluationFiles and p.isfile(resultsVarEvalFilePath):
+            print("Skipping generation of '" + resultsVarName + resultsEval + "' (already exists)")
+            tmpMergeEval = False
 
         # produce evaluation files
         evalSequenceFile.evalSequenceFilePerf(sequencesFileBase + var + sequencesFileExt,
@@ -99,6 +109,7 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
                                               evalNormalizedScores=evalNormalizedScores,
                                               evalTransactionLevel=tmpEvalTransac,
                                               evalTrajectoryLevel=tmpEvalTraject,
+                                              outputMergedEvalFile=tmpMergeEval,
                                               evalBackwardCompatibility=evalBackwardCompatibility)
 
 
@@ -106,30 +117,37 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run evaluations on results files using corresponding sequences files')
     parser.add_argument('-s', '--sequences', type=str, default='./bin/sequences/', nargs='?',
                         dest='sequencesFilesDir', metavar='sequencesFilesDir',
-                        help="path to 'sequences-info*.csv' files as references for evaluation (default: %(default)s)")
+                        help="path to directory containing 'sequences-info*.csv' files as evaluation references "
+                             "(default: %(default)s)")
     parser.add_argument('-r', '--results', type=str, default='./bin/results/', nargs='?',
                         dest='resultsFilesDir', metavar='resultsFilesDir',
-                        help="path to 'results.txt' file to evaluate (default: %(default)s)")
-    parser.add_argument('--transaction', type=bool, default=True, nargs='?',
-                        dest='evalTransactionLevel', metavar='evalTransactionLevel',
-                        help="run evaluation for transaction-level scores (default: %(default)s)")
-    parser.add_argument('--trajectory', type=bool, default=True, nargs='?',
-                        dest='evalTrajectoryLevel', metavar='evalTrajectoryLevel',
-                        help="run evaluation for trajectory-level scores (default: %(default)s)")
-    parser.add_argument('-o', '--overwrite-results', type=bool, default=False, nargs='?',
-                        dest='overwriteResultsFiles', metavar='overwriteResultsFiles',
+                        help="path to directory containing 'results*.txt' files to evaluate (default: %(default)s)")
+    parser.add_argument('--transaction', default=True, action='store_false',
+                        dest='evalTransactionLevel',
+                        help="disable evaluation for transaction-level scores (default: %(default)s)")
+    parser.add_argument('--trajectory', default=True, action='store_false',
+                        dest='evalTrajectoryLevel',
+                        help="disable evaluation for trajectory-level scores (default: %(default)s)")
+    parser.add_argument('-n', '--normalized', default=True, action='store_false',
+                        dest='evalNormalizedScores',
+                        help="disable evaluation with normalized scores across whole results (default: %(default)s)")
+    parser.add_argument('-o', '--overwrite-results', default=False, action='store_true',
+                        dest='overwriteResultsFiles',
                         help="overwrite any existing and conflicting results file (default: %(default)s)")
-    parser.add_argument('-e', '--overwrite-evaluations', type=bool, default=False, nargs='?',
-                        dest='overwriteEvaluationFiles', metavar='overwriteEvaluationFiles',
+    parser.add_argument('-e', '--overwrite-evaluations', default=False, action='store_true',
+                        dest='overwriteEvaluationFiles',
                         help="overwrite any existing and conflicting evaluation file (default: %(default)s)")
-    parser.add_argument('-f', '--filter', type=str, default="", nargs='?',
+    parser.add_argument('-p', '--overwrite-performance', default=False, action='store_true',
+                        dest='overwritePerformanceFiles',
+                        help="overwrite any existing and conflicting performance file (default: %(default)s)")
+    parser.add_argument('-f', '--filter', type=str, default="", nargs=1,
                         dest='filterSequencesFilePath', metavar='filterSequencesFilePath',
                         help="path to file with sequences IDs to filter in evaluation (default: none used)")
-    parser.add_argument('-b', '--backward-compatibility', type=bool, default=False, nargs='?',
-                        dest='evalBackwardCompatibility', metavar='evalBackwardCompatibility',
+    parser.add_argument('-b', '--backward-compatibility', default=False, action='store_true',
+                        dest='evalBackwardCompatibility',
                         help="enable backward compatibility mode - old results format (default: %(default)s)")
     args = parser.parse_args()
     evalSequencesChokePoint(args.sequencesFilesDir, args.resultsFilesDir, args.filterSequencesFilePath,
-                            args.evalTransactionLevel, args.evalTrajectoryLevel,
-                            args.overwriteResultsFiles, args.overwriteEvaluationFiles,
+                            args.evalTransactionLevel, args.evalTrajectoryLevel, args.evalNormalizedScores,
+                            args.overwriteResultsFiles, args.overwriteEvaluationFiles, args.overwritePerformanceFiles,
                             args.evalBackwardCompatibility)
