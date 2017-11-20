@@ -45,8 +45,58 @@ def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=
             print('')
 
 
+def verbose(verboseLevel, requiredLevel, printFunc=print, *printArgs, **kwPrintArgs):
+    """
+    Calls `printFunc` passing it `printArgs` and `kwPrintArgs`
+    only if `verboseLevel` meets the `requiredLevel` of verbosity.
+
+    Following forms are supported:
+
+        > verbose(1, 0, "message")
+
+            >> message
+
+        > verbose(1, 0, "message1", "message2")
+
+            >> message1 message2
+
+        > verbose(1, 2, "message")
+
+            >>          <nothing since verbosity level not high enough>
+
+        > verbose(1, 1, lambda x: print('MSG: ' + x), 'message')
+
+            >> MSG: message
+
+        > def myprint(x, y="msg_y", z=True): print('MSG_Y: ' + y) if z else print('MSG_X: ' + x)
+        > verbose(1, 1, myprint, "msg_x", "msg_y")
+
+            >> MSG_Y: msg_y
+
+        > verbose(1, 1, myprint, "msg_x", "msg_Y!", z=True)
+
+            >> MSG_Y: msg_Y!
+
+        > verbose(1, 1, myprint, "msg_x", z=False)
+
+            >> MSG_X: msg_x
+
+        > verbose(1, 1, myprint, "msg_x", z=True)
+
+            >> MSG_Y: msg_y
+    """
+    if verboseLevel >= requiredLevel:
+        # handle cases when no additional arguments are provided (default print nothing)
+        printArgs = printArgs if printArgs is not None else tuple([''])
+        # handle cases when verbose is called directly with the object (ex: str) to print
+        if not hasattr(printFunc, '__call__'):
+            printArgs = tuple([printFunc]) + printArgs
+            printFunc = print
+        printFunc(*printArgs, **kwPrintArgs)
+
+
 def print_flush(txt=''):
-    print('')
+    print(txt)
     sys.stdout.flush()
 
 

@@ -157,7 +157,7 @@ THRESHOLD_SCORE_RAW_INCR = THRESHOLD_SCORE_RAW_MAX / (THRESHOLD_SCORE_ACC_MAX / 
 def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequencesFilePath="",
                          noHeaderSequences=False, noHeaderResults=False, evalNormalizedScores=True,
                          evalTransactionLevel=True, evalTrajectoryLevel=True,
-                         outputMergedEvalFile=True, evalBackwardCompatibility=False):
+                         outputMergedEvalFile=True, evalBackwardCompatibility=False, verbosity=2):
     """
     Main function that executes the complete RESULTS video multi-track file evaluation filtered using GT SEQUENCES file.
     """
@@ -167,10 +167,10 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
            (evalBackwardCompatibility and evalTrajectoryLevel))
     if evalBackwardCompatibility:
         if evalTransactionLevel:
-            print("WARNING: 'evalTransactionLevel' turned off for 'evalBackwardCompatibility' mode")
+            verbose(verbosity, 1, "WARNING: 'evalTransactionLevel' turned off for 'evalBackwardCompatibility' mode")
             evalTransactionLevel = False
         if evalNormalizedScores:
-            print("WARNING: 'evalNormalizedScores' turned off for 'evalBackwardCompatibility' mode")
+            verbose(verbosity, 1, "WARNING: 'evalNormalizedScores' turned off for 'evalBackwardCompatibility' mode")
             evalNormalizedScores = False
 
     # read files lines and get basic information
@@ -188,7 +188,7 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
             filterSequences = [s.strip() for s in filterSequences]
 
     # parse lines (group by corresponding sequences)
-    print("Grouping lines per corresponding sequences...")
+    verbose(verbosity, 1, "Grouping lines per corresponding sequences...")
     sequenceGroupedLines = dict()
     for lineSeq, lineRes in allLines:
         seqKey = lineRes[getFieldIndex("SEQUENCE_TRACK_ID", TYPE_RES, evalBackwardCompatibility)]  # unique
@@ -196,8 +196,8 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
 
     # filter invalid tracks from sequences
     # (ensure to keep only one track per sequence, validation with GT eye position)
-    print("Filtering tracks with ground truths and from 'filter' file...")
-    print("Filtered sequences from 'filter' file: " + str(filterSequences))
+    verbose(verbosity, 1, "Filtering tracks with ground truths and from 'filter' file...")
+    verbose(verbosity, 1, "Filtered sequences from 'filter' file: " + str(filterSequences))
     for seqKey in sequenceGroupedLines:
         seqLines = sequenceGroupedLines[seqKey]
         filterBestTrack(seqLines, evalBackwardCompatibility)
@@ -206,7 +206,7 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
     # apply normalization if requested
     evalTypes = [TYPE_RES]
     if evalNormalizedScores:
-        print("Applying score normalization to sequences...")
+        verbose(verbosity, 1, "Applying score normalization to sequences...")
         addNormalizedScoreResults(sequenceGroupedLines)
         evalTypes.append(TYPE_NORM)
 
@@ -240,28 +240,34 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
                         frameLine[TYPE_RES].extend(emptyTrackResults)
 
     try:
-        hide_cursor()   # avoid cursor blinking across progress bar
         if evalTransactionLevel and not evalTrajectoryLevel:
-            print("Running evaluations for thresholds: (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "]:")
+            verbose(verbosity, 1, "Running evaluations for thresholds: (transaction) " +
+                                  "[0," + str(THRESHOLD_SCORE_RAW_MAX) + "]...")
         elif not evalTransactionLevel and evalTrajectoryLevel:
-            print("Running evaluations for thresholds: (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
+            verbose(verbosity, 1, "Running evaluations for thresholds: (trajectory) " +
+                                  "[0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]...")
         else:
-            print("Running evaluations for thresholds:" + \
-                  " (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "] |" + \
-                  " (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]:")
+            verbose(verbosity, 1, "Running evaluations for thresholds:" + \
+                                  " (transaction) [0," + str(THRESHOLD_SCORE_RAW_MAX) + "] |" + \
+                                  " (trajectory) [0,"  + str(THRESHOLD_SCORE_ACC_MAX) + "]...")
+        title = ""
         transacDigits = len(str(int(1/THRESHOLD_SCORE_RAW_INCR)))
         transacFormat = "." + str(transacDigits) + "f"
+        verbose(verbosity, 2, hide_cursor)  # avoid cursor blinking across progress bar
         for threshTransac, threshTraject in zip(thresholdsTransac, thresholdsTraject):
-            if evalTransactionLevel and not evalTrajectoryLevel:
-                title = "  Processing transaction-level threshold T=" + format(threshTransac, transacFormat).ljust(6)
-            elif not evalTransactionLevel and evalTrajectoryLevel:
-                title = "  Processing trajectory-level threshold T=" + str(threshTraject).ljust(6)
-            else:
-                title = "  Processing transaction|trajectory-level thresholds T=" + \
-                        format(threshTransac, transacFormat) + "|" + str(threshTraject).ljust(6)
+            if verbosity > 1:
+                if evalTransactionLevel and not evalTrajectoryLevel:
+                    title = "  Processing transaction-level threshold T=" + \
+                            format(threshTransac, transacFormat).ljust(6)
+                elif not evalTransactionLevel and evalTrajectoryLevel:
+                    title = "  Processing trajectory-level threshold T=" + \
+                            str(threshTraject).ljust(6)
+                else:
+                    title = "  Processing transaction|trajectory-level thresholds T=" + \
+                            format(threshTransac, transacFormat) + "|" + str(threshTraject).ljust(6)
             progress = 0
             total = len(sequenceGroupedLines)
-            printProgressBar(progress, total, prefix=title, length=30)
+            verbose(verbosity, 2, printProgressBar, progress, total, prefix=title, length=30)
 
             # evaluate performance of each track-based lines per threshold, for every evaluation type
             for tr in sequenceGroupedLines:
@@ -288,15 +294,15 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
                             threshTrajectPerf[et][e][threshTraject] += evalResults[e]
 
                 progress += 1
-                printProgressBar(progress, total, prefix=title, length=30)
-        print_flush()
+                verbose(verbosity, 2, printProgressBar, progress, total, prefix=title, length=30)
+        verbose(verbosity, 2, print_flush)
     except Exception:
         raise   # rethrow
     finally:    # reset cursor visibility
-        show_cursor()
+        verbose(verbosity, 2, show_cursor)
 
     # prepare performance summary constants
-    print("Running summary evaluations...")
+    verbose(verbosity, 1, "Running summary evaluations...")
     summaryValuesTransac = dict()
     summaryValuesTraject = dict()
     summaryHeader = []
@@ -336,21 +342,21 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
 
         # output transaction-level evaluation performances
         if evalTransactionLevel:
-            print("Writing transaction-level evaluation results to file...")
+            verbose(verbosity, 1, "Writing transaction-level evaluation results to file...")
             outputFile = filePathExt[0] + "-perf-transaction" + fileEvalType + filePathExt[1]
             writeResultPerfFile(outputFile, summaryHeader, summaryValuesTransac[et],
                                 perfHeader, thresholdsTransac, threshTransacPerf[et], nEvaluations)
 
         # output trajectory-level evaluation performances
         if evalTrajectoryLevel:
-            print("Writing trajectory-level evaluation results to file...")
+            verbose(verbosity, 1, "Writing trajectory-level evaluation results to file...")
             outputFile = filePathExt[0] + "-perf-trajectory" + fileEvalType + filePathExt[1]
             writeResultPerfFile(outputFile, summaryHeader, summaryValuesTraject[et],
                                 perfHeader, thresholdsTraject, threshTrajectPerf[et], nEvaluations)
 
         # write file by adding merged sequences and results information
         if outputMergedEvalFile:
-            print("Writing merged sequences and results to file...")
+            verbose(verbosity, 1, "Writing merged sequences and results to file...")
             outputFile = filePathExt[0] + "-eval" + fileEvalType + filePathExt[1]
             writeMergedEvalFile(outputFile, sequenceGroupedLines, evalBackwardCompatibility, et)
 
@@ -698,49 +704,6 @@ def addNormalizedScoreResults(sequenceGroupedLines):
                 frameLine[TYPE_NORM][bestCumulIndex] = max(0, frameLine[TYPE_NORM][bestCumulIndex])
 
 
-class ConfusionMatrix:
-    """
-    Class to contain TP,FP,TN,FN values and performance calculation methods.
-    """
-    def __init__(self, cmAsList=None):
-        if cmAsList is None:
-            self.fromList([0, 0, 0, 0])
-        else:
-            self.fromList(cmAsList)
-
-    def __iadd__(self, other):
-        self.TP += other.TP
-        self.FP += other.FP
-        self.TN += other.TN
-        self.FN += other.FN
-        return self
-
-    @staticmethod
-    def fields():
-        return ['TP', 'FP', 'TN' ,'FN', 'FPR', 'TPR', 'PPV']
-
-    def fromList(self, cmAsList):
-        self.TP = cmAsList[0]
-        self.FP = cmAsList[1]
-        self.TN = cmAsList[2]
-        self.FN = cmAsList[3]
-
-    def asList(self):
-        return [self.TP, self.FP, self.TN, self.FN, self.FPR(), self.TPR(), self.PPV()]
-
-    def FPR(self):
-        if self.FP + self.TN == 0: return -1
-        return self.FP / float(self.FP + self.TN)
-
-    def TPR(self):
-        if self.TP + self.FN == 0: return -1
-        return self.TP / float(self.TP + self.FN)
-
-    def PPV(self):
-        if self.TP + self.FP == 0: return -1
-        return self.TP / float(self.TP + self.FP)
-
-
 def evalLineConfusionMatrix(frameLine, thresholdTransac, thresholdTraject, backComp=False, evalType=TYPE_RES):
     """
     Appends ConfusionMatrix results to line using specified scores, label and GT.
@@ -818,6 +781,42 @@ def evalTrackConfusionMatrix(trackFrameLines, backComp=False, evalType=TYPE_RES)
                 evalCM[i].FN = int(fn)
                 evalCM[i].TN = int(not fn)
     return evalCM
+
+
+class ConfusionMatrix:
+    """
+    Class to contain TP,FP,TN,FN values and performance calculation methods.
+    """
+    def __init__(self, cmAsList=None):
+        if cmAsList is None:
+            self.fromList([0, 0, 0, 0])
+        else:
+            self.fromList(cmAsList)
+    def __iadd__(self, other):
+        self.TP += other.TP
+        self.FP += other.FP
+        self.TN += other.TN
+        self.FN += other.FN
+        return self
+    @staticmethod
+    def fields():
+        return ['TP', 'FP', 'TN' ,'FN', 'FPR', 'TPR', 'PPV']
+    def fromList(self, cmAsList):
+        self.TP = cmAsList[0]
+        self.FP = cmAsList[1]
+        self.TN = cmAsList[2]
+        self.FN = cmAsList[3]
+    def asList(self):
+        return [self.TP, self.FP, self.TN, self.FN, self.FPR(), self.TPR(), self.PPV()]
+    def FPR(self):
+        if self.FP + self.TN == 0: return -1
+        return self.FP / float(self.FP + self.TN)
+    def TPR(self):
+        if self.TP + self.FN == 0: return -1
+        return self.TP / float(self.TP + self.FN)
+    def PPV(self):
+        if self.TP + self.FP == 0: return -1
+        return self.TP / float(self.TP + self.FP)
 
 
 def calcAUC(dictCM, pFPR=1.0):
