@@ -38,6 +38,7 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     resultsPerfTransac = resultsPerf + "-transaction"
     resultsPerfTraject = resultsPerf + "-trajectory"
     resultsVariations = [""] + resultsFrontal + resultsSession
+    resultsEvalVariations = [""] + (["-norm"] if evalNormalizedScores else [])
 
     sequencesFileBase = p.join(sequencesFilesDir, sequencesFileName)
     resultsFileBase = p.join(resultsFilesDir, resultsFileName)
@@ -47,24 +48,26 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     if overwriteEvaluationFiles:
         verbose(verbosity, 1, "Cleaning up old evaluation files (-eval)...")
         for var in resultsVariations:
-            # clean previous results files if overwrite requested
-            resultsVarEvalFilePath = resultsFileBase + var + resultsEval + resultsFileExt
-            if p.isfile(resultsVarEvalFilePath):
-                rm(resultsVarEvalFilePath)
+            for evar in resultsEvalVariations:
+                # clean previous results files if overwrite requested
+                resultsVarEvalFilePath = resultsFileBase + var + resultsEval + evar + resultsFileExt
+                if p.isfile(resultsVarEvalFilePath):
+                    rm(resultsVarEvalFilePath)
 
     if overwritePerformanceFiles:
         verbose(verbosity, 1, "Cleaning up old performance files (-perf)...")
         for var in resultsVariations:
-            # clean previous results files if overwrite requested and matching backward compatibility
-            resultsVarPerfFilePath = resultsFileBase + var + resultsPerf + resultsFileExt
-            resultsVarPerfTransacFilePath = resultsFileBase + var + resultsPerfTransac + resultsFileExt
-            resultsVarPerfTrajectFilePath = resultsFileBase + var + resultsPerfTraject + resultsFileExt
-            if p.isfile(resultsVarPerfFilePath) and evalBackwardCompatibility:
-                rm(resultsVarPerfFilePath)
-            if p.isfile(resultsVarPerfTransacFilePath) and not evalBackwardCompatibility:
-                rm(resultsVarPerfTransacFilePath)
-            if p.isfile(resultsVarPerfTrajectFilePath) and not evalBackwardCompatibility:
-                rm(resultsVarPerfTrajectFilePath)
+            for evar in resultsEvalVariations:
+                # clean previous results files if overwrite requested and matching backward compatibility
+                resultsVarPerfFilePath = resultsFileBase + var + resultsPerf + evar + resultsFileExt
+                resultsVarPerfTransacFilePath = resultsFileBase + var + resultsPerfTransac + evar + resultsFileExt
+                resultsVarPerfTrajectFilePath = resultsFileBase + var + resultsPerfTraject + evar + resultsFileExt
+                if p.isfile(resultsVarPerfFilePath) and evalBackwardCompatibility:
+                    rm(resultsVarPerfFilePath)
+                if p.isfile(resultsVarPerfTransacFilePath) and not evalBackwardCompatibility:
+                    rm(resultsVarPerfTransacFilePath)
+                if p.isfile(resultsVarPerfTrajectFilePath) and not evalBackwardCompatibility:
+                    rm(resultsVarPerfTrajectFilePath)
 
     verbose(verbosity, 1, "Extracting sessions and frontal sequences from complete results file...")
     for var in resultsVariations:
