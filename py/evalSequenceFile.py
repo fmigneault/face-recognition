@@ -678,16 +678,18 @@ def addNormalizedScoreResults(sequenceGroupedLines):
                 iCumulIndex = getFieldIndex("TARGET_SCORE_ACC", TYPE_NORM, backComp, 0, iTarget, targetCount)
                 frameLine[TYPE_NORM][iCumulIndex] = frameLine[TYPE_NORM][iScoreIndex]
                 # add accumulated scores up to previous track-frame to the current frame score when available
+                frameTrackID = frameLine[TYPE_NORM][trackIdIndex]
                 if iFrame > 0:
-                    prevFrame = sequenceGroupedLines[seqKey][iFrame-1]
-                    cumulPrevFrame = prevFrame[TYPE_NORM][iCumulIndex]
-                    frameLine[TYPE_NORM][iCumulIndex] += cumulPrevFrame
+                    prevFrame = sequenceGroupedLines[seqKey][iFrame - 1]
+                    prevTrackID = prevFrame[TYPE_NORM][trackIdIndex]
+                    if prevTrackID == frameTrackID:  # ensure that we are within the same track (maybe is a new track)
+                        cumulPrevFrame = prevFrame[TYPE_NORM][iCumulIndex]
+                        frameLine[TYPE_NORM][iCumulIndex] += cumulPrevFrame
                 # gradually remove accumulated scores out of the same continuous track-frame accumulation window
                 if iFrame >= NORM_TRACK_LENGTH:  # ensure that at least enough frames are passed to do following checks
-                    initFrame = sequenceGroupedLines[seqKey][iFrame-NORM_TRACK_LENGTH]
-                    frameTrackID = frameLine[TYPE_NORM][trackIdIndex]
-                    startTrackID = initFrame[TYPE_NORM][trackIdIndex]
-                    if startTrackID == frameTrackID:  # ensure that we are within the same track (maybe track was lost)
+                    initFrame = sequenceGroupedLines[seqKey][iFrame - NORM_TRACK_LENGTH]
+                    initTrackID = initFrame[TYPE_NORM][trackIdIndex]
+                    if initTrackID == frameTrackID:  # ensure that we are within the same track (maybe track was lost)
                         cumulInitFrame = initFrame[TYPE_NORM][iScoreIndex]
                         frameLine[TYPE_NORM][iCumulIndex] -= cumulInitFrame
                 # update current line 'BEST' transaction/trajectory-level scores and label across targets
