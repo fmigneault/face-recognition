@@ -2,7 +2,7 @@ import os, sys, csv
 import argparse
 
 
-def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile):
+def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     assert(os.path.isfile(sequencesFile))
     assert(os.path.isfile(resultsFile))
     assert(os.path.isfile(probesFile))
@@ -10,11 +10,14 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile):
         assert(os.path.isfile(filterFile))
     
     # remove old files
-    resultsDir = os.path.dirname(resultsFile)
-    probes_res_file = os.path.join(resultsDir, 'results_probes.txt')
+    resultsDir, resultsFileName = os.path.split(resultsFile)
+    resultsFileName, ext = os.path.splitext(resultsFileName)
+    probes_res_file = os.path.join(resultsDir, resultsFileName + '_probes' + ext)
     if os.path.isfile(probes_res_file):
         os.remove(probes_res_file)
-    probes_seq_file = os.path.join(resultsDir, 'sequences_probes.txt')
+    sequencesFileName = os.path.split(sequencesFile)[1]
+    sequencesFileName, ext = os.path.splitext(sequencesFileName)
+    probes_seq_file = os.path.join(resultsDir, sequencesFileName + '_probes' + ext)
     if os.path.isfile(probes_seq_file):
         os.remove(probes_seq_file)
 

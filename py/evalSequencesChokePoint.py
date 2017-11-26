@@ -28,7 +28,7 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     assert(p.isdir(resultsFilesDir))
 
     sequencesFileName = "sequences-info"
-    sequencesFileExt = ".csv"
+    sequencesFileExt = ".txt"
     resultsFileName = "results"
     resultsFileExt = ".txt"
     resultsFrontal = ["-frontal"]
