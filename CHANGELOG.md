@@ -8,6 +8,7 @@
 - Multiple parameter naming, spacing/cleanup adjustments
 - More CMake/defines checks and code inclusion/exclusion
 - Fixes for CMake installs & find libraries
+- Add multiple utility python
 - Add *this* changelog
 
 #### Planned/Considered (?) ####

@@ -522,16 +522,20 @@ def getTargetInfo(sequenceFrameLines, backComp=False):
     # find target labels, searching for the first valid entry since 'RESULTS' fields can contain 'empty' lines
     # in such case, target labels are not set, we loop sequences and their corresponding lines until labels are found
     targetLabels = []
-    seq0 = sequenceFrameLines[next(iter(sequenceFrameLines))]
-    for i, line in enumerate(seq0):
-        mapping = lambda x: x[i][TYPE_RES]
-        nTargets = int(getFieldInfo(seq0, mapping, ["TARGET_COUNT", TYPE_RES, backComp]))
-        for t in range(nTargets):
-            label = getFieldInfo(seq0, mapping, ["TARGET_LABEL", TYPE_RES, backComp, 0, t, nTargets])
-            if label == '': break
-            targetLabels.append(label)
-        if len(targetLabels) == nTargets: break
-    return nTargets, targetLabels
+    for seqID in sequenceFrameLines:
+        seq = sequenceFrameLines[seqID]
+        for i, line in enumerate(seq):
+            mapping = lambda x: x[i][TYPE_RES]
+            nTracks = int(getFieldInfo(seq, mapping, ["TRACK_COUNT", TYPE_RES, backComp]))
+            if nTracks < 1: continue  # skip empty frame-line, check next one in track sequence
+            nTargets = int(getFieldInfo(seq, mapping, ["TARGET_COUNT", TYPE_RES, backComp]))
+            for t in range(nTargets):
+                label = getFieldInfo(seq, mapping, ["TARGET_LABEL", TYPE_RES, backComp, 0, t, nTargets])
+                if label == '': break # skip invalid labels (if any)
+                targetLabels.append(label)
+            if len(targetLabels) == nTargets:
+                return nTargets, targetLabels
+    raise Exception("Could not find targets labels in any frame/track") # should never happend (empty results)
 
 
 def isEyesInROI(roi, eyes):
