@@ -470,7 +470,7 @@ int main(int argc, char *argv[])
             frameCounter = 0;
             // end of all test sequences
             if (sequenceCounter >= testSequenceFileNames.size()) {
-                logOutput << "All test sequences processed."
+                logOutput << "All test sequences processed." << std::endl;
                 break;
             }
             sequenceTrackID = bfs::path(testSequenceRegexPaths[sequenceCounter]).remove_filename().filename().string();
@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
 
         // update frame label or end loop when end reached with input files
         if (optArgP && frameCounter >= testSequenceFileNames[sequenceCounter].size()) {
-            logOutput << "All input frames processed from path."
+            logOutput << "All input frames processed from path." << std::endl;
             break;
         }
         currentFrameLabel = (optArgP || optArgT) ? testSequenceFileNames[sequenceCounter][frameCounter] : std::to_string(frameCounter);

@@ -1,4 +1,5 @@
-﻿#ifndef FACE_RECOG_H
+﻿
+#ifndef FACE_RECOG_H
 #define FACE_RECOG_H
 
 // FaceRecog Dependencies and Utilities
