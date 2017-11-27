@@ -860,15 +860,15 @@ def calcAUPR(dictCM):
     """
     try:
         # reverse sort thresholds for (PPV,TPR) points in ascending order
-        PR = [(dictCM[t].PPV(),dictCM[t].TPR()) for t in sorted(dictCM, reverse=True)]
+        PR = [(dictCM[t].PPV(),dictCM[t].TPR()) for t in dictCM]
         # filter invalid points
-        PR = [p for p in PR if p[0] != -1 and p[1] != -1]
+        PR = sorted([p for p in PR if p[0] != -1 and p[1] != -1])
         if len(PR) < 2: return 0
         # get min(PPV) and corresponding TPR to handle missing points in top of PR (when PPV doesn't start at 0)
         # get min(TPR) to handle missing invalid points (div by 0,-1) at bottom of PR (when TPR doesn't reach 0)
         PPV_minPPV = 1
         TPR_minPPV = 1
-        PPV_minTPR = 0
+        PPV_minTPR = 1
         TPR_minTPR = 1
         for ppv,tpr in PR:
             if ppv < PPV_minPPV:
@@ -878,10 +878,10 @@ def calcAUPR(dictCM):
                 TPR_minTPR = tpr
                 PPV_minTPR = ppv
         # add point (0, TPR_minPPV) to get horizontal line from PPV=0 to first available PPV_minPPV point on plot
-        # add point (PPV_minTPR, 0) to get vertical line from last available TPR_minTPR point down to TPR = 0
-        PR = [(PPV_minTPR, 0)] + PR + [(0, TPR_minPPV)]
+        # add point (PPV_minTPR, 0) to get vertical line from last available TPR_minTPR point down to TPR=0
+        PR = [(0, TPR_minPPV)] + PR + [(PPV_minTPR, 0)]
         # trapezoidal rule of partial area
-        return sum([(PR[i-1][1] + PR[i][1]) * (PR[i-1][0] - PR[i][0]) / 2 for i in range(1, len(PR))])
+        return sum([(PR[i][1] + PR[i-1][1]) * (PR[i][0] - PR[i-1][0]) / 2 for i in range(1, len(PR))])
     except Exception as e:
         print("Exception occurred: [" + repr(e) + "]")
         return -1
