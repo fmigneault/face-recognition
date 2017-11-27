@@ -25,7 +25,7 @@ def get_file_paths(sequencesDir, resultsDir, cameraSequence):
     cam = cameraSequence
     res = "results_"
     seq = "sequences-"
-    info = "-info.txt"
+    info = "-info"
     transac = "-perf-transaction"
     traject = "-perf-trajectory"
     probes = "_probes"
@@ -40,21 +40,21 @@ def get_file_paths(sequencesDir, resultsDir, cameraSequence):
                 "TRAJECTORY_FILE":  os.path.join(resultsDir, res + cam + traject + ext),
             },
             "RESULTS_NORM": {
-                "TRANSACTION_FILE": os.path.join(resultsDir, res  + cam + transac + norm + ext),
-                "TRAJECTORY_FILE" : os.path.join(resultsDir, res + cam + traject + norm + ext),
+                "TRANSACTION_FILE": os.path.join(resultsDir, res + cam + transac + norm + ext),
+                "TRAJECTORY_FILE":  os.path.join(resultsDir, res + cam + traject + norm + ext),
             }
         },
         "PROBES": {                 # probes sequences are generated inside results dir
-            "SEQUENCES_FILE":       os.path.join(resultsDir, seq + cam + info + probes + ext),
+            "SEQUENCES_FILE":       os.path.join(resultsDir, res + cam + info + probes + ext),
             "RESULTS_FILE":         os.path.join(resultsDir, res + cam + probes + ext),
-            "PROBE_FILE":           os.path.join(resultsDir, "probes_list" + ext),
+            "PROBES_FILE":          os.path.join(resultsDir, "probes_list" + ext),
             "RESULTS_RAW": {
                 "TRANSACTION_FILE": os.path.join(resultsDir, res + cam + probes + transac + ext),
                 "TRAJECTORY_FILE":  os.path.join(resultsDir, res + cam + probes + traject + ext),
             },
             "RESULTS_NORM": {
                 "TRANSACTION_FILE": os.path.join(resultsDir, res + cam + probes + transac + norm + ext),
-                "TRAJECTORY_FILE" : os.path.join(resultsDir, res + cam + probes + traject + norm + ext),
+                "TRAJECTORY_FILE":  os.path.join(resultsDir, res + cam + probes + traject + norm + ext),
             }
         }
     }
