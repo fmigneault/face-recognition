@@ -11,10 +11,11 @@ from os import path as p, remove as rm
 import argparse
 
 
-def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesFilePath="",
-                            evalTransactionLevel=True, evalTrajectoryLevel=True, evalNormalizedScores=True,
+def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesFilePath=None,
+                            evalTransactionLevel=True, evalTrajectoryLevel=True, evalNormalizedScores=False,
                             overwriteResultsFiles=False, overwriteEvaluationFiles=False,
-                            overwritePerformanceFiles=False, evalBackwardCompatibility=False, verbosity=2):
+                            overwritePerformanceFiles=False, appendFileModifier=None,
+                            evalBackwardCompatibility=False, verbosity=2):
     """
     Evaluates expected ChokePoint 'RESULTS' file, and all other variations generated from it with corresponding
     'SEQUENCES' files. If complete 'results' file is found and others are not, they get generated before evaluation.
@@ -29,6 +30,8 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
 
     sequencesFileName = "sequences-info"
     sequencesFileExt = ".txt"
+    sequencesFileBase = p.join(sequencesFilesDir, sequencesFileName)
+
     resultsFileName = "results"
     resultsFileExt = ".txt"
     resultsFrontal = ["-frontal"]
@@ -39,18 +42,25 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     resultsPerfTraject = resultsPerf + "-trajectory"
     resultsVariations = [""] + resultsFrontal + resultsSession
     resultsEvalVariations = [""] + (["-norm"] if evalNormalizedScores else [])
-
-    sequencesFileBase = p.join(sequencesFilesDir, sequencesFileName)
     resultsFileBase = p.join(resultsFilesDir, resultsFileName)
-    assert(p.isfile(sequencesFileBase + sequencesFileExt))
-    assert(p.isfile(resultsFileBase + resultsFileExt))
+
+    mod = "" if appendFileModifier is None else appendFileModifier
+
+    verbose(verbosity, 1, "Sequences format is:  [{base}<var>{mod}{ext}]"
+            .format(base=sequencesFileBase, mod=mod, ext=sequencesFileExt))
+    verbose(verbosity, 1, "Results format is:    [{base}<var>{mod}{ext}]"
+            .format(base=resultsFileBase, mod=mod, ext=resultsFileExt))
+    verbose(verbosity, 1, "Results <var> are:    {variations}".format(variations=resultsVariations))
+    verbose(verbosity, 1, "Evaluation <var> are: {variations}".format(variations=resultsEvalVariations))
+    assert(p.isfile(sequencesFileBase + mod + sequencesFileExt))
+    assert(p.isfile(resultsFileBase + mod + resultsFileExt))
 
     if overwriteEvaluationFiles:
         verbose(verbosity, 1, "Cleaning up old evaluation files (-eval)...")
         for var in resultsVariations:
             for evar in resultsEvalVariations:
                 # clean previous results files if overwrite requested
-                resultsVarEvalFilePath = resultsFileBase + var + resultsEval + evar + resultsFileExt
+                resultsVarEvalFilePath = resultsFileBase + var + mod + resultsEval + evar + resultsFileExt
                 if p.isfile(resultsVarEvalFilePath):
                     rm(resultsVarEvalFilePath)
 
@@ -59,9 +69,9 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
         for var in resultsVariations:
             for evar in resultsEvalVariations:
                 # clean previous results files if overwrite requested and matching backward compatibility
-                resultsVarPerfFilePath = resultsFileBase + var + resultsPerf + evar + resultsFileExt
-                resultsVarPerfTransacFilePath = resultsFileBase + var + resultsPerfTransac + evar + resultsFileExt
-                resultsVarPerfTrajectFilePath = resultsFileBase + var + resultsPerfTraject + evar + resultsFileExt
+                resultsVarPerfFilePath = resultsFileBase + var + mod + resultsPerf + evar + resultsFileExt
+                resultsVarPerfTransacFilePath = resultsFileBase + var + mod + resultsPerfTransac + evar + resultsFileExt
+                resultsVarPerfTrajectFilePath = resultsFileBase + var + mod + resultsPerfTraject + evar + resultsFileExt
                 if p.isfile(resultsVarPerfFilePath) and evalBackwardCompatibility:
                     rm(resultsVarPerfFilePath)
                 if p.isfile(resultsVarPerfTransacFilePath) and not evalBackwardCompatibility:
@@ -72,27 +82,27 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     verbose(verbosity, 1, "Extracting sessions and frontal sequences from complete results file...")
     for var in resultsVariations:
         # generate results file variations if missing or overwrite requested
-        resultsVarFilePath = resultsFileBase + var + resultsFileExt
+        resultsVarFilePath = resultsFileBase + var + mod + resultsFileExt
         if not p.isfile(resultsVarFilePath) or overwriteResultsFiles:
             if var in resultsFrontal:
-                extractSequencesChokePoint.extractFrontalChokePoint(resultsFileBase + resultsFileExt)
+                extractSequencesChokePoint.extractFrontalChokePoint(resultsFileBase + mod + resultsFileExt)
             elif var in resultsSession:
-                extractSequencesChokePoint.extractSessionsChokePoint(resultsFileBase + resultsFileExt)
+                extractSequencesChokePoint.extractSessionsChokePoint(resultsFileBase + mod + resultsFileExt)
 
     verbose(verbosity, 1, "Starting evaluation...")
     for var in resultsVariations:
         # skip generation of evaluation file variation if applicable
         evalTransac = evalTransactionLevel
         evalTraject = evalTrajectoryLevel
-        resultsVarName = resultsFileName + var
+        resultsVarName = resultsFileName + var + mod
         resultsVarPerfName = resultsVarName + resultsPerf
         resultsVarPerfTransacName = resultsVarName + resultsPerfTransac
         resultsVarPerfTrajectName = resultsVarName + resultsPerfTraject
-        resultsVarEvalFilePath = resultsFileBase + var + resultsEval + resultsFileExt
-        resultsVarPerfFilePath = resultsFileBase + var + resultsPerf + resultsFileExt
-        resultsVarPerfTransacFilePath = resultsFileBase + var + resultsPerfTransac + resultsFileExt
-        resultsVarPerfTrajectFilePath = resultsFileBase + var + resultsPerfTraject + resultsFileExt
-        if not overwritePerformanceFiles:            
+        resultsVarEvalFilePath = resultsFileBase + var + mod + resultsEval + resultsFileExt
+        resultsVarPerfFilePath = resultsFileBase + var + mod + resultsPerf + resultsFileExt
+        resultsVarPerfTransacFilePath = resultsFileBase + var + mod + resultsPerfTransac + resultsFileExt
+        resultsVarPerfTrajectFilePath = resultsFileBase + var + mod + resultsPerfTraject + resultsFileExt
+        if not overwritePerformanceFiles:
             if evalBackwardCompatibility and p.isfile(resultsVarPerfFilePath):
                 verbose(verbosity, 1, "Skipping generation of '" + resultsVarPerfName + "' (already exists)")
                 continue
@@ -110,8 +120,8 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
             mergeEval = False
 
         # produce evaluation files
-        evalSequenceFile.evalSequenceFilePerf(sequencesFileBase + var + sequencesFileExt,
-                                              resultsFileBase + var + resultsFileExt,
+        evalSequenceFile.evalSequenceFilePerf(sequencesFileBase + var + mod + sequencesFileExt,
+                                              resultsFileBase + var + mod + resultsFileExt,
                                               filterSequencesFilePath=filterSequencesFilePath,
                                               evalNormalizedScores=evalNormalizedScores,
                                               evalTransactionLevel=evalTransac,
@@ -136,9 +146,13 @@ if __name__ == "__main__":
     parser.add_argument('--trajectory', default=True, action='store_false',
                         dest='evalTrajectoryLevel',
                         help="disable evaluation for trajectory-level scores (default: %(default)s)")
-    parser.add_argument('-n', '--normalized', default=True, action='store_false',
+    parser.add_argument('-m', '--modifier', type=str, default=None, nargs=1,
+                        dest='appendFileModifier', metavar='appendFileModifier',
+                        help="pre-append a string modifier to files (default: %(default)s) "
+                             "[ex: 'results<var>-eval.txt' => 'results<var>_probes-eval.txt' by specifying '_probes']")
+    parser.add_argument('-n', '--normalized', default=False, action='store_true',
                         dest='evalNormalizedScores',
-                        help="disable evaluation with normalized scores across whole results (default: %(default)s)")
+                        help="run extra evaluation with normalized scores across whole results (default: %(default)s)")
     parser.add_argument('-o', '--overwrite-results', default=False, action='store_true',
                         dest='overwriteResultsFiles',
                         help="overwrite any existing and conflicting results file (default: %(default)s)")
@@ -148,7 +162,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--overwrite-performance', default=False, action='store_true',
                         dest='overwritePerformanceFiles',
                         help="overwrite any existing and conflicting performance file (default: %(default)s)")
-    parser.add_argument('-f', '--filter', type=str, default="", nargs=1,
+    parser.add_argument('-f', '--filter', type=str, default=None, nargs=1,
                         dest='filterSequencesFilePath', metavar='filterSequencesFilePath',
                         help="path to file with sequences IDs to filter in evaluation (default: none used)")
     parser.add_argument('-b', '--backward-compatibility', default=False, action='store_true',
@@ -158,7 +172,9 @@ if __name__ == "__main__":
                         dest='verbosity', metavar='verbosity',
                         help="verbosity level (default: %(default)s) (0: none, 1: minimal, 2: progress)")
     args = parser.parse_args()
-    evalSequencesChokePoint(args.sequencesFilesDir, args.resultsFilesDir, args.filterSequencesFilePath,
+    evalSequencesChokePoint(args.sequencesFilesDir, args.resultsFilesDir,
+                            None if args.filterSequencesFilePath is None else args.filterSequencesFilePath[0],
                             args.evalTransactionLevel, args.evalTrajectoryLevel, args.evalNormalizedScores,
                             args.overwriteResultsFiles, args.overwriteEvaluationFiles, args.overwritePerformanceFiles,
+                            None if args.appendFileModifier is None else args.appendFileModifier[0],
                             args.evalBackwardCompatibility, args.verbosity)

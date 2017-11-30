@@ -154,8 +154,8 @@ THRESHOLD_SCORE_RAW_MAX = 1.0
 THRESHOLD_SCORE_RAW_INCR = THRESHOLD_SCORE_RAW_MAX / (THRESHOLD_SCORE_ACC_MAX / THRESHOLD_SCORE_ACC_INCR)
 
 
-def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequencesFilePath="",
-                         noHeaderSequences=False, noHeaderResults=False, evalNormalizedScores=True,
+def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequencesFilePath=None,
+                         noHeaderSequences=False, noHeaderResults=False, evalNormalizedScores=False,
                          evalTransactionLevel=True, evalTrajectoryLevel=True,
                          outputMergedEvalFile=True, evalBackwardCompatibility=False, verbosity=2):
     """
@@ -179,7 +179,7 @@ def evalSequenceFilePerf(csvSequencesFilePath, csvResultsFilePath, filterSequenc
     assert(nTargets > 0)
 
     # check for extra filter sequences file
-    if filterSequencesFilePath == "":
+    if filterSequencesFilePath == "" or filterSequencesFilePath is None:
         filterSequences = []
     else:
         assert(os.path.isfile(filterSequencesFilePath))

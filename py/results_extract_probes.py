@@ -8,7 +8,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     assert(os.path.isfile(probesFile))
     if filterFile is not None:
         assert(os.path.isfile(filterFile))
-    
+
     # remove old files
     resultsDir, resultsFileName = os.path.split(resultsFile)
     resultsFileName, ext = os.path.splitext(resultsFileName)
@@ -24,21 +24,21 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     # get filter probes
     with open(probesFile) as f:
         csvf = csv.reader(f)
-        probeIDs = [line[0] for line in csvf if line[0] != '']    
+        probeIDs = [line[0] for line in csvf if line[0] != '']
     print("Probe IDs:")
     print("  " + repr(probeIDs))
-    assert(len(probeIDs)>0) 
-    
+    assert(len(probeIDs)>0)
+
     # get filter sequences
     filterSequences = []
-    if filterFile is not None:        
+    if filterFile is not None:
         with open(filterFile) as f:
             csvf = csv.reader(f)
-            filterSequences = [line[0] for line in csvf if line[0] != ''] 
+            filterSequences = [line[0] for line in csvf if line[0] != '']
             print("Filter Sequences:")
             print("  " + repr(filterSequences))
-            assert(len(filterSequences)>0)   
-            
+            assert(len(filterSequences)>0)
+
     # get sequences info
     sequencesFrames = []
     with open(sequencesFile) as f:
@@ -46,7 +46,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
         sequencesFrames = [line for line in csvf]
     sequencesHeader = sequencesFrames[0]
     sequencesLines = sequencesFrames[1:]  # remove header
-     
+
     # get results info
     resultsLines = []
     with open(resultsFile) as f:
@@ -54,7 +54,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
         resultsLines = [line for line in csvf]
     resultsHeader = resultsLines[0]
     resultsLines = resultsLines[1:]
-       
+
     # filter by sequences
     if len(filterSequences) > 0:
         filterRes = []
@@ -63,7 +63,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
             seqID = lineSeq[0]
             if seqID in filterSequences:
                 filterRes.append(lineRes)
-                filterSeq.append(lineSeq) 
+                filterSeq.append(lineSeq)
         resultsLines = filterRes
         sequencesLines = filterSeq
 
@@ -74,24 +74,23 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
         seqTargetID = lineSeq[4]
         if seqTargetID in probeIDs:
             linesProbesRes.append(lineRes)
-            linesProbesSeq.append(lineSeq)    
-    
+            linesProbesSeq.append(lineSeq)
+
     with open(probes_res_file, 'w') as f:
         csvf = csv.writer(f)
         csvf.writerows(linesProbesRes)
-    
+
     with open(probes_seq_file, 'w') as f:
         csvf = csv.writer(f)
         csvf.writerows(linesProbesSeq)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Extract probes from results file')
     parser.add_argument(dest='sequencesFile', metavar='sequencesFile', type=str)
     parser.add_argument(dest='resultsFile', metavar='resultsFile', type=str)
     parser.add_argument(dest='probesFile', metavar='probesFile', type=str)
-    parser.add_argument('-f', dest='filterFile', metavar='filterFile', type=str, default=None, 
+    parser.add_argument('-f', dest='filterFile', metavar='filterFile', type=str, default=None,
                         help='sequences to preserve for evaluation (ignore others)')
     args = parser.parse_args()
     get_probe_results(args.sequencesFile, args.resultsFile, args.probesFile, args.filterFile)
-
-    

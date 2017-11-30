@@ -45,7 +45,7 @@ def get_file_paths(sequencesDir, resultsDir, cameraSequence):
             }
         },
         "PROBES": {                 # probes sequences are generated inside results dir
-            "SEQUENCES_FILE":       os.path.join(resultsDir, res + cam + info + probes + ext),
+            "SEQUENCES_FILE":       os.path.join(resultsDir, seq + cam + info + probes + ext),
             "RESULTS_FILE":         os.path.join(resultsDir, res + cam + probes + ext),
             "PROBES_FILE":          os.path.join(resultsDir, "probes_list" + ext),
             "RESULTS_RAW": {
@@ -70,6 +70,8 @@ def batch_process_camera(sequencesDir, resultsDir):
                             pathInfo["PROBES"]["PROBES_FILE"])
 
         for info in pathInfo:
+            print("SEQ: " + pathInfo[info]["SEQUENCES_FILE"])
+            print("RES: " + pathInfo[info]["RESULTS_FILE"])
             e.evalSequenceFilePerf(pathInfo[info]["SEQUENCES_FILE"], pathInfo[info]["RESULTS_FILE"],
                                    filterSequencesFilePath="", noHeaderSequences=False, noHeaderResults=False,
                                    evalNormalizedScores=True, evalTransactionLevel=True, evalTrajectoryLevel=True,
@@ -85,7 +87,7 @@ def batch_analysis_camera(sequencesDir, resultsDir):
             raise Exception("Missing required file: " + str(filePath))
 
     RESULTS_HEADER = ['pAUC(5%)','pAUC(10%)','pAUC(20%)','AUC','AUPR']
-    RESULTS = dict([(h, -1) for h in RESULTS_HEADER])
+    RESULTS = dict([(h, 0) for h in RESULTS_HEADER])
 
     def print_summary_result(sequence, results):
         res = ["{0:.5f}".format(results[r]).rjust(COLUMN_WIDTH) for r in RESULTS_HEADER]
@@ -108,7 +110,7 @@ def batch_analysis_camera(sequencesDir, resultsDir):
                     with open(pathInfo[p][n][t], 'r') as f:
                         csvr = csv.reader(f)
                         lines = [_ for _ in csvr]
-                    for i, r in enumerate(RESULTS.keys()):
+                    for i, r in enumerate(RESULTS_HEADER):
                         seqRes[s][r] = float(lines[1][i])
                         seqRes["AVG"][r] += seqRes[s][r]
                     print_summary_result(s, seqRes[s])
