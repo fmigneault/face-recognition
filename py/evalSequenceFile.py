@@ -390,7 +390,7 @@ def writeMergedEvalFile(mergedFilePath, sequenceGroupedLines, backComp=False, ev
     Writes the merged file combining 'SEQUENCES' and 'RESULTS' fields, removing duplicate data and invalid tracks.
     Information must have been preprocessed, this function only handles writing operations, not the actual processing.
     """
-    with open(mergedFilePath, 'wb') as csvFileOut:
+    with open(mergedFilePath, 'w') as csvFileOut:
         csvWriter = csv.writer(csvFileOut)
         if backComp:
             bestHeader = ["BEST_LABEL","BEST_SCORE"]
@@ -429,7 +429,7 @@ def writeResultPerfFile(perfFilePath, summaryHeader, summaryValues, perfHeader, 
     Writes the summary and detailed (per-threshold) results of the specified containers.
     Information must have been preprocessed, this function only handles writing operations, not the actual processing.
     """
-    with open(perfFilePath, 'wb') as csvFileOut:
+    with open(perfFilePath, 'w') as csvFileOut:
         csvWriter = csv.writer(csvFileOut)
         csvWriter.writerow(summaryHeader)
         csvWriter.writerow(summaryValues)

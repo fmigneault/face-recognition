@@ -11,6 +11,13 @@ def results_list_from_file(results_file):
     return results_list
 
 
+def append_missing_thresholds(results_list, increment=0.1):
+    TL = e.generateThresholds(0, (len(results_list) - 1) * increment, increment)
+    for i, line in enumerate(results_list):
+        results_list[i] = [TL[i]] + line
+    return results_list
+
+
 def process_summary_from_results_list(results_list):
     cmList = results_list_to_confusion_matrix_dict(results_list)
     results = [
