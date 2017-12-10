@@ -120,6 +120,8 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
             mergeEval = False
 
         # produce evaluation files
+        verbose(verbosity, 1, "Runing generation with sequences: '{seq}'".format(seq=sequencesFileBase + var + mod + sequencesFileExt))
+        verbose(verbosity, 1, "Runing generation for results: '{res}'".format(res=resultsFileBase + var + mod + resultsFileExt))
         evalSequenceFile.evalSequenceFilePerf(sequencesFileBase + var + mod + sequencesFileExt,
                                               resultsFileBase + var + mod + resultsFileExt,
                                               filterSequencesFilePath=filterSequencesFilePath,
