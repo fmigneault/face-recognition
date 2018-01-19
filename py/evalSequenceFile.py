@@ -370,13 +370,13 @@ def readSequenceFileInput(csvSequencesFilePath, csvResultsFilePath, noHeaderSequ
     assert(os.path.isfile(csvSequencesFilePath))
     with open(csvResultsFilePath, 'r') as csvFileIn:
         csvReader = csv.reader(csvFileIn)
-        allLinesRes = [line for line in csvReader]
+        allLinesRes = [line for line in csvReader if line != '' and len(line) > 0]
         assert(len(allLinesRes) > 1)
         if not noHeaderResults:
             del allLinesRes[0] # remove header
     with open(csvSequencesFilePath, 'r') as csvFileIn:
         csvReader = csv.reader(csvFileIn)
-        allLinesSeq = [line for line in csvReader]
+        allLinesSeq = [line for line in csvReader if line != '' and len(line) > 0]
         assert(len(allLinesSeq) > 1)
         if not noHeaderSequences:
             del allLinesSeq[0] # remove header

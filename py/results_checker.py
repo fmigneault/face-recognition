@@ -15,11 +15,11 @@ def check(sequencesFile, resultsFile):
 
     with open(sequencesFile, 'rb') as csvFileIn:
         csvReader = csv.reader(csvFileIn)
-        allLinesSeq = [line for line in csvReader]
+        allLinesSeq = [line for line in csvReader if line != '' and len(line) > 0]
         assert_print(len(allLinesSeq) > 1, "len(allLinesSeq): '{0}'".format(len(allLinesSeq)))
     with open(resultsFile, 'rb') as csvFileIn:
         csvReader = csv.reader(csvFileIn)
-        allLinesRes = [line for line in csvReader]
+        allLinesRes = [line for line in csvReader if line != '' and len(line) > 0]
         assert_print(len(allLinesRes) > 1, "len(allLinesRes): '{0}'".format(len(allLinesRes)))
 
     assert_print(allLinesRes[0][0] == 'SEQUENCE_TRACK_ID', "allLinesRes[0]: '{0}'".format(allLinesRes[0]))
@@ -39,6 +39,8 @@ def check(sequencesFile, resultsFile):
         except Exception as e:
             print("Something weird happened here: " + str(i) + " [" + repr(e) + "]")
             raise
+    assert_print(len(allLinesRes) == len(allLinesSeq), "Not equal sequences/results length, seq={0}, res={1}" \
+                                                       .format(len(allLinesSeq), len(allLinesRes)))
     return 0
 
 

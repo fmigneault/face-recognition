@@ -28,7 +28,8 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     assert(p.isdir(sequencesFilesDir))
     assert(p.isdir(resultsFilesDir))
 
-    sequencesFileName = "sequences-info"
+    sequencesFileName = "sequences"
+    sequencesDetails = "-info"
     sequencesFileExt = ".txt"
     sequencesFileBase = p.join(sequencesFilesDir, sequencesFileName)
 
@@ -45,15 +46,20 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
     resultsFileBase = p.join(resultsFilesDir, resultsFileName)
 
     mod = "" if appendFileModifier is None else appendFileModifier
+    refSequencesFile = sequencesFileBase + sequencesDetails + mod + sequencesFileExt
+    refResultsFile = resultsFileBase + mod + resultsFileExt
 
-    verbose(verbosity, 1, "Sequences format is:  [{base}<var>{mod}{ext}]"
-            .format(base=sequencesFileBase, mod=mod, ext=sequencesFileExt))
-    verbose(verbosity, 1, "Results format is:    [{base}<var>{mod}{ext}]"
+    verbose(verbosity, 1, "Sequences format is:      [{base}<var>{detail}{mod}{ext}]"
+            .format(base=sequencesFileBase, detail=sequencesDetails, mod=mod, ext=sequencesFileExt))
+    verbose(verbosity, 1, "Results format is:        [{base}<var>{mod}{ext}]"
             .format(base=resultsFileBase, mod=mod, ext=resultsFileExt))
-    verbose(verbosity, 1, "Results <var> are:    {variations}".format(variations=resultsVariations))
-    verbose(verbosity, 1, "Evaluation <var> are: {variations}".format(variations=resultsEvalVariations))
-    assert(p.isfile(sequencesFileBase + mod + sequencesFileExt))
-    assert(p.isfile(resultsFileBase + mod + resultsFileExt))
+    verbose(verbosity, 1, "Results <var> are:        {variations}".format(variations=resultsVariations))
+    verbose(verbosity, 1, "Evaluation <var> are:     {variations}".format(variations=resultsEvalVariations))
+    verbose(verbosity, 1, "Reference sequences file: [{ref}]".format(ref=refSequencesFile))
+    verbose(verbosity, 1, "Reference results file:   [{ref}]".format(ref=refResultsFile))
+
+    assert(p.isfile(refSequencesFile))
+    assert(p.isfile(refResultsFile))
 
     if overwriteEvaluationFiles:
         verbose(verbosity, 1, "Cleaning up old evaluation files (-eval)...")
@@ -104,26 +110,27 @@ def evalSequencesChokePoint(sequencesFilesDir, resultsFilesDir, filterSequencesF
         resultsVarPerfTrajectFilePath = resultsFileBase + var + mod + resultsPerfTraject + resultsFileExt
         if not overwritePerformanceFiles:
             if evalBackwardCompatibility and p.isfile(resultsVarPerfFilePath):
-                verbose(verbosity, 1, "Skipping generation of '" + resultsVarPerfName + "' (already exists)")
+                verbose(verbosity, 1, "Skipping generation of [" + resultsVarPerfName + "] (already exists)")
                 continue
             if not evalBackwardCompatibility and p.isfile(resultsVarPerfTransacFilePath):
-                verbose(verbosity, 1, "Skipping generation of '" + resultsVarPerfTransacName + "' (already exists)")
+                verbose(verbosity, 1, "Skipping generation of [" + resultsVarPerfTransacName + "] (already exists)")
                 evalTransac = False
             if not evalBackwardCompatibility and p.isfile(resultsVarPerfTrajectFilePath):
-                verbose(verbosity, 1, "Skipping generation of '" + resultsVarPerfTrajectName + "' (already exists)")
+                verbose(verbosity, 1, "Skipping generation of [" + resultsVarPerfTrajectName + "] (already exists)")
                 evalTraject = False
             if not evalTransac and not evalTraject:
                 continue
         mergeEval = True
         if not overwriteEvaluationFiles and p.isfile(resultsVarEvalFilePath):
-            verbose(verbosity, 1, "Skipping generation of '" + resultsVarName + resultsEval + "' (already exists)")
+            verbose(verbosity, 1, "Skipping generation of [" + resultsVarName + resultsEval + "] (already exists)")
             mergeEval = False
 
         # produce evaluation files
-        verbose(verbosity, 1, "Runing generation with sequences: '{seq}'".format(seq=sequencesFileBase + var + mod + sequencesFileExt))
-        verbose(verbosity, 1, "Runing generation for results: '{res}'".format(res=resultsFileBase + var + mod + resultsFileExt))
-        evalSequenceFile.evalSequenceFilePerf(sequencesFileBase + var + mod + sequencesFileExt,
-                                              resultsFileBase + var + mod + resultsFileExt,
+        sequencesFileVar = sequencesFileBase + var + sequencesDetails + mod + sequencesFileExt
+        resultsFileVar = resultsFileBase + var + mod + resultsFileExt
+        verbose(verbosity, 1, "Runing generation with sequences: [{seq}]".format(seq=sequencesFileVar))
+        verbose(verbosity, 1, "Runing generation for results:    [{res}]".format(res=resultsFileVar))
+        evalSequenceFile.evalSequenceFilePerf(sequencesFileVar, resultsFileVar,
                                               filterSequencesFilePath=filterSequencesFilePath,
                                               evalNormalizedScores=evalNormalizedScores,
                                               evalTransactionLevel=evalTransac,

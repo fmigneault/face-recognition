@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 import os, sys, csv
 import argparse
 import copy
-import evalSequenceFile as e
-import results_extract_probes as p
+import evalSequenceFile as ev
+import extract_probes as ex
 
 
 SEQUENCES = [
@@ -23,7 +24,7 @@ SEQUENCES = [
 
 def get_file_paths(sequencesDir, resultsDir, cameraSequence):
     cam = cameraSequence
-    res = "results_"
+    res = "results-"
     seq = "sequences-"
     info = "-info"
     transac = "-perf-transaction"
@@ -60,22 +61,33 @@ def get_file_paths(sequencesDir, resultsDir, cameraSequence):
     }
 
 
-def batch_process_camera(sequencesDir, resultsDir):
+def batch_process_camera(sequencesDir, resultsDir, probesFilePath, overwrite):
     global SEQUENCES
+    
     for s in SEQUENCES:
-
         pathInfo = get_file_paths(sequencesDir, resultsDir, s)
-        p.get_probe_results(pathInfo["ALL"]["SEQUENCES_FILE"],
-                            pathInfo["ALL"]["RESULTS_FILE"],
-                            pathInfo["PROBES"]["PROBES_FILE"])
+        probesFilePath = pathInfo["PROBES"]["PROBES_FILE"] if probesFilePath is None else probesFilePath
+        sequencesFilePath = pathInfo["ALL"]["SEQUENCES_FILE"]
+        resultsFilePath = pathInfo["ALL"]["RESULTS_FILE"]
+        assert(os.path.isfile(probesFilePath))
+        assert(os.path.isfile(sequencesFilePath))
+        assert(os.path.isfile(resultsFilePath))
+        ex.get_probe_results(resultsFilePath, resultsFilePath, probesFilePath)
 
         for info in pathInfo:
             print("SEQ: " + pathInfo[info]["SEQUENCES_FILE"])
             print("RES: " + pathInfo[info]["RESULTS_FILE"])
-            e.evalSequenceFilePerf(pathInfo[info]["SEQUENCES_FILE"], pathInfo[info]["RESULTS_FILE"],
-                                   filterSequencesFilePath="", noHeaderSequences=False, noHeaderResults=False,
-                                   evalNormalizedScores=True, evalTransactionLevel=True, evalTrajectoryLevel=True,
-                                   outputMergedEvalFile=True, evalBackwardCompatibility=False, verbosity=2)
+            if not overwrite \
+            and os.path.isfile(pathInfo[info]["RESULTS_RAW"]["TRANSACTION_FILE"]) \
+            and os.path.isfile(pathInfo[info]["RESULTS_RAW"]["TRAJECTORY_FILE"]) \
+            and os.path.isfile(pathInfo[info]["RESULTS_NORM"]["TRANSACTION_FILE"]) \
+            and os.path.isfile(pathInfo[info]["RESULTS_NORM"]["TRAJECTORY_FILE"]) :
+                print("Skipping existing results generation (exist and 'overwrite=True'")
+                continue
+            ev.evalSequenceFilePerf(pathInfo[info]["SEQUENCES_FILE"], pathInfo[info]["RESULTS_FILE"],
+                                    filterSequencesFilePath="", noHeaderSequences=False, noHeaderResults=False,
+                                    evalNormalizedScores=True, evalTransactionLevel=True, evalTrajectoryLevel=True,
+                                    outputMergedEvalFile=True, evalBackwardCompatibility=False, verbosity=2)
 
 
 def batch_analysis_camera(sequencesDir, resultsDir):
@@ -127,9 +139,14 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--summary', dest='summaryOnly', action='store_true',
                         help="execute only summary analysis of pre-generated evaluation files"
                              "(skip perf/eval generation, corresponding files must exist)")
+    parser.add_argument('-p', '--probes', dest='probesFile', metavar='probesFile', type=str, default=None,
+                        help='path to probes file list (default: `probes_list.txt` in current directory)')
+    parser.add_argument('-o', '--overwrite', dest='overwrite', action='store_true', default=False,
+                        help='overwrite results files (re-evaluate) if they already exist')
     args = parser.parse_args()
     if not args.summaryOnly:
-        batch_process_camera(args.sequencesDir, args.resultsDir)
+        batch_process_camera(args.sequencesDir, args.resultsDir, args.probesFile, args.overwrite)
     else:
         print("Skipping directly to summary analysis without evaluation file generation")
     batch_analysis_camera(args.sequencesDir, args.resultsDir)
+

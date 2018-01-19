@@ -2,7 +2,17 @@ import os, sys, csv
 import argparse
 
 
+def csv_extract_lines(csv_reader, only_first_column=False):
+    lines = [line for line in csv_reader if len(line) > 0 and line[0] != '']
+    if only_first_column:
+        return [line[0] for line in lines]
+    return lines
+
+
 def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
+    print("Sequences File: '{0}'".format(sequencesFile))
+    print("Results File:   '{0}'".format(resultsFile))
+    print("Probes File:    '{0}'".format(probesFile))
     assert(os.path.isfile(sequencesFile))
     assert(os.path.isfile(resultsFile))
     assert(os.path.isfile(probesFile))
@@ -24,7 +34,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     # get filter probes
     with open(probesFile) as f:
         csvf = csv.reader(f)
-        probeIDs = [line[0] for line in csvf if line[0] != '']
+        probeIDs = csv_extract_lines(csvf, only_first_column=True)
     print("Probe IDs:")
     print("  " + repr(probeIDs))
     assert(len(probeIDs)>0)
@@ -34,7 +44,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     if filterFile is not None:
         with open(filterFile) as f:
             csvf = csv.reader(f)
-            filterSequences = [line[0] for line in csvf if line[0] != '']
+            filterSequences = csv_extract_lines(csvf, only_first_column=True)
             print("Filter Sequences:")
             print("  " + repr(filterSequences))
             assert(len(filterSequences)>0)
@@ -43,7 +53,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     sequencesFrames = []
     with open(sequencesFile) as f:
         csvf = csv.reader(f)
-        sequencesFrames = [line for line in csvf]
+        sequencesFrames = csv_extract_lines(csvf)
     sequencesHeader = sequencesFrames[0]
     sequencesLines = sequencesFrames[1:]  # remove header
 
@@ -70,7 +80,7 @@ def get_probe_results(sequencesFile, resultsFile, probesFile, filterFile=None):
     # filter by probes IDs
     linesProbesRes = [resultsHeader]
     linesProbesSeq = [sequencesHeader]
-    for lineRes, lineSeq in zip(resultsLines, sequencesLines):
+    for lineRes, lineSeq in zip(resultsLines, sequencesLines):        
         seqTargetID = lineSeq[4]
         if seqTargetID in probeIDs:
             linesProbesRes.append(lineRes)
