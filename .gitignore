@@ -1,0 +1,83 @@
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Build results
+debug.log
+*.exe
+*.d
+*.o
+[Dd]ebug/
+[Dd]ebugPublic/
+Properties/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+bld-vc14-x64/
+lib-vc14-x64/
+
+# Visual Studio 2015 cache/options directory
+.vs/
+_ReSharper.Caches/
+
+# NuGet Packages
+*.nupkg
+*.config
+packages/
+tessdata/
+
+# Profiler files
+*.psess
+*.vsp
+
+# Python files
+*.pyc
+*.pyo
+
+# Project specific
+*.7z
+*.tar
+*.mp4
+*.mkv
+*.ogv
+*.png
+.vscode/
+build/
+chokepoint_good/
+data/
+images/
+lib/
+NEG/old_bug_hog_data_ptr/
+NEG/REP[0-9]*/
+output/
+sam2_pretty_good/
+sam_success/
+sln/
+testoutput/
+testoutput_detector/
+working_girl/
+generalOutput.txt
+outputBboxes.txt
+timings.txt
+test.txt

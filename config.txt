@@ -1,0 +1,187 @@
+#==============================
+# device
+#==============================
+deviceIndex = 0
+
+#==============================
+# camera 
+#==============================
+# Specify which camera live feed must be used
+#   overrides any specified input frame sequence
+#   to use files on disk, specify cameraType -1
+#   see enum CameraType for corresponding indexes
+cameraType = -1
+cameraIndex = 0
+useCameraTrigger = 0
+
+#==============================
+# algorithms
+#==============================
+# Algorithms selection for face detection, tracking and recognition 
+FastDT = 1
+FRCNN = 0
+VJ = 0
+LBP = 0
+ImprovedLBP = 0
+YOLO = 0
+camshift = 0
+compressive = 0
+ESVM = 1
+FaceNet = 0
+TM = 0
+
+#==============================
+# face recognition
+#==============================
+useFaceRecognition = 1
+#   employ positive images from geometric operations on original still
+useGeometricPositiveStills = 0
+#   employ pre-generated positive still synthetic images (3D model) 
+useSyntheticPositiveStills = 0
+#   employ other individual stills as hard counter-examples 
+useReferenceNegativeStills = 0
+#   employ additional images from geometric operations on negative stills 
+#   requires 'useReferenceNegativeStills' to be employed 
+useGeometricNegativeStills = 0
+#   geometric operations parameters
+geometricTranslatePixels = 10 
+geometricScalingMinSize = 24
+geometricScalingFactor = 0.9 
+#   stills directories
+POIDir = ../data/POI/
+NEGDir = ../data/NEG/
+NEGDirExtra = ../data/POI/NEG/
+#   accumulation and thresholds for recognition
+thresholdFaceConsidered = 8
+thresholdFaceRecognized = 12
+roiAccumulationSize = 20
+roiAccumulationMode = 1
+
+#==============================
+# detection and tracking
+#==============================
+searchRadius = 20
+useHungarianMatching = 0
+associationTrackThreshold = 90
+removeThresholdInsideBounds = 1
+removeThresholdOutsideBounds = 1
+removeScoreInsideBounds = 0.6
+removeScoreOutsideBounds = 0.6
+createThreshold = 1
+createScore = 0.8
+trackerOverlapThreshold = 0.3
+detectionAugmentationOffset = 0
+detectionFrameInterval = 5
+detectionFrameBufferSize = 20                            
+
+#==============================
+# training (Fast-DT)
+#==============================
+# seed for random number generator.
+seed = 0
+
+# SVM regularization parameter.
+svmC = 15.0
+# SVM budget size (0 = no budget).
+svmBudgetSize = 15
+
+# image features to use.
+# format is: feature kernel [kernel-params]
+# where:
+#   feature = haar/raw/histogram
+#   kernel = gaussian/linear/intersection/chi2
+#   for kernel=gaussian, kernel-params is sigma
+feature = haar gaussian 0.5
+#feature = raw gaussian 0.1
+#feature = histogram intersection
+
+#==============================
+# face bounding boxes
+#==============================
+faceOverlapThreshold = 0.5
+faceMinNeighbours = 0
+faceScaleFactor = 1.2
+faceNmsThreshold = 4
+faceMinWidth = 40
+faceMinHeight = 40
+faceMaxWidth = 400
+faceMaxHeight = 400
+faceConfidenceSize = 48
+
+#==============================
+# eyes bounding boxes
+#==============================
+#   enable eyes detection for ROI validation
+useEyesDetection = 0
+#   employ top left/right eye subROI for local search
+#   otherwise search on whole localized face ROI
+useEyeLocalizedPosition = 1
+eyesOverlapThreshold = 0.5
+eyesMinNeighbours = 0
+eyesScaleFactor = 1.2
+eyesNmsThreshold = 0
+eyesMinWidth = 10
+eyesMinHeight = 10
+eyesMaxWidth = 100
+eyesMaxHeight = 100
+
+#==============================
+# localized ROI search
+#==============================
+#   enable local ROI search to correct bbox before face recognition
+useLocalSearchROI = 1
+use3CascadesLocalSearch = 0
+#   multiplier of found tracker bbox to multiply for local search
+bboxSizeMultiplyer = 1.5
+
+#==============================
+# output/debug/display
+#==============================
+#   verboseDebug prints additional messages to the console
+#   outputDebug writes additional information to file
+verboseDebug = 0
+outputDebug = 0
+#   output/display processed frames with detected/track/recognized ROIs
+outputFrames = 0
+outputROI = 0
+outputLocalROI = 0
+roiOutputSize = 96
+outputDirsClearOnStart = 1
+#   mirror camera video stream frames, ignored if input file stream
+flipFrames = 1
+displayFrames = 1
+displayFrameRate = 1
+displayFrameNumber = 1
+displaySequenceTrackID = 1
+#   display window position and dimensions (if displaying frames)
+displayWindowX = 100
+displayWindowY = 100
+displayWindowW = 800
+displayWindowH = 600
+#   show the original and updated ROI after local search if employed
+#   otherwise, simply display the most updated ROI
+displayOldROI = 0
+#   output recognition colours of bbox
+#   see the 'MultiColorType' codes for modes
+roiColorMode = 1
+#   thickness of lines drawn for ROIs (updated and old if applicable)
+roiThickness = 2
+roiThicknessOld = 1
+
+#==============================
+# plot display
+#==============================
+# Display plots of recognition score accumulations
+displayPlots = 0
+plotAccumulationPoints = 100
+plotFigureWidth = 800
+plotFigureHeight = 600
+#   0 = horizontal (POI next to each other for same track on 1 line)
+#   1 = vertical (POI on top/bottom of each other for same track on 1 column)
+plotTrackDirection = 0
+#   maximum number of tracks/POI allowed to be displayed by plots 
+plotMaxTracks = 10
+plotMaxPOI = 6
+#   resets plot previously employed for lost track if a new track is started
+plotResetOnTrackLost = 1
+

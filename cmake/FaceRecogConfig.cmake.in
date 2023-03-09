@@ -1,0 +1,7 @@
+# - Config file for the FaceRecog package
+
+set(FaceRecog_INCLUDE_DIRS      "@FaceRecog_CONFIG_INC_DIR@")
+set(FaceRecog_BINARY_DIRS 	    "@FaceRecog_CONFIG_BIN_DIR@")
+set(FaceRecog_LIBRARY_DIRS      "@FaceRecog_CONFIG_LIB_DIR@")
+set(FaceRecog_LIBRARY_DEBUG     "@FaceRecog_CONFIG_LIB_DBG@")
+set(FaceRecog_LIBRARY_RELEASE   "@FaceRecog_CONFIG_LIB_REL@")
