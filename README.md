@@ -9,19 +9,38 @@ On-line Face Detection, Tracking and Recognition.
 ### Citation and License ###
 
 Relevant Papers and Reports:
-- [Conception de système de reconnaissance de visages spatio-temporelle sur vidéos à partir d’une seule image de référence](https://www.researchgate.net/publication/323401703)
-- [Using Adaptive Trackers for Video Face Recognition from a Single Sample Per Person](https://www.researchgate.net/publication/328118135)
 
-```bibtex
-@inproceedings{migneault2018using,
-  title={Using Adaptive Trackers for Video Face Recognition from a Single Sample Per Person},
-  author={Migneault, Francis Charette and Granger, Eric and Mokhayeri, Fania},
-  booktitle={2018 Eighth International Conference on Image Processing Theory, Tools and Applications (IPTA)},
-  pages={1--6},
-  year={2018},
-  organization={IEEE}
-}
-```
+- [Conception de système de reconnaissance de visages spatio-temporelle sur vidéos à partir d’une seule image de référence](https://www.researchgate.net/publication/323401703)
+  <br> \[Full Text Available\] \[Language: French\] 
+
+  ```bibtex
+  @mastersthesis{fmigneault2017ets,
+    title={Conception de syst{\`e}me de reconnaissance de visages spatiotemporelles sur vid{\'e}os {\`a} partir d'une seule image de r{\'e}f{\'e}rence},
+    author={Charette-Migneault, Francis},
+    journal={Master's thesis in Automated Production Engineering, University of Quebec},
+    pages={173},
+    year={2017},
+    month={dec},
+    school={{\'E}cole de technologie sup{\'e}rieure, Universit{\'e} du Qu{\'e}bec},
+    note={supervisor: Granger, Eric},
+    doi={10.13140/RG.2.2.20640.07683}
+  }
+  ```
+
+- [Using Adaptive Trackers for Video Face Recognition from a Single Sample Per Person](https://www.researchgate.net/publication/328118135)
+  <br> \[Full Text Available\] \[Language: English\]
+
+  ```bibtex
+  @inproceedings{fmigneault2018ipta,
+    title={Using Adaptive Trackers for Video Face Recognition from a Single Sample Per Person},
+    author={Charette-Migneault, Francis and Granger, Eric and Mokhayeri, Fania},
+    booktitle={2018 Eighth International Conference on Image Processing Theory, Tools and Applications (IPTA)},
+    pages={1--6},
+    year={2018},
+    organization={IEEE},
+    doi={10.1109/IPTA.2018.8608163}
+  }
+  ```
 
 See: [LICENSE](./LICENSE)
 
@@ -54,7 +73,7 @@ See: [LICENSE](./LICENSE)
 |Common (C++) | utility functions                   | [CommonCpp](https://bitbucket.org/TeamLIVIA/common-cpp)  |
 |Eigen        | 3.3 supported                       | [Eigen](http://eigen.tuxfamily.org/)  |
 |OpenCV       | 3.2 supported, 2.4 not maintained   | [OpenCV](https://github.com/opencv/opencv)  |
-|mvector      | multi-dimensional vector            | fork: [KenjiKyo/mvector](https://github.com/KenjiKyo/mvector) original: [carlobaldassi/mvector](https://github.com/carlobaldassi/mvector) |
+|mvector      | multi-dimensional vector            | fork: [fmigneault/mvector](https://github.com/fmigneault/mvector) original: [carlobaldassi/mvector](https://github.com/carlobaldassi/mvector) |
 
 ### *Optional* ###
 
