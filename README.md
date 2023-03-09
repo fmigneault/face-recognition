@@ -6,7 +6,26 @@
 
 On-line Face Detection, Tracking and Recognition.
 
-### Includes: ###
+### Citation and License ###
+
+Relevant Papers and Reports:
+- [Conception de système de reconnaissance de visages spatio-temporelle sur vidéos à partir d’une seule image de référence](https://www.researchgate.net/publication/323401703)
+- [Using Adaptive Trackers for Video Face Recognition from a Single Sample Per Person](https://www.researchgate.net/publication/328118135)
+
+```bibtex
+@inproceedings{migneault2018using,
+  title={Using Adaptive Trackers for Video Face Recognition from a Single Sample Per Person},
+  author={Migneault, Francis Charette and Granger, Eric and Mokhayeri, Fania},
+  booktitle={2018 Eighth International Conference on Image Processing Theory, Tools and Applications (IPTA)},
+  pages={1--6},
+  year={2018},
+  organization={IEEE}
+}
+```
+
+See: [LICENSE](./LICENSE)
+
+### Contents ###
 
 | Algorithm                   | Description                                                                       |
 |-----------------------------|-----------------------------------------------------------------------------------|
